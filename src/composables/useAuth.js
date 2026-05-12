@@ -3,8 +3,11 @@ import { ref } from 'vue';
 const encryptionKey = ref(null);
 const isUnlocked = ref(false);
 
+const activeProfile = ref(localStorage.getItem('financial_planner_active_profile') || 'default');
+const profilesList = ref(JSON.parse(localStorage.getItem('financial_planner_profiles') || '["default"]'));
+
 let timeoutTimer = null;
-const IDLE_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+const IDLE_TIMEOUT_MS = 60 * 60 * 1000; // 1 hour
 
 async function lock() {
   if (isUnlocked.value) {
@@ -38,6 +41,43 @@ function unlock(key) {
   resetIdleTimeout();
 }
 
+function setActiveProfile(profileName) {
+  activeProfile.value = profileName;
+  localStorage.setItem('financial_planner_active_profile', profileName);
+  lock();
+}
+
+function addProfile(profileName) {
+  const cleanName = profileName.trim();
+  if (!cleanName) return false;
+  if (profilesList.value.includes(cleanName)) return false;
+  profilesList.value.push(cleanName);
+  localStorage.setItem('financial_planner_profiles', JSON.stringify(profilesList.value));
+  setActiveProfile(cleanName);
+  return true;
+}
+
+async function deleteProfile(profileName) {
+  if (profileName === 'default') return false;
+  
+  profilesList.value = profilesList.value.filter(p => p !== profileName);
+  localStorage.setItem('financial_planner_profiles', JSON.stringify(profilesList.value));
+  
+  try {
+    const dbName = `FinancialPlannerDB_${profileName}`;
+    if (typeof indexedDB !== 'undefined') {
+      indexedDB.deleteDatabase(dbName);
+    }
+  } catch (e) {
+    console.error("Failed to delete DB for profile", profileName, e);
+  }
+  
+  if (activeProfile.value === profileName) {
+    setActiveProfile('default');
+  }
+  return true;
+}
+
 // Add global listeners for user activity
 if (typeof window !== 'undefined') {
   window.addEventListener('mousemove', resetIdleTimeout);
@@ -61,6 +101,11 @@ export function useAuth() {
   return {
     encryptionKey,
     isUnlocked,
+    activeProfile,
+    profilesList,
+    setActiveProfile,
+    addProfile,
+    deleteProfile,
     lock,
     unlock
   };

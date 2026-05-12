@@ -24,7 +24,12 @@ function openDB() {
       return reject(new Error('IndexedDB not supported in this environment'));
     }
 
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    const { activeProfile } = useAuth();
+    const dbName = activeProfile && activeProfile.value && activeProfile.value !== 'default'
+      ? `${DB_NAME}_${activeProfile.value}`
+      : DB_NAME;
+
+    const request = indexedDB.open(dbName, DB_VERSION);
 
     request.onupgradeneeded = (event) => {
       const db = event.target.result;
