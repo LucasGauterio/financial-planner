@@ -130,7 +130,7 @@
             v-if="selectedProfile !== 'default'"
             type="button" 
             class="btn btn-secondary btn-icon" 
-            style="color: #ef4444; border-color: rgba(239, 68, 68, 0.2); background: rgba(239, 68, 68, 0.05);"
+            style="color: #ffffff; background: #dc2626; border-color: #dc2626;"
             @click="handleDeleteProfile(selectedProfile)"
             :title="t('auth.deleteProfileBtn')"
           >
@@ -377,60 +377,69 @@ async function fetchAuthStatus() {
   }
 }
 
-// Custom input, backspace and copy-paste handling for Multi-Input PIN Boxes
-function handlePinInput(index, event, isConfirm = false, idPrefix = 'pin-digit') {
-  const digits = isConfirm ? confirmPinDigits.value : pinDigits.value;
-  const val = event.target.value;
-  
-  // Keep only numeric characters and grab the last digit
-  const sanitized = val.replace(/[^0-9]/g, '').slice(-1);
-  digits[index] = sanitized;
-  
+function updatePasswordValue(digits, isConfirm) {
   const fullPin = digits.join('');
   if (isConfirm) {
     confirmPassword.value = fullPin;
   } else {
     password.value = fullPin;
   }
+}
+
+function focusNextPinDigit(sanitized, index, idPrefix) {
+  if (!sanitized) return;
+  if (index >= 3) return;
+  const nextInput = document.getElementById(`${idPrefix}-${index + 1}`);
+  if (nextInput) {
+    nextInput.focus();
+  }
+}
+
+function shouldAutoSubmitPin(isConfirm, fullPin, idPrefix) {
+  if (isConfirm) return false;
+  if (fullPin.length !== 4) return false;
+  if (idPrefix !== 'pin-digit') return false;
+  if (status.value !== 'locked') return false;
+  return true;
+}
+
+// Custom input, backspace and copy-paste handling for Multi-Input PIN Boxes
+function handlePinInput(index, event, isConfirm = false, idPrefix = 'pin-digit') {
+  const digits = isConfirm ? confirmPinDigits.value : pinDigits.value;
+  const val = event.target.value;
+  
+  // Keep only numeric characters and grab the last digit
+  const sanitized = val.replaceAll(/\D/g, '').slice(-1);
+  digits[index] = sanitized;
+  
+  updatePasswordValue(digits, isConfirm);
 
   // Auto-focus next field
-  if (sanitized && index < 3) {
-    const nextInput = document.getElementById(`${idPrefix}-${index + 1}`);
-    if (nextInput) {
-      nextInput.focus();
-    }
-  }
+  focusNextPinDigit(sanitized, index, idPrefix);
 
   // Auto-submit login on standard PIN unlock screen when 4th digit is input
-  if (!isConfirm && fullPin.length === 4 && idPrefix === 'pin-digit' && status.value === 'locked') {
+  const fullPin = digits.join('');
+  if (shouldAutoSubmitPin(isConfirm, fullPin, idPrefix)) {
     submitPassword();
   }
 }
 
 function handlePinKeydown(index, event, isConfirm = false, idPrefix = 'pin-digit') {
+  if (event.key !== 'Backspace') return;
+
   const digits = isConfirm ? confirmPinDigits.value : pinDigits.value;
-  if (event.key === 'Backspace') {
-    if (!digits[index] && index > 0) {
-      // Focus previous and clear it
-      const prevInput = document.getElementById(`${idPrefix}-${index - 1}`);
-      if (prevInput) {
-        prevInput.focus();
-        digits[index - 1] = '';
-        if (isConfirm) {
-          confirmPassword.value = digits.join('');
-        } else {
-          password.value = digits.join('');
-        }
-      }
-    } else {
-      // Clear current
-      digits[index] = '';
-      if (isConfirm) {
-        confirmPassword.value = digits.join('');
-      } else {
-        password.value = digits.join('');
-      }
+  if (!digits[index] && index > 0) {
+    // Focus previous and clear it
+    const prevInput = document.getElementById(`${idPrefix}-${index - 1}`);
+    if (prevInput) {
+      prevInput.focus();
+      digits[index - 1] = '';
+      updatePasswordValue(digits, isConfirm);
     }
+  } else {
+    // Clear current
+    digits[index] = '';
+    updatePasswordValue(digits, isConfirm);
   }
 }
 

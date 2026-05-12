@@ -6,8 +6,8 @@
     <div class="grid-2" style="margin-top: 1.5rem;">
       <div>
         <div class="form-group">
-          <label>{{ t('past.startYear') }}</label>
-          <input type="number" v-model="startYear" min="1900" :max="currentYear" step="1" @input="startYear = startYear > currentYear ? currentYear : startYear" />
+          <label for="start-year-input">{{ t('past.startYear') }}</label>
+          <input id="start-year-input" type="number" v-model="startYear" min="1900" :max="currentYear" step="1" @input="startYear = startYear > currentYear ? currentYear : startYear" />
           <span v-if="startYear && startYear < 1900" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
             ⚠️ {{ t('validation.minYear') }}
           </span>
@@ -16,29 +16,29 @@
           </span>
         </div>
         <div class="form-group">
-          <label>{{ t('past.initialAmount') }} ({{ currency }})</label>
-          <input type="number" v-model="principal" min="0" max="999999999999999" step="0.01" @input="principal = principal > 999999999999999 ? 999999999999999 : principal" />
+          <label for="principal-input">{{ t('past.initialAmount') }} ({{ currency }})</label>
+          <input id="principal-input" type="number" v-model="principal" min="0" max="999999999999999" step="0.01" @input="principal = principal > 999999999999999 ? 999999999999999 : principal" />
           <span v-if="principal > 999999999999999" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
             ⚠️ {{ t('validation.maxLimit') }}
           </span>
         </div>
         <div class="form-group">
-          <label>{{ t('past.startingApport') }} ({{ currency }})</label>
-          <input type="number" v-model="monthlyContribution" min="0" max="999999999999999" step="0.01" @input="monthlyContribution = monthlyContribution > 999999999999999 ? 999999999999999 : monthlyContribution" />
+          <label for="monthly-contribution-input">{{ t('past.startingApport') }} ({{ currency }})</label>
+          <input id="monthly-contribution-input" type="number" v-model="monthlyContribution" min="0" max="999999999999999" step="0.01" @input="monthlyContribution = monthlyContribution > 999999999999999 ? 999999999999999 : monthlyContribution" />
           <span v-if="monthlyContribution > 999999999999999" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
             ⚠️ {{ t('validation.maxLimit') }}
           </span>
         </div>
         <div class="form-group">
-          <label>{{ t('past.annualIncrease') }}</label>
-          <input type="number" v-model="annualIncrease" min="0" max="100" step="0.01" @input="annualIncrease = annualIncrease > 100 ? 100 : annualIncrease" />
+          <label for="annual-increase-input">{{ t('past.annualIncrease') }}</label>
+          <input id="annual-increase-input" type="number" v-model="annualIncrease" min="0" max="100" step="0.01" @input="annualIncrease = annualIncrease > 100 ? 100 : annualIncrease" />
           <span v-if="annualIncrease >= 100" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
             ⚠️ {{ t('validation.maxRate') }}
           </span>
         </div>
         <div class="form-group">
-          <label>{{ t('past.annualRate') }}</label>
-          <input type="number" v-model="annualRate" min="0" max="100" step="0.01" @input="annualRate = annualRate > 100 ? 100 : annualRate" />
+          <label for="annual-rate-input">{{ t('past.annualRate') }}</label>
+          <input id="annual-rate-input" type="number" v-model="annualRate" min="0" max="100" step="0.01" @input="annualRate = annualRate > 100 ? 100 : annualRate" />
           <span v-if="annualRate >= 100" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
             ⚠️ {{ t('validation.maxRate') }}
           </span>
@@ -80,7 +80,7 @@ const annualRate = ref(12);
 
 const result = computed(() => {
   const sYear = Number(startYear.value);
-  if (isNaN(sYear) || sYear < 1900) return 0;
+  if (Number.isNaN(sYear) || sYear < 1900) return 0;
   const months = (currentYear - sYear) * 12;
   const monthlyRate = (annualRate.value / 100) / 12;
   
@@ -90,7 +90,7 @@ const result = computed(() => {
 
 const totalInvested = computed(() => {
   const sYear = Number(startYear.value);
-  if (isNaN(sYear) || sYear < 1900) return 0;
+  if (Number.isNaN(sYear) || sYear < 1900) return 0;
   const months = Math.max(0, (currentYear - sYear) * 12);
   // Re-use logic passing 0 interest rate to calculate physical contributions
   return calculateCompoundInterest(principal.value, monthlyContribution.value, 0, months, annualIncrease.value);

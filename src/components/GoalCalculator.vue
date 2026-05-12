@@ -6,33 +6,33 @@
     <div class="grid-2" style="margin-top: 1.5rem;">
       <div>
         <div class="form-group">
-          <label>{{ t('goal.targetAmount') }} ({{ currency }})</label>
-          <input type="number" v-model="targetAmount" min="0" max="999999999999999" step="0.01" @input="targetAmount = targetAmount > 999999999999999 ? 999999999999999 : targetAmount" />
+          <label for="target-amount-input">{{ t('goal.targetAmount') }} ({{ currency }})</label>
+          <input id="target-amount-input" type="number" v-model="targetAmount" min="0" max="999999999999999" step="0.01" @input="targetAmount = targetAmount > 999999999999999 ? 999999999999999 : targetAmount" />
           <span v-if="targetAmount > 999999999999999" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
             ⚠️ {{ t('validation.maxLimit') }}
           </span>
         </div>
         <div class="form-group">
-          <label>{{ t('goal.principal') }} ({{ currency }})</label>
-          <input type="number" v-model="principal" min="0" max="999999999999999" step="0.01" @input="principal = principal > 999999999999999 ? 999999999999999 : principal" />
+          <label for="principal-input">{{ t('goal.principal') }} ({{ currency }})</label>
+          <input id="principal-input" type="number" v-model="principal" min="0" max="999999999999999" step="0.01" @input="principal = principal > 999999999999999 ? 999999999999999 : principal" />
           <span v-if="principal > 999999999999999" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
             ⚠️ {{ t('validation.maxLimit') }}
           </span>
         </div>
         <div class="form-group">
-          <label>{{ t('goal.timeHorizon') }}</label>
-          <input type="number" v-model="years" min="1" max="100" step="1" @input="years = years > 100 ? 100 : years" />
+          <label for="years-input">{{ t('goal.timeHorizon') }}</label>
+          <input id="years-input" type="number" v-model="years" min="1" max="100" step="1" @input="years = years > 100 ? 100 : years" />
         </div>
         <div class="form-group">
-          <label>{{ t('goal.annualReturn') }}</label>
-          <input type="number" v-model="annualRate" min="0" max="100" step="0.01" @input="annualRate = annualRate > 100 ? 100 : annualRate" />
+          <label for="annual-rate-input">{{ t('goal.annualReturn') }}</label>
+          <input id="annual-rate-input" type="number" v-model="annualRate" min="0" max="100" step="0.01" @input="annualRate = annualRate > 100 ? 100 : annualRate" />
           <span v-if="annualRate >= 100" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
             ⚠️ {{ t('validation.maxRate') }}
           </span>
         </div>
         <div class="form-group">
-          <label>{{ t('goal.annualIncrease') }}</label>
-          <input type="number" v-model="annualIncrease" min="0" max="100" step="0.01" @input="annualIncrease = annualIncrease > 100 ? 100 : annualIncrease" />
+          <label for="annual-increase-input">{{ t('goal.annualIncrease') }}</label>
+          <input id="annual-increase-input" type="number" v-model="annualIncrease" min="0" max="100" step="0.01" @input="annualIncrease = annualIncrease > 100 ? 100 : annualIncrease" />
           <span v-if="annualIncrease >= 100" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
             ⚠️ {{ t('validation.maxRate') }}
           </span>

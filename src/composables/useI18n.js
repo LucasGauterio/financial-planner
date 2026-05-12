@@ -52,11 +52,11 @@ export function useI18n() {
 
   function t(key, args = {}) {
     const keys = key.split('.');
-    let str = keys.reduce((obj, k) => (obj || {})[k], messages[state.locale]);
+    let str = keys.reduce((obj, k) => obj?.[k], messages[state.locale]);
     
     // Fallback exactly to English if a translation was stripped or missing
     if (!str) {
-      str = keys.reduce((obj, k) => (obj || {})[k], messages['en-US']) || key;
+      str = keys.reduce((obj, k) => obj?.[k], messages['en-US']) || key;
     }
 
     // Advanced dynamic interpolator replacing string mapped elements
@@ -68,7 +68,7 @@ export function useI18n() {
   }
 
   function formatCurrency(val) {
-    const num = parseFloat(val) || 0;
+    const num = Number.parseFloat(val) || 0;
     const maxVal = 999999999999999; // Strict ceiling cap under a quadrillion
     const clampedVal = Math.min(maxVal, num);
     return new Intl.NumberFormat(state.locale, {

@@ -13,21 +13,21 @@
           </div>
           <div class="controls-section">
             <div class="control-group">
-              <label class="control-label">{{ t('settings.language') }}</label>
-              <select :value="locale" @change="setLocale($event.target.value)" class="control-select">
+              <label class="control-label" for="lang-select">{{ t('settings.language') }}</label>
+              <select id="lang-select" :value="locale" @change="setLocale($event.target.value)" class="control-select">
                 <option value="en-US">{{ t('settings.languageEn') }}</option>
                 <option value="pt-BR">{{ t('settings.languagePt') }}</option>
               </select>
             </div>
             <div class="control-group">
-              <label class="control-label">{{ t('settings.currency') }}</label>
-              <select :value="currency" @change="setCurrency($event.target.value)" class="control-select">
+              <label class="control-label" for="curr-select">{{ t('settings.currency') }}</label>
+              <select id="curr-select" :value="currency" @change="setCurrency($event.target.value)" class="control-select">
                 <option value="BRL">R$ (BRL)</option>
                 <option value="USD">$ (USD)</option>
               </select>
             </div>
             <div class="control-group">
-              <label class="control-label">Security</label>
+              <span class="control-label">Security</span>
               <div class="security-buttons">
                 <button class="btn btn-secondary btn-icon" @click="showBackup = true" title="Backup / Restore">
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>

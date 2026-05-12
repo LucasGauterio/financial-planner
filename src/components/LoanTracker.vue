@@ -215,10 +215,10 @@
                     <fieldset class="form-fieldset">
                       <legend>{{ t('loans.form.dateLent') }} *</legend>
                       <input type="date" v-model="form.dateLent" min="1900-01-01" max="2200-12-31" required />
-                      <span v-if="form.dateLent && parseInt(form.dateLent.split('-')[0]) < 1900" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
+                      <span v-if="form.dateLent && Number.parseInt(form.dateLent.split('-')[0]) < 1900" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
                         ⚠️ {{ t('validation.minYear') }}
                       </span>
-                      <span v-if="form.dateLent && parseInt(form.dateLent.split('-')[0]) > 2200" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
+                      <span v-if="form.dateLent && Number.parseInt(form.dateLent.split('-')[0]) > 2200" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
                         ⚠️ {{ t('validation.maxYear') }}
                       </span>
                     </fieldset>
@@ -245,10 +245,10 @@
                     <fieldset class="form-fieldset">
                       <legend>{{ t('loans.form.startMonth') }} *</legend>
                       <input type="month" v-model="form.startMonth" min="1900-01" max="2200-12" required />
-                      <span v-if="form.startMonth && parseInt(form.startMonth.split('-')[0]) < 1900" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
+                      <span v-if="form.startMonth && Number.parseInt(form.startMonth.split('-')[0]) < 1900" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
                         ⚠️ {{ t('validation.minYear') }}
                       </span>
-                      <span v-if="form.startMonth && parseInt(form.startMonth.split('-')[0]) > 2200" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
+                      <span v-if="form.startMonth && Number.parseInt(form.startMonth.split('-')[0]) > 2200" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
                         ⚠️ {{ t('validation.maxYear') }}
                       </span>
                     </fieldset>
@@ -359,8 +359,9 @@
                 <form @submit.prevent="addRepayment">
                   <div class="grid-2" style="margin-bottom: 0.5rem;">
                     <div class="form-group small">
-                      <label>{{ t('loans.casual.amountPaid') }} *</label>
+                      <label for="payment-amount-input">{{ t('loans.casual.amountPaid') }} *</label>
                       <input 
+                        id="payment-amount-input"
                         type="number" 
                         step="0.01" 
                         min="0.01" 
@@ -371,19 +372,19 @@
                       />
                     </div>
                     <div class="form-group small">
-                      <label>{{ t('loans.casual.datePaid') }} *</label>
-                      <input type="date" v-model="paymentForm.date" min="1900-01-01" max="2200-12-31" required />
-                      <span v-if="paymentForm.date && parseInt(paymentForm.date.split('-')[0]) < 1900" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
+                      <label for="payment-date-input">{{ t('loans.casual.datePaid') }} *</label>
+                      <input id="payment-date-input" type="date" v-model="paymentForm.date" min="1900-01-01" max="2200-12-31" required />
+                      <span v-if="paymentForm.date && Number.parseInt(paymentForm.date.split('-')[0]) < 1900" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
                         ⚠️ {{ t('validation.minYear') }}
                       </span>
-                      <span v-if="paymentForm.date && parseInt(paymentForm.date.split('-')[0]) > 2200" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
+                      <span v-if="paymentForm.date && Number.parseInt(paymentForm.date.split('-')[0]) > 2200" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
                         ⚠️ {{ t('validation.maxYear') }}
                       </span>
                     </div>
                   </div>
                   <div class="form-group small" style="margin-bottom: 0.75rem;">
-                    <label>{{ t('loans.casual.paymentNotes') }}</label>
-                    <input type="text" v-model="paymentForm.notes" />
+                    <label for="payment-notes-input">{{ t('loans.casual.paymentNotes') }}</label>
+                    <input id="payment-notes-input" type="text" v-model="paymentForm.notes" />
                   </div>
                   <button type="submit" class="btn btn-primary btn-sm" style="width: 100%;">
                     {{ t('loans.casual.addPaymentBtn') }}
@@ -614,79 +615,90 @@ function formatDate(dateStr) {
 }
 
 // Core Operations: Save / Delete / Archive / Payment updates
-async function saveLoan() {
-  // Validate dates/years
+function validateLoanForm() {
   if (form.type === 'casual') {
     if (form.dateLent) {
-      const year = parseInt(form.dateLent.split('-')[0]);
-      if (isNaN(year) || year < 1900) {
+      const year = Number.parseInt(form.dateLent.split('-')[0]);
+      if (Number.isNaN(year) || year < 1900) {
         alert("The lent date cannot be before year 1900.");
-        return;
+        return false;
       }
     }
-  } else {
-    if (form.startMonth) {
-      const year = parseInt(form.startMonth.split('-')[0]);
-      if (isNaN(year) || year < 1900) {
-        alert("The starting month cannot be before year 1900.");
-        return;
-      }
+  } else if (form.startMonth) {
+    const year = Number.parseInt(form.startMonth.split('-')[0]);
+    if (Number.isNaN(year) || year < 1900) {
+      alert("The starting month cannot be before year 1900.");
+      return false;
     }
   }
+  return true;
+}
 
-  if (form.loanId) {
-    // Edit existing
-    const index = loans.value.findIndex(l => l.id === form.loanId);
-    if (index !== -1) {
-      const existing = loans.value[index];
-      existing.friendName = form.friendName;
-      existing.loanName = form.loanName;
-      existing.notes = form.notes;
-      
-      if (existing.type === 'casual') {
-        existing.amountLent = form.totalAmount;
-        existing.dateLent = form.dateLent;
-      } else {
-        // Regenerating installments is tricky if some are paid, let's keep installments if count/amount did not alter
-        if (existing.totalAmount !== form.totalAmount || existing.installmentsCount !== form.installmentsCount || existing.startMonth !== form.startMonth || existing.dueDay !== form.dueDay) {
-          if (confirm("Altering these credit parameters will RE-GENERATE all installments, clearing past payment flags. Continue?")) {
-            existing.totalAmount = form.totalAmount;
-            existing.installmentsCount = form.installmentsCount;
-            existing.startMonth = form.startMonth;
-            existing.dueDay = form.dueDay;
-            existing.cardName = form.cardName;
-            existing.installments = generateCreditCardInstallments(form.totalAmount, form.installmentsCount, form.startMonth, form.dueDay);
-          }
-        } else {
-          existing.cardName = form.cardName;
-        }
-      }
+function updateExistingLoan(existing) {
+  existing.friendName = form.friendName;
+  existing.loanName = form.loanName;
+  existing.notes = form.notes;
+  
+  if (existing.type === 'casual') {
+    existing.amountLent = form.totalAmount;
+    existing.dateLent = form.dateLent;
+    return;
+  }
+
+  const isParamsChanged = existing.totalAmount !== form.totalAmount ||
+                          existing.installmentsCount !== form.installmentsCount ||
+                          existing.startMonth !== form.startMonth ||
+                          existing.dueDay !== form.dueDay;
+
+  if (isParamsChanged) {
+    if (confirm("Altering these credit parameters will RE-GENERATE all installments, clearing past payment flags. Continue?")) {
+      existing.totalAmount = form.totalAmount;
+      existing.installmentsCount = form.installmentsCount;
+      existing.startMonth = form.startMonth;
+      existing.dueDay = form.dueDay;
+      existing.cardName = form.cardName;
+      existing.installments = generateCreditCardInstallments(form.totalAmount, form.installmentsCount, form.startMonth, form.dueDay);
     }
   } else {
-    // New setup
-    const newLoan = {
-      id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
-      type: form.type,
-      friendName: form.friendName,
-      loanName: form.loanName,
-      notes: form.notes,
-      archived: false
-    };
+    existing.cardName = form.cardName;
+  }
+}
 
-    if (form.type === 'casual') {
-      newLoan.amountLent = form.totalAmount;
-      newLoan.dateLent = form.dateLent;
-      newLoan.payments = [];
-    } else {
-      newLoan.totalAmount = form.totalAmount;
-      newLoan.installmentsCount = form.installmentsCount;
-      newLoan.startMonth = form.startMonth;
-      newLoan.dueDay = form.dueDay;
-      newLoan.cardName = form.cardName;
-      newLoan.installments = generateCreditCardInstallments(form.totalAmount, form.installmentsCount, form.startMonth, form.dueDay);
+function createNewLoan() {
+  const newLoan = {
+    id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+    type: form.type,
+    friendName: form.friendName,
+    loanName: form.loanName,
+    notes: form.notes,
+    archived: false
+  };
+
+  if (form.type === 'casual') {
+    newLoan.amountLent = form.totalAmount;
+    newLoan.dateLent = form.dateLent;
+    newLoan.payments = [];
+  } else {
+    newLoan.totalAmount = form.totalAmount;
+    newLoan.installmentsCount = form.installmentsCount;
+    newLoan.startMonth = form.startMonth;
+    newLoan.dueDay = form.dueDay;
+    newLoan.cardName = form.cardName;
+    newLoan.installments = generateCreditCardInstallments(form.totalAmount, form.installmentsCount, form.startMonth, form.dueDay);
+  }
+  return newLoan;
+}
+
+async function saveLoan() {
+  if (!validateLoanForm()) return;
+
+  if (form.loanId) {
+    const index = loans.value.findIndex(l => l.id === form.loanId);
+    if (index !== -1) {
+      updateExistingLoan(loans.value[index]);
     }
-
-    loans.value.push(newLoan);
+  } else {
+    loans.value.push(createNewLoan());
   }
 
   await repository.saveLoans(loans.value);
@@ -719,8 +731,8 @@ async function addRepayment() {
   if (!selectedLoan.value || !paymentForm.amount) return;
 
   if (paymentForm.date) {
-    const year = parseInt(paymentForm.date.split('-')[0]);
-    if (isNaN(year) || year < 1900) {
+    const year = Number.parseInt(paymentForm.date.split('-')[0]);
+    if (Number.isNaN(year) || year < 1900) {
       alert("The payment date cannot be before year 1900.");
       return;
     }
@@ -728,7 +740,7 @@ async function addRepayment() {
 
   const newPayment = {
     id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
-    amount: parseFloat(paymentForm.amount),
+    amount: Number.parseFloat(paymentForm.amount),
     date: paymentForm.date,
     notes: paymentForm.notes
   };
@@ -853,7 +865,7 @@ async function toggleInstallmentStatus(installment) {
 
 .stat-card.lent .stat-icon { color: var(--text-primary); background: rgba(255, 255, 255, 0.08); }
 .stat-card.recovered .stat-icon { color: var(--primary-accent); background: rgba(16, 185, 129, 0.1); }
-.stat-card.outstanding .stat-icon { color: #f59e0b; background: rgba(245, 158, 11, 0.1); }
+.stat-card.outstanding .stat-icon { color: #fbbf24; background: #2d1f10; }
 .stat-card.active-count .stat-icon { color: var(--secondary-accent); background: rgba(59, 130, 246, 0.1); }
 
 .stat-content {
@@ -1110,8 +1122,8 @@ async function toggleInstallmentStatus(installment) {
 }
 
 .action-icon-btn.danger:hover {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  background: #dc2626;
+  color: #ffffff;
 }
 
 /* Empty State Styling */
@@ -1333,7 +1345,7 @@ async function toggleInstallmentStatus(installment) {
 }
 
 .drawer-metric .val.success { color: var(--primary-accent); }
-.drawer-metric .val.warning { color: #f59e0b; }
+.drawer-metric .val.warning { color: #fbbf24; }
 
 .drawer-notes-block {
   background: rgba(255, 255, 255, 0.02);
@@ -1567,9 +1579,9 @@ async function toggleInstallmentStatus(installment) {
 }
 
 .btn-toggle-paid.paid:hover {
-  background: rgba(239, 68, 68, 0.1);
-  border-color: #ef4444;
-  color: #ef4444;
+  background: #dc2626;
+  border-color: #dc2626;
+  color: #ffffff;
 }
 
 /* Animations declarations */

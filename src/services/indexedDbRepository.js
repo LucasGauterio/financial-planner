@@ -25,7 +25,7 @@ function openDB() {
     }
 
     const { activeProfile } = useAuth();
-    const dbName = activeProfile && activeProfile.value && activeProfile.value !== 'default'
+    const dbName = activeProfile?.value && activeProfile.value !== 'default'
       ? `${DB_NAME}_${activeProfile.value}`
       : DB_NAME;
 
@@ -67,34 +67,41 @@ function setRaw(key, value) {
   });
 }
 
+async function decryptValue(rawValue) {
+  const { isUnlocked, encryptionKey } = useAuth();
+  if (!isUnlocked.value) {
+    throw new Error("App is locked.");
+  }
+  const decrypted = await decryptData(encryptionKey.value, rawValue);
+  if (decrypted !== null) {
+    return decrypted;
+  }
+  throw new Error("Data could not be decrypted. Tampering or key lost.");
+}
+
+function getMigrationData(key) {
+  if (typeof localStorage === 'undefined') return null;
+  const lsData = localStorage.getItem(key);
+  if (!lsData) return null;
+  const parsed = JSON.parse(lsData);
+  localStorage.removeItem(key);
+  return parsed;
+}
+
 async function get(key) {
   try {
     const rawValue = await getRaw(key);
 
     if (rawValue !== undefined) {
       if (typeof rawValue === 'string') {
-        const { isUnlocked, encryptionKey } = useAuth();
-        if (isUnlocked.value) {
-          const decrypted = await decryptData(encryptionKey.value, rawValue);
-          if (decrypted !== null) {
-            return decrypted;
-          }
-          throw new Error("Data could not be decrypted. Tampering or key lost.");
-        }
-        throw new Error("App is locked.");
+        return await decryptValue(rawValue);
       }
       return rawValue; // Plaintext (legacy or migration)
     }
 
-    // Migration from localStorage fallback
-    if (typeof localStorage !== 'undefined') {
-      const lsData = localStorage.getItem(key);
-      if (lsData) {
-        const parsed = JSON.parse(lsData);
-        // We do not save to IDB here; we'll wait for the next explicit save so it's encrypted
-        localStorage.removeItem(key);
-        return parsed;
-      }
+    const migrated = getMigrationData(key);
+    if (migrated !== null) {
+      return migrated;
     }
     return key === TIMELINE_KEY ? {} : [];
   } catch (error) {

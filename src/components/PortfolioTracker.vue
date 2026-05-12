@@ -5,8 +5,8 @@
 
     <div style="margin-top: 1.5rem; display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap;">
       <div style="display: flex; align-items: center; gap: 0.5rem;">
-        <label style="margin: 0;">{{ t('tracker.projHorizon') }}</label>
-        <select v-model.number="projectionYears" style="width: auto; padding: 0.5rem;">
+        <label for="projection-years-select" style="margin: 0;">{{ t('tracker.projHorizon') }}</label>
+        <select id="projection-years-select" v-model.number="projectionYears" style="width: auto; padding: 0.5rem;">
           <option :value="5">{{ t('tracker.years', { years: 5 }) }}</option>
           <option :value="10">{{ t('tracker.years', { years: 10 }) }}</option>
           <option :value="20">{{ t('tracker.years', { years: 20 }) }}</option>
@@ -342,7 +342,7 @@
             <button class="btn btn-secondary" @click="showDeleteConfirm = false" style="flex: 1;">
               {{ t('tracker.form.cancel') }}
             </button>
-            <button class="btn class-danger" @click="confirmDeleteInv" style="flex: 1; background: #ef4444; border-color: #ef4444; color: white;">
+            <button class="btn class-danger" @click="confirmDeleteInv" style="flex: 1; background: #dc2626; border-color: #dc2626; color: white;">
               {{ t('tracker.actions.del') }}
             </button>
           </div>
@@ -353,7 +353,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, inject } from 'vue';
+import { ref, watch, onMounted, inject } from 'vue';
 import { repository } from '../services/indexedDbRepository';
 import { calculateCompoundInterest, calculateRequiredMonthlyContribution } from '../services/financialCalculations';
 
@@ -363,11 +363,7 @@ const currentDate = new Date();
 const currentYear = currentDate.getFullYear();
 const currentMonthStr = `${currentYear}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
 
-// Unused months wrapper natively decoupled via translations inline gracefully
-const availableYears = [];
-for (let y = currentYear; y >= currentYear - 40; y--) {
-  availableYears.push(y);
-}
+// Available years
 
 const investments = ref([]);
 const projectionYears = ref(10);
@@ -412,7 +408,7 @@ onMounted(async () => {
 watch(investments, async (newVal) => {
   if (isLoaded.value) {
     try {
-      const plainObj = JSON.parse(JSON.stringify(newVal));
+      const plainObj = structuredClone(newVal);
       await repository.saveInvestments(plainObj);
     } catch (e) {
       console.error("Failed to strip structural proxies for IndexedDB:", e);
@@ -423,17 +419,17 @@ watch(investments, async (newVal) => {
 function formatMonth(dateStr) {
   if (!dateStr) return '';
   const [sy, sm] = dateStr.split('-');
-  if (parseInt(sy) < 1900) return `${sm}/1900`;
+  if (Number.parseInt(sy) < 1900) return `${sm}/1900`;
   return `${sm}/${sy}`;
 }
 
 function getElapsedMonths(startDateStr) {
   if (!startDateStr) return 0;
   const [sy, sm] = startDateStr.split('-');
-  const syInt = parseInt(sy);
-  if (isNaN(syInt) || syInt < 1900) return 0;
+  const syInt = Number.parseInt(sy);
+  if (Number.isNaN(syInt) || syInt < 1900) return 0;
   const d = new Date();
-  return Math.max(0, (d.getFullYear() - syInt) * 12 + (d.getMonth() + 1 - parseInt(sm)));
+  return Math.max(0, (d.getFullYear() - syInt) * 12 + (d.getMonth() + 1 - Number.parseInt(sm)));
 }
 
 function hasTimeGap(inv) {
@@ -459,7 +455,7 @@ function saveInvestment() {
   
   const startY = Number(formInv.value.startYear);
   const earlyY = Number(formInv.value.earlyStartYear);
-  if (isNaN(startY) || startY < 1900 || isNaN(earlyY) || earlyY < 1900) {
+  if (Number.isNaN(startY) || startY < 1900 || Number.isNaN(earlyY) || earlyY < 1900) {
     alert("Year cannot be before 1900.");
     return;
   }
@@ -476,12 +472,12 @@ function saveInvestment() {
   delete payload.startYear;
   delete payload.startMonth;
   
-  if (editingIndex.value !== null) {
-    investments.value[editingIndex.value] = payload;
-    editingIndex.value = null;
-  } else {
+  if (editingIndex.value === null) {
     investments.value.push(payload);
     showAddForm.value = false; // Hide adding layout upon saving explicitly
+  } else {
+    investments.value[editingIndex.value] = payload;
+    editingIndex.value = null;
   }
   
   formInv.value = { ...defaultForm };
@@ -492,14 +488,18 @@ function editInv(index) {
   editingIndex.value = index;
   
   const target = { ...investments.value[index] };
-  if (!target.increase) target.increase = 0;
-  if (target.investedValue === undefined) target.investedValue = Number(target.balance) || 0;
-  if (target.alreadyMade === undefined) target.alreadyMade = false;
-  if (!target.earlyStartYear) target.earlyStartYear = currentYear - 5;
-  if (!target.actualStartDate) target.actualStartDate = currentMonthStr;
+  target.increase = target.increase || 0;
+  if (target.investedValue === undefined) {
+    target.investedValue = Number(target.balance) || 0;
+  }
+  if (target.alreadyMade === undefined) {
+    target.alreadyMade = false;
+  }
+  target.earlyStartYear = target.earlyStartYear || (currentYear - 5);
+  target.actualStartDate = target.actualStartDate || currentMonthStr;
   
   const [sy, sm] = target.actualStartDate.split('-');
-  target.startYear = parseInt(sy);
+  target.startYear = Number.parseInt(sy);
   target.startMonth = sm;
   
   formInv.value = target;

@@ -138,7 +138,7 @@ async function restoreSnapshot(snap) {
        try {
            importMsg.value = t('backup.statusRestoring');
            await repository.importRawBackup(snap.data);
-           window.location.reload();
+           globalThis.location.reload();
        } catch (e) {
            importMsg.value = t('backup.statusRestoreFailed', { error: e.message });
        }
@@ -153,11 +153,11 @@ async function downloadSnapshot(snap) {
     
     const link = document.createElement('a');
     link.href = url;
-    const timeStr = new Date(snap.timestamp).toISOString().replace(/[:.]/g, '-');
+    const timeStr = new Date(snap.timestamp).toISOString().replaceAll(/[:.]/g, '-');
     link.download = `financial_planner_snapshot_${timeStr}.json`;
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+    link.remove();
     URL.revokeObjectURL(url);
   } catch (err) {
     alert(t('backup.errorDownloadFailed', { error: err.message }));
@@ -177,7 +177,7 @@ async function exportBackup() {
     link.download = `financial_planner_backup_${date}.json`;
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+    link.remove();
     URL.revokeObjectURL(url);
   } catch (err) {
     alert(t('backup.errorExportFailed', { error: err.message }));
@@ -189,37 +189,34 @@ async function importBackup(event) {
   if (!file) return;
   
   importMsg.value = t('backup.statusReading');
-  const reader = new FileReader();
-  reader.onload = async (e) => {
-    try {
-      const data = JSON.parse(e.target.result);
-      
-      if (!data || typeof data !== 'object') {
-        throw new Error(t('backup.errorInvalidFormat'));
-      }
-      
-      const authCheckToken = data['financial_planner_auth_check'];
-      if (authCheckToken) {
-         const { encryptionKey } = useAuth();
-         if (!encryptionKey.value) throw new Error(t('backup.errorAppLocked'));
-         
-         const decrypted = await decryptData(encryptionKey.value, authCheckToken);
-         if (decrypted !== 'VALID_AUTH') {
-            importMsg.value = t('backup.errorDifferentPassword');
-            return;
-         }
-      }
-
-      await repository.importRawBackup(data);
-      importMsg.value = t('backup.importSuccess');
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-    } catch (err) {
-      importMsg.value = err.message || t('backup.errorParsing');
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+    
+    if (!data || typeof data !== 'object') {
+      throw new Error(t('backup.errorInvalidFormat'));
     }
-  };
-  reader.readAsText(file);
+    
+    const authCheckToken = data['financial_planner_auth_check'];
+    if (authCheckToken) {
+       const { encryptionKey } = useAuth();
+       if (!encryptionKey.value) throw new Error(t('backup.errorAppLocked'));
+       
+       const decrypted = await decryptData(encryptionKey.value, authCheckToken);
+       if (decrypted !== 'VALID_AUTH') {
+          importMsg.value = t('backup.errorDifferentPassword');
+          return;
+       }
+    }
+
+    await repository.importRawBackup(data);
+    importMsg.value = t('backup.importSuccess');
+    setTimeout(() => {
+      globalThis.location.reload();
+    }, 1000);
+  } catch (err) {
+    importMsg.value = err.message || t('backup.errorParsing');
+  }
 }
 </script>
 

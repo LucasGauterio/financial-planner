@@ -65,7 +65,7 @@ async function deleteProfile(profileName) {
   
   try {
     const dbName = `FinancialPlannerDB_${profileName}`;
-    if (typeof indexedDB !== 'undefined') {
+    if (globalThis.indexedDB !== undefined) {
       indexedDB.deleteDatabase(dbName);
     }
   } catch (e) {
@@ -79,11 +79,11 @@ async function deleteProfile(profileName) {
 }
 
 // Add global listeners for user activity
-if (typeof window !== 'undefined') {
-  window.addEventListener('mousemove', resetIdleTimeout);
-  window.addEventListener('keydown', resetIdleTimeout);
-  window.addEventListener('click', resetIdleTimeout);
-  window.addEventListener('scroll', resetIdleTimeout);
+if (globalThis.window !== undefined) {
+  globalThis.addEventListener('mousemove', resetIdleTimeout);
+  globalThis.addEventListener('keydown', resetIdleTimeout);
+  globalThis.addEventListener('click', resetIdleTimeout);
+  globalThis.addEventListener('scroll', resetIdleTimeout);
   
   document.addEventListener('visibilitychange', async () => {
      if (document.visibilityState === 'hidden' && isUnlocked.value) {

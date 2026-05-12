@@ -1,6 +1,6 @@
 export async function deriveKey(password, saltString) {
   const enc = new TextEncoder();
-  const keyMaterial = await window.crypto.subtle.importKey(
+  const keyMaterial = await globalThis.crypto.subtle.importKey(
     "raw",
     enc.encode(password),
     { name: "PBKDF2" },
@@ -10,7 +10,7 @@ export async function deriveKey(password, saltString) {
 
   const salt = enc.encode(saltString || "FinancialPlannerSalt_v1");
 
-  return window.crypto.subtle.deriveKey(
+  return globalThis.crypto.subtle.deriveKey(
     {
       name: "PBKDF2",
       salt: salt,
@@ -26,10 +26,10 @@ export async function deriveKey(password, saltString) {
 
 export async function encryptData(key, data) {
   const enc = new TextEncoder();
-  const iv = window.crypto.getRandomValues(new Uint8Array(12));
+  const iv = globalThis.crypto.getRandomValues(new Uint8Array(12));
   const encodedText = enc.encode(JSON.stringify(data));
 
-  const cipherText = await window.crypto.subtle.encrypt(
+  const cipherText = await globalThis.crypto.subtle.encrypt(
     {
       name: "AES-GCM",
       iv: iv
@@ -53,7 +53,7 @@ export async function decryptData(key, base64Data) {
     const iv = combined.slice(0, 12);
     const cipherText = combined.slice(12);
 
-    const decrypted = await window.crypto.subtle.decrypt(
+    const decrypted = await globalThis.crypto.subtle.decrypt(
       {
         name: "AES-GCM",
         iv: iv
@@ -75,17 +75,17 @@ function arrayBufferToBase64(buffer) {
   const bytes = new Uint8Array(buffer);
   const len = bytes.byteLength;
   for (let i = 0; i < len; i++) {
-      binary += String.fromCharCode(bytes[i]);
+      binary += String.fromCodePoint(bytes[i]);
   }
-  return window.btoa(binary);
+  return globalThis.btoa(binary);
 }
 
 function base64ToArrayBuffer(base64) {
-  const binary_string = window.atob(base64);
+  const binary_string = globalThis.atob(base64);
   const len = binary_string.length;
   const bytes = new Uint8Array(len);
   for (let i = 0; i < len; i++) {
-      bytes[i] = binary_string.charCodeAt(i);
+      bytes[i] = binary_string.codePointAt(i);
   }
   return bytes;
 }

@@ -6,15 +6,15 @@
     <div class="grid-2" style="margin-top: 1.5rem;">
       <div>
         <div class="form-group">
-          <label>{{ t('timegap.targetAmount') }} ({{ currency }})</label>
-          <input type="number" v-model="targetAmount" min="0" max="999999999999999" step="0.01" @input="targetAmount = targetAmount > 999999999999999 ? 999999999999999 : targetAmount" />
+          <label for="target-amount-input">{{ t('timegap.targetAmount') }} ({{ currency }})</label>
+          <input id="target-amount-input" type="number" v-model="targetAmount" min="0" max="999999999999999" step="0.01" @input="targetAmount = targetAmount > 999999999999999 ? 999999999999999 : targetAmount" />
           <span v-if="targetAmount > 999999999999999" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
             ⚠️ {{ t('validation.maxLimit') }}
           </span>
         </div>
         <div class="form-group">
-          <label>{{ t('timegap.goalEndYear') }}</label>
-          <input type="number" v-model="endYear" min="1900" max="2200" step="1" @input="endYear = endYear > 2200 ? 2200 : endYear" />
+          <label for="end-year-input">{{ t('timegap.goalEndYear') }}</label>
+          <input id="end-year-input" type="number" v-model="endYear" min="1900" max="2200" step="1" @input="endYear = endYear > 2200 ? 2200 : endYear" />
           <span v-if="endYear && endYear < 1900" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
             ⚠️ {{ t('validation.minYear') }}
           </span>
@@ -23,8 +23,8 @@
           </span>
         </div>
         <div class="form-group">
-          <label>{{ t('timegap.earlyStart') }}</label>
-          <input type="number" v-model="earlyStartYear" min="1900" :max="currentYear" step="1" @input="earlyStartYear = earlyStartYear > currentYear ? currentYear : earlyStartYear" />
+          <label for="early-start-year-input">{{ t('timegap.earlyStart') }}</label>
+          <input id="early-start-year-input" type="number" v-model="earlyStartYear" min="1900" :max="currentYear" step="1" @input="earlyStartYear = earlyStartYear > currentYear ? currentYear : earlyStartYear" />
           <span v-if="earlyStartYear && earlyStartYear < 1900" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
             ⚠️ {{ t('validation.minYear') }}
           </span>
@@ -33,8 +33,8 @@
           </span>
         </div>
         <div class="form-group">
-          <label>{{ t('timegap.annualReturn') }}</label>
-          <input type="number" v-model="annualRate" min="0" max="100" step="0.01" @input="annualRate = annualRate > 100 ? 100 : annualRate" />
+          <label for="annual-rate-input">{{ t('timegap.annualReturn') }}</label>
+          <input id="annual-rate-input" type="number" v-model="annualRate" min="0" max="100" step="0.01" @input="annualRate = annualRate > 100 ? 100 : annualRate" />
           <span v-if="annualRate >= 100" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
             ⚠️ {{ t('validation.maxRate') }}
           </span>
@@ -96,7 +96,7 @@ const annualRate = ref(10);
 const earlyPmt = computed(() => {
   const eYear = Number(endYear.value);
   const esYear = Number(earlyStartYear.value);
-  if (isNaN(eYear) || eYear < 1900 || isNaN(esYear) || esYear < 1900 || eYear <= esYear) return 0;
+  if (Number.isNaN(eYear) || eYear < 1900 || Number.isNaN(esYear) || esYear < 1900 || eYear <= esYear) return 0;
   
   const months = (eYear - esYear) * 12;
   const monthlyRate = (annualRate.value / 100) / 12;
@@ -106,7 +106,7 @@ const earlyPmt = computed(() => {
 
 const currentPmt = computed(() => {
   const eYear = Number(endYear.value);
-  if (isNaN(eYear) || eYear < 1900 || eYear <= currentYear) return 0;
+  if (Number.isNaN(eYear) || eYear < 1900 || eYear <= currentYear) return 0;
   
   const months = (eYear - currentYear) * 12;
   const monthlyRate = (annualRate.value / 100) / 12;
@@ -116,7 +116,7 @@ const currentPmt = computed(() => {
 
 const yieldIfStartedEarly = computed(() => {
   const esYear = Number(earlyStartYear.value);
-  if (isNaN(esYear) || esYear < 1900 || esYear >= currentYear) return 0;
+  if (Number.isNaN(esYear) || esYear < 1900 || esYear >= currentYear) return 0;
   
   const elapsedMonthsSinceEarly = (currentYear - esYear) * 12;
   const monthlyRate = (annualRate.value / 100) / 12;

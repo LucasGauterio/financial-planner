@@ -102,7 +102,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, inject, watch } from 'vue';
+import { ref, onMounted, computed, inject } from 'vue';
 import { repository } from '../services/indexedDbRepository';
 
 const { t, formatCurrency, locale } = inject('i18n');
@@ -134,15 +134,17 @@ onMounted(async () => {
 });
 
 function toggleCheck(id, defaultExpected) {
-  if (!stateMap.value[id]) {
-    stateMap.value[id] = { checked: true, actualValue: defaultExpected, reportedBalance: null };
-  } else {
+  if (stateMap.value[id]) {
     // Toggle
     stateMap.value[id].checked = !stateMap.value[id].checked;
     if (stateMap.value[id].checked) {
-      if (!stateMap.value[id].actualValue) stateMap.value[id].actualValue = defaultExpected;
-      if (stateMap.value[id].reportedBalance === undefined) stateMap.value[id].reportedBalance = null;
+      stateMap.value[id].actualValue = stateMap.value[id].actualValue || defaultExpected;
+      if (stateMap.value[id].reportedBalance === undefined) {
+        stateMap.value[id].reportedBalance = null;
+      }
     }
+  } else {
+    stateMap.value[id] = { checked: true, actualValue: defaultExpected, reportedBalance: null };
   }
   saveState();
 }
@@ -156,7 +158,7 @@ function generateTimeline() {
     investments.value.forEach(inv => {
       if (inv.actualStartDate) {
         const [sy, sm] = inv.actualStartDate.split('-');
-        const elapsed = (currentDate.getFullYear() - parseInt(sy)) * 12 + (currentDate.getMonth() + 1 - parseInt(sm));
+        const elapsed = (currentDate.getFullYear() - Number.parseInt(sy)) * 12 + (currentDate.getMonth() + 1 - Number.parseInt(sm));
         if (elapsed > maxHistoricalMonths) maxHistoricalMonths = elapsed;
       }
     });
@@ -175,7 +177,7 @@ function generateTimeline() {
       let elapsedPrior = 0;
       if (inv.actualStartDate) {
         const [sy, sm] = inv.actualStartDate.split('-');
-        elapsedPrior = (currentDate.getFullYear() - parseInt(sy)) * 12 + (currentDate.getMonth() + 1 - parseInt(sm));
+        elapsedPrior = (currentDate.getFullYear() - Number.parseInt(sy)) * 12 + (currentDate.getMonth() + 1 - Number.parseInt(sm));
       }
       
       // If elapsedPrior + m < 0, this specific investment hadn't aggressively physically launched natively yet
@@ -184,7 +186,7 @@ function generateTimeline() {
       // If current month investment already included inside initial principal natively, optionally skip "m=0" natively
       if (m === 0 && inv.alreadyMade) return null;
       
-      let amount = parseFloat(inv.monthly);
+      let amount = Number.parseFloat(inv.monthly);
       if (inv.increase && inv.increase > 0) {
         const newAnniversaries = Math.floor((elapsedPrior + m) / 12) - Math.floor(elapsedPrior / 12);
         if (newAnniversaries !== 0) {
@@ -220,15 +222,15 @@ function generateTimeline() {
 
 function saveState() {
   try {
-    const plainObj = JSON.parse(JSON.stringify(stateMap.value));
+    const plainObj = structuredClone(stateMap.value);
     repository.saveTimelineState(plainObj);
     
     // Dynamic Balance Synchronization organically natively
     if (investments.value && investments.value.length > 0) {
-      const updatedInvs = JSON.parse(JSON.stringify(investments.value));
+      const updatedInvs = structuredClone(investments.value);
       updatedInvs.forEach(inv => {
-         let currentBal = parseFloat(inv.investedValue || 0);
-         let currentInvested = parseFloat(inv.investedValue || 0);
+         let currentBal = Number.parseFloat(inv.investedValue || 0);
+         let currentInvested = Number.parseFloat(inv.investedValue || 0);
          
          // Extract and organically sort keys explicitly filtering this investment specifically
          const sortedKeys = Object.keys(plainObj)
@@ -238,12 +240,12 @@ function saveState() {
          for (const key of sortedKeys) {
            const state = plainObj[key];
            if (state.checked) {
-              const apport = parseFloat(state.actualValue || 0);
+              const apport = Number.parseFloat(state.actualValue || 0);
               currentInvested += apport;
               
               if (state.reportedBalance !== null && state.reportedBalance !== undefined && state.reportedBalance !== '') {
                  // Explicitly overridden dynamically
-                 currentBal = parseFloat(state.reportedBalance);
+                 currentBal = Number.parseFloat(state.reportedBalance);
               } else {
                  // Increment mathematically iteratively purely off apports inherently precisely securely logically inherently natively gracefully safely properly
                  currentBal += apport;
@@ -264,7 +266,7 @@ function saveState() {
 }
 
 const theoreticalTotal = computed(() => {
-  let sum = investments.value.reduce((acc, inv) => acc + parseFloat(inv.investedValue || 0), 0);
+  let sum = investments.value.reduce((acc, inv) => acc + Number.parseFloat(inv.investedValue || 0), 0);
   timelineGroups.value.forEach(g => {
     g.items.forEach(item => sum += item.amount);
   });
@@ -272,7 +274,7 @@ const theoreticalTotal = computed(() => {
 });
 
 const realLifeTotal = computed(() => {
-  return investments.value.reduce((acc, inv) => acc + parseFloat(inv.balance || 0), 0);
+  return investments.value.reduce((acc, inv) => acc + Number.parseFloat(inv.balance || 0), 0);
 });
 
 </script>

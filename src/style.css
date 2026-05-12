@@ -23,6 +23,8 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) rgba(24, 24, 27, 0.3);
 }
 
 body {
@@ -432,7 +434,7 @@ input:focus, select:focus {
   padding: 0 0.4rem !important;
   font-weight: 600 !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.05em !important;
+  letter-spacing: 0.05em;
   margin: 0 !important;
 }
 
@@ -530,10 +532,6 @@ input:focus, select:focus {
 }
 
 /* Support standard scrollbars */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.1) rgba(24, 24, 27, 0.3);
-}
 
 /* Table styling with horizontal scrollbar on Desktop/Mobile instead of column narrowing */
 .table-wrapper {
