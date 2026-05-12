@@ -1,0 +1,237 @@
+export default {
+  header: {
+    title: 'Financial Planner',
+    subtitle: 'Planeje seu futuro com projeções inteligentes.'
+  },
+  tabs: {
+    timeGap: 'Salto no Tempo',
+    past: 'Simulador Passado',
+    goal: 'Calculadora de Metas',
+    portfolio: 'Rastreador de Carteira',
+    timeline: 'Linha do Tempo',
+    loans: 'Empréstimos'
+  },
+  settings: {
+    language: 'Idioma',
+    languageEn: 'English',
+    languagePt: 'Português (BR)',
+    currency: 'Moeda'
+  },
+  tracker: {
+    title: 'Monitor de Carteira',
+    subtitle: 'Acompanhe seus investimentos atuais e projete sua riqueza armazenada offline de forma segura.',
+    projHorizon: 'Horizonte de Projeção:',
+    years: '{years} Anos',
+    alertExists: 'Um investimento com esse nome já existe na sua carteira!',
+    types: {
+      stocks: 'Ações',
+      crypto: 'Cripto',
+      realEstate: 'Imóveis',
+      savings: 'Poupança',
+      other: 'Outros'
+    },
+    months: {
+      '01': 'Jan', '02': 'Fev', '03': 'Mar', '04': 'Abr', '05': 'Mai', '06': 'Jun',
+      '07': 'Jul', '08': 'Ago', '09': 'Set', '10': 'Out', '11': 'Nov', '12': 'Dez'
+    },
+    addInvestment: '+ Adicionar à Carteira',
+    noInvestments: 'Nenhum investimento adicionado ainda. Comece adicionando um à sua carteira!',
+    table: {
+      name: 'Nome',
+      type: 'Tipo',
+      investedValue: 'Investido',
+      balance: 'Saldo',
+      monthly: 'Aporte',
+      increase: 'Aumento Anual Aporte (%)',
+      rate: 'Taxa Anual (%)',
+      goal: 'Meta: Projetada ({years}A)',
+      gapAnalysis: 'Análise de Gap',
+      actions: 'Ações',
+      achieved: 'concluído'
+    },
+    gap: {
+      refYear: 'Ref:',
+      tBal: 'T.Saldo:',
+      tGoal: 'T.Meta:',
+      catchUp: 'Rec. Atraso:',
+      startedOnTime: 'Sem Gap',
+      onTrack: 'No Prazo',
+      noPastGap: 'Iniciado no prazo.',
+      perMonth: '/mês'
+    },
+    form: {
+      name: 'Nome Único',
+      type: 'Tipo de Ativo',
+      investedValue: 'Valor Atual Investido',
+      balance: 'Saldo Atual',
+      rate: 'Retorno Anual Projetado (%)',
+      actualStartDate: 'Data de Início Real',
+      gapYear: 'Ano Alvo de Disponibilidade (Análise de Gap)',
+      currentApport: 'Aporte Mensal Atual',
+      increase: 'Aumento Anual de Aporte (%)',
+      alreadyMade: 'Já fiz o aporte deste mês',
+      cancel: 'Cancelar',
+      save: 'Salvar Alterações',
+      add: 'Adicionar à Carteira'
+    },
+    actions: {
+      edit: 'Editar',
+      del: 'Apagar'
+    },
+    confirmDelete: 'Tem certeza de que deseja excluir este investimento?',
+    confirmDeleteTitle: 'Excluir Investimento'
+  },
+  goal: {
+    title: 'Calculadora de Metas',
+    subtitle: 'Descubra quanto você precisa economizar mensalmente para atingir seu objetivo financeiro.',
+    targetAmount: 'Valor da Meta',
+    principal: 'Capital Inicial',
+    timeHorizon: 'Horizonte de Tempo (Anos)',
+    annualReturn: 'Retorno Anual Esperado (%)',
+    annualIncrease: 'Aumento Anual Esperado do Aporte (%)',
+    reqPMT: 'Aporte Mensal Necessário (Inicia com)',
+    totalInv: 'Total a ser Investido',
+    totalYield: 'Rendimento Total Estimado'
+  },
+  past: {
+    title: 'Simulador Passado',
+    subtitle: 'Descubra o que seu dinheiro poderia ter se tornado se você tivesse começado a investir antes.',
+    startYear: 'Ano de Início',
+    initialAmount: 'Valor Inicial',
+    startingApport: 'Aporte Mensal Inicial',
+    annualIncrease: 'Aumento Anual do Aporte (%)',
+    annualRate: 'Taxa de Juros Anual (%)',
+    today: 'Você Teria Hoje',
+    totalInv: 'Total Investido',
+    totalYield: 'Total de Rendimentos'
+  },
+  timegap: {
+    title: 'Comparador de Salto no Tempo',
+    subtitle: 'Compare a dura realidade de começar tarde com a mágica exponencial de começar cedo.',
+    targetAmount: 'Valor da Meta',
+    goalEndYear: 'Ano de Fim da Meta',
+    earlyStart: 'Ano de Início "Cedo"',
+    annualReturn: 'Retorno Anual Esperado (%)',
+    scenarioA: 'Cenário A: Começando Cedo ({year})',
+    reqPMT: 'Valor Mensal Necessário',
+    todayYield: 'Se você tivesse feito isso, hoje você teria:',
+    scenarioB: 'Cenário B: Começando Agora ({year})',
+    costWait: 'O Custo da Espera',
+    costDesc: 'Ao começar agora em vez de em {year}, você deve investir {multiplier}x mais todos os meses (um extra de {diff}/mês).'
+  },
+  timeline: {
+    title: 'Linha do Tempo',
+    subtitle: 'Compare os planos teóricos com seus depósitos reais registrados localmente.',
+    empty: 'Sua carteira está vazia. Adicione investimentos no Rastreador primeiro!',
+    archive: 'Meses Anteriores Arquivados',
+    progressTitle: 'Progresso Real',
+    theoreticalFuture: 'Total Futuro Teórico (100% concluído)',
+    actualVerified: 'Total Verificado Atual',
+    relativePlan: 'do planejado',
+    expected: 'Esperado:',
+    apport: 'Aporte',
+    reportedBalance: 'Saldo Real',
+    status: {
+      done: 'Feito',
+      pending: 'Pendente'
+    }
+  },
+  loans: {
+    title: 'Rastreador de Empréstimos',
+    subtitle: 'Acompanhe o dinheiro emprestado incluindo empréstimos informais',
+    totalLent: 'Total Emprestado',
+    recovered: 'Pago',
+    outstanding: 'Saldo devedor',
+    activeCount: 'Empréstimos Ativos',
+    typeCasual: 'Informal (Sem Parcelas)',
+    typeCredit: 'Parcelado',
+    empty: 'Nenhum empréstimo encontrado. Pressione "+ Adicionar Empréstimo" para começar!',
+    addLoan: 'Adicionar Empréstimo',
+    addPayment: 'Novo Pagamento',
+    editLoan: 'Editar Empréstimo',
+    deleteLoan: 'Excluir Empréstimo',
+    archiveLoan: 'Arquivar Empréstimo',
+    unarchiveLoan: 'Restaurar Empréstimo',
+    confirmDelete: 'Tem certeza de que deseja excluir este empréstimo e todo o histórico associado?',
+    confirmArchive: 'Tem certeza de que deseja arquivar este empréstimo?',
+    form: {
+      type: 'Tipo de Empréstimo',
+      friendName: 'Nome da Entidade (Devedor/Credor)',
+      loanName: 'Nome do Empréstimo / Motivo',
+      totalAmount: 'Valor Total Emprestado',
+      amountLent: 'Valor Emprestado',
+      dateLent: 'Data do Empréstimo',
+      startMonth: 'Mês de Início',
+      dueDay: 'Dia do Vencimento (do Mês)',
+      installmentsCount: 'Quantidade de Parcelas',
+      installmentAmount: 'Valor da Parcela',
+      cardName: 'Nome do Cartão de Crédito / Fatura',
+      notes: 'Notas (Opcional)',
+      cancel: 'Cancelar',
+      save: 'Salvar Empréstimo',
+      add: 'Criar Empréstimo'
+    },
+    casual: {
+      ledgerTitle: 'Histórico de Pagamentos',
+      noPayments: 'Nenhum pagamento registrado ainda.',
+      paymentFormTitle: 'Registrar um Pagamento',
+      amountPaid: 'Valor do Pagamento',
+      datePaid: 'Data do Pagamento',
+      paymentNotes: 'Notas (Opcional)',
+      addPaymentBtn: 'Adicionar Pagamento',
+      remaining: 'restante'
+    },
+    credit: {
+      installmentsTitle: 'Cronograma de Parcelas',
+      installmentNum: 'Parcela {num} de {total}',
+      statusPaid: 'Pago',
+      statusPending: 'Pendente',
+      paymentDate: 'Pago em:',
+      paidShort: 'Pago',
+      pendingShort: 'Pendente',
+      details: '{amount} x {count} no {card}'
+    },
+    stats: {
+      paidCount: '{paid} de {total} pagas',
+      recoveredPct: '{pct}% recuperado'
+    },
+    filters: {
+      all: 'Todos',
+      active: 'Ativos',
+      completed: 'Concluídos',
+      archived: 'Arquivados'
+    }
+  },
+  backup: {
+    title: 'Backup e Restauração',
+    subtitle: 'Seus dados são salvos localmente de forma automática ao bloquear ou sair do aplicativo. Você também pode exportar um arquivo de cópia.',
+    exportBtn: 'Exportar Arquivo',
+    exportTitle: 'Exportar .json',
+    importBtn: 'Importar Arquivo',
+    importTitle: 'Importar .json',
+    snapshotBtn: '+ Snapshot',
+    snapshotTitle: 'Criar Snapshot Agora',
+    historyTitle: 'Histórico de Snapshots Locais',
+    noSnapshots: 'Nenhum snapshot encontrado ainda.',
+    restoreBtn: 'Restaurar',
+    downloadTooltip: 'Baixar este snapshot',
+    closeBtn: 'Fechar',
+    confirmRestore: 'Tem certeza de que deseja restaurar o snapshot de {date}? Suas alterações não salvas serão perdidas.',
+    statusRestoring: 'Restaurando...',
+    statusRestoreFailed: 'Falha na restauração: {error}',
+    statusReading: 'Lendo arquivo...',
+    errorInvalidFormat: 'Formato de backup inválido.',
+    errorAppLocked: 'O aplicativo está bloqueado.',
+    errorDifferentPassword: 'Erro: O backup usa uma senha diferente. Faça login com essa senha primeiro.',
+    importSuccess: 'Importação bem-sucedida! Recarregando...',
+    errorParsing: 'Erro ao analisar arquivo de backup.',
+    errorDownloadFailed: 'Falha no download: {error}',
+    errorExportFailed: 'Falha na exportação: {error}'
+  },
+  validation: {
+    minYear: 'O ano mínimo permitido é 1900',
+    maxYear: 'O ano máximo permitido é 2200',
+    maxLimit: 'O limite máximo permitido é 999 Trilhões (abaixo de 1 Quatrilhão)',
+    maxRate: 'A porcentagem máxima permitida é 100%'
+  }
+};

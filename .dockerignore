@@ -1,0 +1,10 @@
+node_modules
+dist
+.vscode
+.git
+.gitignore
+.gemini
+README.md
+context.md
+Dockerfile
+.dockerignore

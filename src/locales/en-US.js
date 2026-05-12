@@ -1,0 +1,237 @@
+export default {
+  header: {
+    title: 'Financial Planner',
+    subtitle: 'Plan your future with intelligent projections.'
+  },
+  tabs: {
+    timeGap: 'Time Gap',
+    past: 'Past Simulator',
+    goal: 'Goal Calculator',
+    portfolio: 'Portfolio Tracker',
+    timeline: 'Life Timeline',
+    loans: 'Loan Tracker'
+  },
+  settings: {
+    language: 'Language',
+    languageEn: 'English',
+    languagePt: 'Português (BR)',
+    currency: 'Currency'
+  },
+  tracker: {
+    title: 'Portfolio Tracker',
+    subtitle: 'Track your current investments and project your wealth securely stored offline.',
+    projHorizon: 'Projection Horizon:',
+    years: '{years} Years',
+    alertExists: 'An investment with this name already exists in your portfolio!',
+    types: {
+      stocks: 'Stocks',
+      crypto: 'Crypto',
+      realEstate: 'Real Estate',
+      savings: 'Savings',
+      other: 'Other'
+    },
+    months: {
+      '01': 'Jan', '02': 'Feb', '03': 'Mar', '04': 'Apr', '05': 'May', '06': 'Jun',
+      '07': 'Jul', '08': 'Aug', '09': 'Sep', '10': 'Oct', '11': 'Nov', '12': 'Dec'
+    },
+    addInvestment: '+ Add to Portfolio',
+    noInvestments: 'No investments added yet. Start by adding one to your portfolio!',
+    table: {
+      name: 'Name',
+      type: 'Type',
+      investedValue: 'Invested',
+      balance: 'Balance',
+      monthly: 'Contribution',
+      increase: 'Annual Contribution + (%)',
+      rate: 'Annual Rate (%)',
+      goal: 'Goal: Projected ({years}Y)',
+      gapAnalysis: 'Gap Analysis',
+      actions: 'Actions',
+      achieved: 'achieved'
+    },
+    gap: {
+      refYear: 'Ref Year:',
+      tBal: 'T.Bal:',
+      tGoal: 'T.Goal:',
+      catchUp: 'Catch-up:',
+      startedOnTime: 'No Gap',
+      onTrack: 'On Track',
+      noPastGap: 'Started on time.',
+      perMonth: '/mo'
+    },
+    form: {
+      name: 'Unique Name',
+      type: 'Asset Type',
+      investedValue: 'Current Invested Value',
+      balance: 'Current Balance',
+      rate: 'Projected Annual Return (%)',
+      actualStartDate: 'Actual Start Date',
+      gapYear: 'Target Available Year (Gap Analysis)',
+      currentApport: 'Current Monthly Contribution',
+      increase: 'Contribution Annual Increase (%)',
+      alreadyMade: 'I already made this month\'s contribution',
+      cancel: 'Cancel',
+      save: 'Save Changes',
+      add: 'Add to Portfolio'
+    },
+    actions: {
+      edit: 'Edit',
+      del: 'Delete'
+    },
+    confirmDelete: 'Are you sure you want to delete this investment?',
+    confirmDeleteTitle: 'Delete Investment'
+  },
+  goal: {
+    title: 'Goal Calculator',
+    subtitle: 'Find out how much you need to save monthly to reach your financial goal.',
+    targetAmount: 'Target Goal Amount',
+    principal: 'Starting Principal',
+    timeHorizon: 'Time Horizon (Years)',
+    annualReturn: 'Expected Annual Return (%)',
+    annualIncrease: 'Expected Annual Contribution Increase (%)',
+    reqPMT: 'Required Monthly Contribution (Starts At)',
+    totalInv: 'Total to be Invested',
+    totalYield: 'Estimated Total Yield'
+  },
+  past: {
+    title: 'Past Investment Simulator',
+    subtitle: 'Discover what your money could have become if you started investing earlier.',
+    startYear: 'Starting Year',
+    initialAmount: 'Initial amount',
+    startingApport: 'Starting Monthly Contribution',
+    annualIncrease: 'Annual Contribution Increase (%)',
+    annualRate: 'Annual Interest Rate (%)',
+    today: 'You Would Have Today',
+    totalInv: 'Total Invested',
+    totalYield: 'Total Yielded'
+  },
+  timegap: {
+    title: 'Time Gap Comparator',
+    subtitle: 'Compare the harsh reality of starting late versus the exponential magic of starting early.',
+    targetAmount: 'Target Goal Amount',
+    goalEndYear: 'Goal End Year',
+    earlyStart: '"Early" Start Year',
+    annualReturn: 'Expected Annual Return (%)',
+    scenarioA: 'Scenario A: Starting Early ({year})',
+    reqPMT: 'Required Monthly Amount',
+    todayYield: 'If you did this, today you\'d have:',
+    scenarioB: 'Scenario B: Starting Now ({year})',
+    costWait: 'The Cost of Waiting',
+    costDesc: 'By starting now instead of in {year}, you must invest {multiplier}x more every month (an extra {diff}/mo).'
+  },
+  timeline: {
+    title: 'Investment Timeline',
+    subtitle: 'Compare theoretical plans against your recorded real-life deposits locally.',
+    empty: 'Your portfolio is empty. Add investments in the Tracker first!',
+    archive: 'Archived Past Months',
+    progressTitle: 'Real-Life Tracking Progress',
+    theoreticalFuture: 'Theoretical Future Total (100% checkmarks)',
+    actualVerified: 'Actual Verified Total',
+    relativePlan: 'relative to plan',
+    expected: 'Expected:',
+    apport: 'Contribution',
+    reportedBalance: 'Actual Balance',
+    status: {
+      done: 'Done',
+      pending: 'Pending'
+    }
+  },
+  loans: {
+    title: 'Loan Tracker',
+    subtitle: 'Keep track of money lent including informal loans.',
+    totalLent: 'Total Lent',
+    recovered: 'Paid',
+    outstanding: 'Outstanding',
+    activeCount: 'Active Loans',
+    typeCasual: 'Casual (No Installments)',
+    typeCredit: 'Installment',
+    empty: 'No loans found. Press "+ Add Loan" to start tracking!',
+    addLoan: 'Add Loan',
+    addPayment: 'Add Repayment',
+    editLoan: 'Edit Loan',
+    deleteLoan: 'Delete Loan',
+    archiveLoan: 'Archive Loan',
+    unarchiveLoan: 'Restore Loan',
+    confirmDelete: 'Are you sure you want to delete this loan and all associated history?',
+    confirmArchive: 'Are you sure you want to archive this loan?',
+    form: {
+      type: 'Loan Type',
+      friendName: 'Entity Name (Borrower/Lender)',
+      loanName: 'Loan Name / Reason',
+      totalAmount: 'Total Amount Lent',
+      amountLent: 'Amount Lent',
+      dateLent: 'Date Lent',
+      startMonth: 'Start Month',
+      dueDay: 'Due Day (of Month)',
+      installmentsCount: 'Installments Count',
+      installmentAmount: 'Installment Amount',
+      cardName: 'Credit Card Name / Bill',
+      notes: 'Notes (Optional)',
+      cancel: 'Cancel',
+      save: 'Save Loan',
+      add: 'Create Loan'
+    },
+    casual: {
+      ledgerTitle: 'Repayment History',
+      noPayments: 'No repayments recorded yet.',
+      paymentFormTitle: 'Record a Repayment',
+      amountPaid: 'Payment Amount',
+      datePaid: 'Payment Date',
+      paymentNotes: 'Notes (Optional)',
+      addPaymentBtn: 'Add Repayment',
+      remaining: 'remaining'
+    },
+    credit: {
+      installmentsTitle: 'Installment Schedule',
+      installmentNum: 'Installment {num} of {total}',
+      statusPaid: 'Paid',
+      statusPending: 'Pending',
+      paymentDate: 'Paid on:',
+      paidShort: 'Paid',
+      pendingShort: 'Pending',
+      details: '{amount} x {count} on {card}'
+    },
+    stats: {
+      paidCount: '{paid} of {total} paid',
+      recoveredPct: '{pct}% recovered'
+    },
+    filters: {
+      all: 'All',
+      active: 'Active',
+      completed: 'Completed',
+      archived: 'Archived'
+    }
+  },
+  backup: {
+    title: 'Backup & Restore',
+    subtitle: 'Your data is automatically backed up locally when you lock or leave the app. You can also export a file copy.',
+    exportBtn: 'Export File',
+    exportTitle: 'Export .json',
+    importBtn: 'Import File',
+    importTitle: 'Import .json',
+    snapshotBtn: '+ Snapshot',
+    snapshotTitle: 'Snapshot Now',
+    historyTitle: 'Local Snapshot History',
+    noSnapshots: 'No snapshots found yet.',
+    restoreBtn: 'Restore',
+    downloadTooltip: 'Download this snapshot',
+    closeBtn: 'Close',
+    confirmRestore: 'Are you sure you want to restore the snapshot from {date}? Your current unsaved changes will be lost.',
+    statusRestoring: 'Restoring...',
+    statusRestoreFailed: 'Restore failed: {error}',
+    statusReading: 'Reading file...',
+    errorInvalidFormat: 'Invalid backup format.',
+    errorAppLocked: 'App is locked.',
+    errorDifferentPassword: 'Error: Backup uses a different password. Please log in with that password first.',
+    importSuccess: 'Import successful! Reloading...',
+    errorParsing: 'Error parsing backup file.',
+    errorDownloadFailed: 'Download failed: {error}',
+    errorExportFailed: 'Export failed: {error}'
+  },
+  validation: {
+    minYear: 'Minimum year allowed is 1900',
+    maxYear: 'Maximum year allowed is 2200',
+    maxLimit: 'Maximum limit allowed is 999 Trillion (under 1 Quadrillion)',
+    maxRate: 'Maximum percentage allowed is 100%'
+  }
+};
