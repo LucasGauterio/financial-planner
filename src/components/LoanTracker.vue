@@ -149,152 +149,155 @@
     </div>
 
     <!-- ADD/EDIT LOAN MODAL -->
-    <transition name="fade">
-      <div v-if="showAddModal" class="modal-overlay" @click.self="closeAddModal">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h3>{{ form.loanId ? t('loans.editLoan') : t('loans.addLoan') }}</h3>
-            <button class="close-btn" @click="closeAddModal">&times;</button>
-          </div>
+    <Teleport to="body">
+      <transition name="fade">
+        <div v-if="showAddModal" class="modal-overlay">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3>{{ form.loanId ? t('loans.editLoan') : t('loans.addLoan') }}</h3>
+              <button class="close-btn" @click="closeAddModal">&times;</button>
+            </div>
 
-          <form @submit.prevent="saveLoan" style="display: flex; flex-direction: column; flex: 1; overflow: hidden; margin: 0;">
-            <div class="modal-body">
-              <!-- Loan Type (Disabled in Edit Mode) -->
-              <fieldset class="form-fieldset">
-                <legend>{{ t('loans.form.type') }}</legend>
-                <div class="type-selector" style="margin-top: 0.35rem; border: none; padding: 0; background: transparent;">
-                  <label class="type-option" :class="{ selected: form.type === 'casual', disabled: form.loanId }" style="flex: 1;">
-                    <input 
-                      type="radio" 
-                      value="casual" 
-                      v-model="form.type" 
-                      :disabled="!!form.loanId"
-                      style="display: none;" 
-                    />
-                    <span>{{ t('loans.typeCasual') }}</span>
-                  </label>
-                  <label class="type-option" :class="{ selected: form.type === 'credit', disabled: form.loanId }" style="flex: 1;">
-                    <input 
-                      type="radio" 
-                      value="credit" 
-                      v-model="form.type" 
-                      :disabled="!!form.loanId"
-                      style="display: none;" 
-                    />
-                    <span>{{ t('loans.typeCredit') }}</span>
-                  </label>
-                </div>
-              </fieldset>
-
-              <div class="grid-2" style="margin-bottom: 0;">
-                <!-- Friend Name -->
+            <form @submit.prevent="saveLoan" style="display: flex; flex-direction: column; flex: 1; overflow: hidden; margin: 0;">
+              <div class="modal-body">
+                <!-- Loan Type (Disabled in Edit Mode) -->
                 <fieldset class="form-fieldset">
-                  <legend>{{ t('loans.form.friendName') }} *</legend>
-                  <input type="text" v-model="form.friendName" required />
+                  <legend>{{ t('loans.form.type') }}</legend>
+                  <div class="type-selector" style="margin-top: 0.35rem; border: none; padding: 0; background: transparent;">
+                    <label class="type-option" :class="{ selected: form.type === 'casual', disabled: form.loanId }" style="flex: 1;">
+                      <input 
+                        type="radio" 
+                        value="casual" 
+                        v-model="form.type" 
+                        :disabled="!!form.loanId"
+                        style="display: none;" 
+                      />
+                      <span>{{ t('loans.typeCasual') }}</span>
+                    </label>
+                    <label class="type-option" :class="{ selected: form.type === 'credit', disabled: form.loanId }" style="flex: 1;">
+                      <input 
+                        type="radio" 
+                        value="credit" 
+                        v-model="form.type" 
+                        :disabled="!!form.loanId"
+                        style="display: none;" 
+                      />
+                      <span>{{ t('loans.typeCredit') }}</span>
+                    </label>
+                  </div>
                 </fieldset>
 
-                <!-- Loan Name -->
-                <fieldset class="form-fieldset">
-                  <legend>{{ t('loans.form.loanName') }} *</legend>
-                  <input type="text" v-model="form.loanName" required />
+                <div class="grid-2" style="margin-bottom: 0;">
+                  <!-- Friend Name -->
+                  <fieldset class="form-fieldset">
+                    <legend>{{ t('loans.form.friendName') }} *</legend>
+                    <input type="text" v-model="form.friendName" required />
+                  </fieldset>
+
+                  <!-- Loan Name -->
+                  <fieldset class="form-fieldset">
+                    <legend>{{ t('loans.form.loanName') }} *</legend>
+                    <input type="text" v-model="form.loanName" required />
+                  </fieldset>
+                </div>
+
+                <!-- DYNAMIC FORM SECTIONS BASED ON TYPE -->
+                <!-- 1. CASUAL LOAN SECTION -->
+                <transition name="fade" mode="out-in">
+                  <div v-if="form.type === 'casual'" key="casual-form" class="dynamic-form-fields">
+                    <div class="grid-2" style="margin-bottom: 0;">
+                      <fieldset class="form-fieldset">
+                        <legend>{{ t('loans.form.amountLent') }} *</legend>
+                        <input type="number" step="0.01" min="0.01" max="999999999999999" v-model.number="form.totalAmount" required @input="form.totalAmount = form.totalAmount > 999999999999999 ? 999999999999999 : form.totalAmount" />
+                        <span v-if="form.totalAmount > 999999999999999" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
+                          ⚠️ {{ t('validation.maxLimit') }}
+                        </span>
+                      </fieldset>
+                      <fieldset class="form-fieldset">
+                        <legend>{{ t('loans.form.dateLent') }} *</legend>
+                        <input type="date" v-model="form.dateLent" min="1900-01-01" max="2200-12-31" required />
+                        <span v-if="form.dateLent && Number.parseInt(form.dateLent.split('-')[0]) < 1900" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
+                          ⚠️ {{ t('validation.minYear') }}
+                        </span>
+                        <span v-if="form.dateLent && Number.parseInt(form.dateLent.split('-')[0]) > 2200" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
+                          ⚠️ {{ t('validation.maxYear') }}
+                        </span>
+                      </fieldset>
+                    </div>
+                  </div>
+
+                  <!-- 2. CREDIT CARD LIMIT LOAN SECTION -->
+                  <div v-else-if="form.type === 'credit'" key="credit-form" class="dynamic-form-fields">
+                    <div class="grid-2" style="margin-bottom: 0;">
+                      <fieldset class="form-fieldset">
+                        <legend>{{ t('loans.form.totalAmount') }} *</legend>
+                        <input type="number" step="0.01" min="0.01" max="999999999999999" v-model.number="form.totalAmount" required @input="form.totalAmount = form.totalAmount > 999999999999999 ? 999999999999999 : form.totalAmount" />
+                        <span v-if="form.totalAmount > 999999999999999" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
+                          ⚠️ {{ t('validation.maxLimit') }}
+                        </span>
+                      </fieldset>
+                      <fieldset class="form-fieldset">
+                        <legend>{{ t('loans.form.installmentsCount') }} *</legend>
+                        <input type="number" min="1" max="120" v-model.number="form.installmentsCount" required />
+                      </fieldset>
+                    </div>
+
+                    <div class="grid-2" style="margin-bottom: 0;">
+                      <fieldset class="form-fieldset">
+                        <legend>{{ t('loans.form.startMonth') }} *</legend>
+                        <input type="month" v-model="form.startMonth" min="1900-01" max="2200-12" required />
+                        <span v-if="form.startMonth && Number.parseInt(form.startMonth.split('-')[0]) < 1900" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
+                          ⚠️ {{ t('validation.minYear') }}
+                        </span>
+                        <span v-if="form.startMonth && Number.parseInt(form.startMonth.split('-')[0]) > 2200" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
+                          ⚠️ {{ t('validation.maxYear') }}
+                        </span>
+                      </fieldset>
+                      <fieldset class="form-fieldset">
+                        <legend>{{ t('loans.form.dueDay') }} *</legend>
+                        <input type="number" min="1" max="31" v-model.number="form.dueDay" required />
+                      </fieldset>
+                    </div>
+
+                    <fieldset class="form-fieldset">
+                      <legend>{{ t('loans.form.cardName') }}</legend>
+                      <input type="text" v-model="form.cardName" placeholder="Visa, Mastercard, etc." />
+                    </fieldset>
+                    
+                    <div v-if="form.totalAmount && form.installmentsCount" class="estimated-installment">
+                      <span>{{ t('loans.form.installmentAmount') }}:</span>
+                      <strong>{{ formatCurrency(form.totalAmount / form.installmentsCount) }} /mo</strong>
+                    </div>
+                  </div>
+                </transition>
+
+                <!-- Notes -->
+                <fieldset class="form-fieldset" style="margin-bottom: 0;">
+                  <legend>{{ t('loans.form.notes') }}</legend>
+                  <textarea v-model="form.notes" rows="2" class="notes-textarea" style="border: none !important; background: transparent !important; resize: none; padding: 0.15rem 0 !important; outline: none !important; width: 100%; color: var(--text-primary); font-family: var(--font-sans);"></textarea>
                 </fieldset>
               </div>
 
-              <!-- DYNAMIC FORM SECTIONS BASED ON TYPE -->
-              <!-- 1. CASUAL LOAN SECTION -->
-              <transition name="fade" mode="out-in">
-                <div v-if="form.type === 'casual'" key="casual-form" class="dynamic-form-fields">
-                  <div class="grid-2" style="margin-bottom: 0;">
-                    <fieldset class="form-fieldset">
-                      <legend>{{ t('loans.form.amountLent') }} *</legend>
-                      <input type="number" step="0.01" min="0.01" max="999999999999999" v-model.number="form.totalAmount" required @input="form.totalAmount = form.totalAmount > 999999999999999 ? 999999999999999 : form.totalAmount" />
-                      <span v-if="form.totalAmount > 999999999999999" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
-                        ⚠️ {{ t('validation.maxLimit') }}
-                      </span>
-                    </fieldset>
-                    <fieldset class="form-fieldset">
-                      <legend>{{ t('loans.form.dateLent') }} *</legend>
-                      <input type="date" v-model="form.dateLent" min="1900-01-01" max="2200-12-31" required />
-                      <span v-if="form.dateLent && Number.parseInt(form.dateLent.split('-')[0]) < 1900" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
-                        ⚠️ {{ t('validation.minYear') }}
-                      </span>
-                      <span v-if="form.dateLent && Number.parseInt(form.dateLent.split('-')[0]) > 2200" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
-                        ⚠️ {{ t('validation.maxYear') }}
-                      </span>
-                    </fieldset>
-                  </div>
-                </div>
-
-                <!-- 2. CREDIT CARD LIMIT LOAN SECTION -->
-                <div v-else-if="form.type === 'credit'" key="credit-form" class="dynamic-form-fields">
-                  <div class="grid-2" style="margin-bottom: 0;">
-                    <fieldset class="form-fieldset">
-                      <legend>{{ t('loans.form.totalAmount') }} *</legend>
-                      <input type="number" step="0.01" min="0.01" max="999999999999999" v-model.number="form.totalAmount" required @input="form.totalAmount = form.totalAmount > 999999999999999 ? 999999999999999 : form.totalAmount" />
-                      <span v-if="form.totalAmount > 999999999999999" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
-                        ⚠️ {{ t('validation.maxLimit') }}
-                      </span>
-                    </fieldset>
-                    <fieldset class="form-fieldset">
-                      <legend>{{ t('loans.form.installmentsCount') }} *</legend>
-                      <input type="number" min="1" max="120" v-model.number="form.installmentsCount" required />
-                    </fieldset>
-                  </div>
-
-                  <div class="grid-2" style="margin-bottom: 0;">
-                    <fieldset class="form-fieldset">
-                      <legend>{{ t('loans.form.startMonth') }} *</legend>
-                      <input type="month" v-model="form.startMonth" min="1900-01" max="2200-12" required />
-                      <span v-if="form.startMonth && Number.parseInt(form.startMonth.split('-')[0]) < 1900" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
-                        ⚠️ {{ t('validation.minYear') }}
-                      </span>
-                      <span v-if="form.startMonth && Number.parseInt(form.startMonth.split('-')[0]) > 2200" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
-                        ⚠️ {{ t('validation.maxYear') }}
-                      </span>
-                    </fieldset>
-                    <fieldset class="form-fieldset">
-                      <legend>{{ t('loans.form.dueDay') }} *</legend>
-                      <input type="number" min="1" max="31" v-model.number="form.dueDay" required />
-                    </fieldset>
-                  </div>
-
-                  <fieldset class="form-fieldset">
-                    <legend>{{ t('loans.form.cardName') }}</legend>
-                    <input type="text" v-model="form.cardName" placeholder="Visa, Mastercard, etc." />
-                  </fieldset>
-                  
-                  <div v-if="form.totalAmount && form.installmentsCount" class="estimated-installment">
-                    <span>{{ t('loans.form.installmentAmount') }}:</span>
-                    <strong>{{ formatCurrency(form.totalAmount / form.installmentsCount) }} /mo</strong>
-                  </div>
-                </div>
-              </transition>
-
-              <!-- Notes -->
-              <fieldset class="form-fieldset" style="margin-bottom: 0;">
-                <legend>{{ t('loans.form.notes') }}</legend>
-                <textarea v-model="form.notes" rows="2" class="notes-textarea" style="border: none !important; background: transparent !important; resize: none; padding: 0.15rem 0 !important; outline: none !important; width: 100%; color: var(--text-primary); font-family: var(--font-sans);"></textarea>
-              </fieldset>
-            </div>
-
-            <!-- Form Actions inside fixed footer -->
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" @click="closeAddModal">
-                {{ t('loans.form.cancel') }}
-              </button>
-              <button type="submit" class="btn btn-primary">
-                {{ form.loanId ? t('loans.form.save') : t('loans.form.add') }}
-              </button>
-            </div>
-          </form>
+              <!-- Form Actions inside fixed footer -->
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @click="closeAddModal">
+                  {{ t('loans.form.cancel') }}
+                </button>
+                <button type="submit" class="btn btn-primary">
+                  {{ form.loanId ? t('loans.form.save') : t('loans.form.add') }}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
-    </transition>
+      </transition>
+    </Teleport>
 
     <!-- DETAILED LOAN DRAWER (RIGHT PANEL) -->
-    <transition name="slide-panel">
-      <div v-if="showDetailsDrawer && selectedLoan" class="drawer-overlay" @click.self="closeDetailsDrawer">
-        <div class="drawer-panel">
+    <Teleport to="body">
+      <transition name="slide-panel">
+        <div v-if="showDetailsDrawer && selectedLoan" class="drawer-overlay" @click.self="closeDetailsDrawer">
+          <div class="drawer-panel">
           <!-- Drawer Header -->
           <div class="drawer-header">
             <div>
@@ -434,6 +437,7 @@
         </div>
       </div>
     </transition>
+    </Teleport>
   </div>
 </template>
 

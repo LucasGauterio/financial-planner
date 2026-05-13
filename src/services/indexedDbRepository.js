@@ -169,9 +169,53 @@ async function checkAuthStatus() {
   return { status: 'locked' };
 }
 
+let pendingLegacyMigrationData = null;
+
+async function authenticateLegacyPassword(legacyPassword) {
+  const legacyKey = await deriveKey(legacyPassword);
+  const checkToken = await getRaw(ENCRYPTION_TEST_KEY);
+  const decrypted = await decryptData(legacyKey, checkToken);
+  if (decrypted === 'VALID_AUTH') {
+    async function fetchDecrypted(k) {
+      const raw = await getRaw(k);
+      if (raw === undefined || raw === null) return null;
+      if (typeof raw === 'string') {
+        const dec = await decryptData(legacyKey, raw);
+        return dec !== null ? dec : raw;
+      }
+      return raw;
+    }
+    pendingLegacyMigrationData = {
+      [INVESTMENTS_KEY]: await fetchDecrypted(INVESTMENTS_KEY),
+      [GOALS_KEY]: await fetchDecrypted(GOALS_KEY),
+      [TIMELINE_KEY]: await fetchDecrypted(TIMELINE_KEY),
+      [LOANS_KEY]: await fetchDecrypted(LOANS_KEY),
+      [BACKUPS_KEY]: await fetchDecrypted(BACKUPS_KEY)
+    };
+    return true;
+  }
+  return false;
+}
+
 async function authenticate(password) {
   const key = await deriveKey(password);
   const statusRes = await checkAuthStatus();
+
+  if (pendingLegacyMigrationData) {
+    const encryptedToken = await encryptData(key, 'VALID_AUTH');
+    await setRaw(ENCRYPTION_TEST_KEY, encryptedToken);
+    
+    useAuth().unlock(key);
+
+    for (const [k, val] of Object.entries(pendingLegacyMigrationData)) {
+      if (val !== null) {
+        const encrypted = await encryptData(key, val);
+        await setRaw(k, encrypted);
+      }
+    }
+    pendingLegacyMigrationData = null;
+    return true;
+  }
 
   if (statusRes.status === 'locked') {
     const checkToken = await getRaw(ENCRYPTION_TEST_KEY);
@@ -242,5 +286,6 @@ export const repository = {
   getBackupHistory,
   saveBackupSnapshot,
   checkAuthStatus,
-  authenticate
+  authenticate,
+  authenticateLegacyPassword
 };

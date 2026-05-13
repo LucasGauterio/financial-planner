@@ -263,6 +263,7 @@ export default {
     confirmDeleteProfile: 'Tem certeza de que deseja excluir o perfil "{name}" e TODOS os seus dados? Esta ação não pode ser desfeita.',
     authMethodLabel: 'Método de Entrada',
     authMethodPin: 'Código PIN',
-    authMethodPassword: 'Senha Antiga (Legado)'
+    authMethodPassword: 'Senha Antiga (Descontinuado)',
+    chooseNewPinDesc: 'O login por senha foi descontinuado. Escolha um novo PIN de 4 dígitos para proteger seus dados.'
   }
 };

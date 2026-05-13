@@ -1,39 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testExecutions version="1">
   <file path="src\components\GoalCalculator.test.js">
-    <testCase name="GoalCalculator.vue - renders title and inputs" duration="75" />
-    <testCase name="GoalCalculator.vue - updates target amounts correctly based on reactive properties" duration="49" />
+    <testCase name="GoalCalculator.vue - renders title and inputs" duration="52" />
+    <testCase name="GoalCalculator.vue - updates target amounts correctly based on reactive properties" duration="36" />
   </file>
   <file path="src\components\InvestmentTimeline.test.js">
-    <testCase name="InvestmentTimeline.vue - renders timeline and handles empty state properly" duration="116" />
+    <testCase name="InvestmentTimeline.vue - renders timeline and handles empty state properly" duration="104" />
   </file>
   <file path="src\components\PastInvestmentSimulator.test.js">
-    <testCase name="PastInvestmentSimulator.vue - renders the component correctly" duration="100" />
-    <testCase name="PastInvestmentSimulator.vue - calculates based on input changes" duration="44" />
+    <testCase name="PastInvestmentSimulator.vue - renders the component correctly" duration="50" />
+    <testCase name="PastInvestmentSimulator.vue - calculates based on input changes" duration="27" />
   </file>
   <file path="src\components\PortfolioTracker.test.js">
-    <testCase name="PortfolioTracker.vue - renders portfolio tracker and handles mock data" duration="273" />
+    <testCase name="PortfolioTracker.vue - renders portfolio tracker and handles mock data" duration="234" />
   </file>
   <file path="src\components\TimeGapComparator.test.js">
-    <testCase name="TimeGapComparator.vue - renders title" duration="220" />
-    <testCase name="TimeGapComparator.vue - displays the early start year logic correctly" duration="52" />
+    <testCase name="TimeGapComparator.vue - renders title" duration="140" />
+    <testCase name="TimeGapComparator.vue - displays the early start year logic correctly" duration="34" />
   </file>
   <file path="src\services\financialCalculations.test.js">
     <testCase name="Financial Calculations - calculates future value of past investments correctly (no principal)" duration="3" />
     <testCase name="Financial Calculations - calculates future value with a starting principal" duration="0" />
     <testCase name="Financial Calculations - calculates future value with an annual apport increase" duration="0" />
-    <testCase name="Financial Calculations - calculates required monthly contribution for a goal (no principal)" duration="1" />
+    <testCase name="Financial Calculations - calculates required monthly contribution for a goal (no principal)" duration="2" />
     <testCase name="Financial Calculations - calculates required monthly contribution with starting principal" duration="0" />
-    <testCase name="Financial Calculations - calculates required monthly contribution with annual increase" duration="1" />
+    <testCase name="Financial Calculations - calculates required monthly contribution with annual increase" duration="0" />
     <testCase name="Financial Calculations - handles extremely large targetAmount gracefully without infinite looping" duration="1" />
   </file>
   <file path="src\services\loanCalculations.test.js">
-    <testCase name="Loan Calculations Service - generateCreditCardInstallments - returns empty array for invalid inputs" duration="6" />
-    <testCase name="Loan Calculations Service - generateCreditCardInstallments - splits installments equally and handles rounding remainders on the final installment" duration="3" />
+    <testCase name="Loan Calculations Service - generateCreditCardInstallments - returns empty array for invalid inputs" duration="3" />
+    <testCase name="Loan Calculations Service - generateCreditCardInstallments - splits installments equally and handles rounding remainders on the final installment" duration="2" />
     <testCase name="Loan Calculations Service - generateCreditCardInstallments - correctly increments year and month for subsequent installments" duration="1" />
     <testCase name="Loan Calculations Service - generateCreditCardInstallments - caps due date day at max month length" duration="1" />
-    <testCase name="Loan Calculations Service - generateCreditCardInstallments - correctly handles leap years for February due days" duration="1" />
-    <testCase name="Loan Calculations Service - calculateCasualLoanSummary - calculates correct metrics with no payments" duration="1" />
+    <testCase name="Loan Calculations Service - generateCreditCardInstallments - correctly handles leap years for February due days" duration="0" />
+    <testCase name="Loan Calculations Service - calculateCasualLoanSummary - calculates correct metrics with no payments" duration="0" />
     <testCase name="Loan Calculations Service - calculateCasualLoanSummary - calculates correct metrics with multiple payments" duration="0" />
     <testCase name="Loan Calculations Service - calculateCasualLoanSummary - limits progress percent to 100 if paid amount exceeds lent amount" duration="0" />
     <testCase name="Loan Calculations Service - calculateCreditLoanSummary - calculates totals and remaining balance correctly" duration="1" />
@@ -41,9 +41,9 @@
     <testCase name="Loan Calculations Service - calculateCreditLoanSummary - returns null for nextPending if all installments are paid" duration="1" />
   </file>
   <file path="src\services\localStorageRepository.test.js">
-    <testCase name="Local Storage Repository - saves and retrieves investments" duration="6" />
+    <testCase name="Local Storage Repository - saves and retrieves investments" duration="3" />
     <testCase name="Local Storage Repository - returns empty array when no investments exist" duration="0" />
     <testCase name="Local Storage Repository - saves and retrieves goals" duration="0" />
-    <testCase name="Local Storage Repository - saves and retrieves timeline states" duration="1" />
+    <testCase name="Local Storage Repository - saves and retrieves timeline states" duration="0" />
   </file>
 </testExecutions>

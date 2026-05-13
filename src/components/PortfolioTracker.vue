@@ -3,18 +3,35 @@
     <h2>{{ t('tracker.title') }}</h2>
     <p>{{ t('tracker.subtitle') }}</p>
 
-    <div style="margin-top: 1.5rem; display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap;">
-      <div style="display: flex; align-items: center; gap: 0.5rem;">
-        <label for="projection-years-select" style="margin: 0;">{{ t('tracker.projHorizon') }}</label>
-        <select id="projection-years-select" v-model.number="projectionYears" style="width: auto; padding: 0.5rem;">
-          <option :value="5">{{ t('tracker.years', { years: 5 }) }}</option>
-          <option :value="10">{{ t('tracker.years', { years: 10 }) }}</option>
-          <option :value="20">{{ t('tracker.years', { years: 20 }) }}</option>
-          <option :value="30">{{ t('tracker.years', { years: 30 }) }}</option>
-        </select>
+    <div style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 1.5rem;">
+      <div class="horizon-ruler-container" style="width: 100%; background: rgba(0,0,0,0.25); padding: 1.25rem 1.75rem; border-radius: var(--radius-lg); border: 1px solid rgba(255,255,255,0.1); box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <span style="font-weight: 600; color: var(--text-primary); font-size: 1rem;">{{ t('tracker.projHorizon') }}</span>
+          <div style="background: var(--primary-accent); color: #000; font-weight: bold; padding: 0.35rem 0.85rem; border-radius: var(--radius-full); font-size: 0.9rem; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);">
+            {{ projectionYears }} {{ projectionYears === 1 ? 'year' : 'years' }} / {{ baseYear + projectionYears }}
+          </div>
+        </div>
+        
+        <div class="ruler-wrapper" style="position: relative; padding: 0.5rem 0;">
+          <input 
+            type="range" 
+            id="projection-horizon-ruler" 
+            v-model.number="projectionYears" 
+            min="1" 
+            max="50" 
+            step="1" 
+            class="ruler-slider" 
+          />
+          <div class="ruler-ticks" style="display: flex; justify-content: space-between; padding-top: 0.75rem; font-size: 0.8rem; color: var(--text-secondary); pointer-events: none;">
+            <span v-for="tick in [0, 10, 20, 30, 40, 50]" :key="tick" style="text-align: center;">
+              <span style="display: block; height: 6px; width: 2px; background: rgba(255,255,255,0.25); margin: 0 auto 4px;"></span>
+              {{ baseYear + tick }}
+            </span>
+          </div>
+        </div>
       </div>
 
-      <div v-if="!showAddForm">
+      <div v-if="!showAddForm" style="display: flex; justify-content: flex-start;">
         <button class="btn btn-primary" @click="triggerAddMode" style="box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);">
           {{ t('tracker.addInvestment') }}
         </button>
@@ -99,16 +116,139 @@
     </div>
 
     <!-- ADD INVESTMENT MODAL OVERLAY -->
-    <transition name="fade">
-      <div v-if="showAddForm" class="modal-overlay" @click.self="cancelEdit">
-        <div class="modal-content" style="max-width: 550px;">
-          <div class="modal-header">
-            <h3>{{ t('tracker.addInvestment') }}</h3>
-            <button class="close-btn" @click="cancelEdit">&times;</button>
+    <Teleport to="body">
+      <transition name="fade">
+        <div v-if="showAddForm" class="modal-overlay">
+          <div class="modal-content" style="max-width: 550px;">
+            <div class="modal-header">
+              <h3>{{ t('tracker.addInvestment') }}</h3>
+              <button class="close-btn" @click="cancelEdit">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+              <div class="grid-2" style="margin-bottom: 0;">
+                <fieldset class="form-fieldset">
+                  <legend>{{ t('tracker.form.name') }}</legend>
+                  <input type="text" v-model="formInv.name" placeholder="e.g. NuBank Savings" />
+                </fieldset>
+                
+                <fieldset class="form-fieldset">
+                  <legend>{{ t('tracker.form.type') }}</legend>
+                  <select v-model="formInv.type">
+                    <option value="Stocks">{{ t('tracker.types.stocks') }}</option>
+                    <option value="Crypto">{{ t('tracker.types.crypto') }}</option>
+                    <option value="Real Estate">{{ t('tracker.types.realEstate') }}</option>
+                    <option value="Savings">{{ t('tracker.types.savings') }}</option>
+                    <option value="Other">{{ t('tracker.types.other') }}</option>
+                  </select>
+                </fieldset>
+                
+                <fieldset class="form-fieldset">
+                  <legend>{{ t('tracker.form.actualStartDate') }}</legend>
+                  <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <select v-model="formInv.startMonth" style="flex: 1;">
+                      <option value="01">{{ t('tracker.months.01') }}</option><option value="02">{{ t('tracker.months.02') }}</option><option value="03">{{ t('tracker.months.03') }}</option>
+                      <option value="04">{{ t('tracker.months.04') }}</option><option value="05">{{ t('tracker.months.05') }}</option><option value="06">{{ t('tracker.months.06') }}</option>
+                      <option value="07">{{ t('tracker.months.07') }}</option><option value="08">{{ t('tracker.months.08') }}</option><option value="09">{{ t('tracker.months.09') }}</option>
+                      <option value="10">{{ t('tracker.months.10') }}</option><option value="11">{{ t('tracker.months.11') }}</option><option value="12">{{ t('tracker.months.12') }}</option>
+                    </select>
+                    <input type="number" v-model.number="formInv.startYear" min="1900" :max="currentYear" step="1" style="flex: 1;" placeholder="YYYY" @input="formInv.startYear = formInv.startYear > currentYear ? currentYear : formInv.startYear" />
+                  </div>
+                  <span v-if="formInv.startYear && formInv.startYear < 1900" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
+                    ⚠️ {{ t('validation.minYear') }}
+                  </span>
+                  <span v-if="formInv.startYear && formInv.startYear > currentYear" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
+                    ⚠️ {{ t('validation.maxYear') }}
+                  </span>
+                </fieldset>
+                
+                <fieldset class="form-fieldset">
+                  <legend>{{ t('tracker.form.gapYear') }}</legend>
+                  <input type="number" v-model.number="formInv.earlyStartYear" min="1900" :max="currentYear" step="1" @input="formInv.earlyStartYear = formInv.earlyStartYear > currentYear ? currentYear : formInv.earlyStartYear" />
+                  <span v-if="formInv.earlyStartYear && formInv.earlyStartYear < 1900" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
+                    ⚠️ {{ t('validation.minYear') }}
+                  </span>
+                  <span v-if="formInv.earlyStartYear && formInv.earlyStartYear > currentYear" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
+                    ⚠️ {{ t('validation.maxYear') }}
+                  </span>
+                </fieldset>
+                
+                <fieldset class="form-fieldset">
+                  <legend>{{ t('tracker.form.currentApport') }}</legend>
+                  <input type="number" v-model.number="formInv.monthly" min="0" max="999999999999999" step="0.01" @input="formInv.monthly = formInv.monthly > 999999999999999 ? 999999999999999 : formInv.monthly" />
+                  <span v-if="formInv.monthly > 999999999999999" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
+                    ⚠️ {{ t('validation.maxLimit') }}
+                  </span>
+                </fieldset>
+                
+                <fieldset class="form-fieldset">
+                  <legend>{{ t('tracker.form.increase') }}</legend>
+                  <input type="number" v-model.number="formInv.increase" min="0" max="100" step="0.01" @input="formInv.increase = formInv.increase > 100 ? 100 : formInv.increase" />
+                  <span v-if="formInv.increase >= 100" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
+                    ⚠️ {{ t('validation.maxRate') }}
+                  </span>
+                </fieldset>
+                
+                <fieldset class="form-fieldset">
+                  <legend>{{ t('tracker.form.investedValue') }}</legend>
+                  <input type="number" v-model.number="formInv.investedValue" min="0" max="999999999999999" step="0.01" @input="formInv.investedValue = formInv.investedValue > 999999999999999 ? 999999999999999 : formInv.investedValue" />
+                  <span v-if="formInv.investedValue > 999999999999999" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
+                    ⚠️ {{ t('validation.maxLimit') }}
+                  </span>
+                </fieldset>
+                
+                <fieldset class="form-fieldset">
+                  <legend>{{ t('tracker.form.balance') }}</legend>
+                  <input type="number" v-model.number="formInv.balance" min="0" max="999999999999999" step="0.01" @input="formInv.balance = formInv.balance > 999999999999999 ? 999999999999999 : formInv.balance" />
+                  <span v-if="formInv.balance > 999999999999999" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
+                    ⚠️ {{ t('validation.maxLimit') }}
+                  </span>
+                  
+                  <div style="margin-top: 0.35rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: var(--text-secondary);">
+                    <input type="checkbox" v-model="formInv.alreadyMade" id="alreadyMade" style="accent-color: var(--primary-accent);" />
+                    <label for="alreadyMade" style="margin: 0; cursor: pointer; color: inherit;">{{ t('tracker.form.alreadyMade') }}</label>
+                  </div>
+                </fieldset>
+                
+                <fieldset class="form-fieldset" style="grid-column: span 2; margin-bottom: 0;">
+                  <legend>{{ t('tracker.form.rate') }}</legend>
+                  <input type="number" v-model.number="formInv.rate" min="0" max="100" step="0.01" @input="formInv.rate = formInv.rate > 100 ? 100 : formInv.rate" />
+                  <span v-if="formInv.rate >= 100" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
+                    ⚠️ {{ t('validation.maxRate') }}
+                  </span>
+                </fieldset>
+              </div>
+            </div>
+            
+            <div class="modal-footer">
+              <button class="btn btn-secondary" @click="cancelEdit">{{ t('tracker.form.cancel') }}</button>
+              <button class="btn btn-primary" @click="saveInvestment">
+                {{ t('tracker.form.add') }}
+              </button>
+            </div>
           </div>
-          
-          <div class="modal-body">
-            <div class="grid-2" style="margin-bottom: 0;">
+        </div>
+      </transition>
+    </Teleport>
+
+    <!-- EDIT INVESTMENT SIDEBAR DRAWER PANEL -->
+    <Teleport to="body">
+      <transition name="slide-panel">
+        <div v-if="editingIndex !== null" class="drawer-overlay" @click.self="cancelEdit">
+          <div class="drawer-panel" style="max-width: 480px;">
+            <div class="drawer-header" style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid var(--border-color);">
+              <div>
+                <span class="drawer-friend" style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500;">
+                  {{ t('tracker.table.type') }}: {{ getTranslatedType(formInv.type) }}
+                </span>
+                <h3 class="drawer-title" style="margin: 0; font-size: 1.5rem; font-weight: bold; color: var(--text-primary);">
+                  {{ formInv.name || t('tracker.form.save') }}
+                </h3>
+              </div>
+              <button class="close-btn" @click="cancelEdit">&times;</button>
+            </div>
+            
+            <div class="drawer-body" style="flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
               <fieldset class="form-fieldset">
                 <legend>{{ t('tracker.form.name') }}</legend>
                 <input type="text" v-model="formInv.name" placeholder="e.g. NuBank Savings" />
@@ -187,12 +327,12 @@
                 </span>
                 
                 <div style="margin-top: 0.35rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: var(--text-secondary);">
-                  <input type="checkbox" v-model="formInv.alreadyMade" id="alreadyMade" style="accent-color: var(--primary-accent);" />
-                  <label for="alreadyMade" style="margin: 0; cursor: pointer; color: inherit;">{{ t('tracker.form.alreadyMade') }}</label>
+                  <input type="checkbox" v-model="formInv.alreadyMade" id="alreadyMade_edit" style="accent-color: var(--primary-accent);" />
+                  <label for="alreadyMade_edit" style="margin: 0; cursor: pointer; color: inherit;">{{ t('tracker.form.alreadyMade') }}</label>
                 </div>
               </fieldset>
               
-              <fieldset class="form-fieldset" style="grid-column: span 2; margin-bottom: 0;">
+              <fieldset class="form-fieldset" style="margin-bottom: 0;">
                 <legend>{{ t('tracker.form.rate') }}</legend>
                 <input type="number" v-model.number="formInv.rate" min="0" max="100" step="0.01" @input="formInv.rate = formInv.rate > 100 ? 100 : formInv.rate" />
                 <span v-if="formInv.rate >= 100" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
@@ -200,160 +340,43 @@
                 </span>
               </fieldset>
             </div>
-          </div>
-          
-          <div class="modal-footer">
-            <button class="btn btn-secondary" @click="cancelEdit">{{ t('tracker.form.cancel') }}</button>
-            <button class="btn btn-primary" @click="saveInvestment">
-              {{ t('tracker.form.add') }}
-            </button>
-          </div>
-        </div>
-      </div>
-    </transition>
-
-    <!-- EDIT INVESTMENT SIDEBAR DRAWER PANEL -->
-    <transition name="slide-panel">
-      <div v-if="editingIndex !== null" class="drawer-overlay" @click.self="cancelEdit">
-        <div class="drawer-panel" style="max-width: 480px;">
-          <div class="drawer-header" style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid var(--border-color);">
-            <div>
-              <span class="drawer-friend" style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500;">
-                {{ t('tracker.table.type') }}: {{ getTranslatedType(formInv.type) }}
-              </span>
-              <h3 class="drawer-title" style="margin: 0; font-size: 1.5rem; font-weight: bold; color: var(--text-primary);">
-                {{ formInv.name || t('tracker.form.save') }}
-              </h3>
+            
+            <div style="padding: 1.5rem; border-top: 1px solid var(--border-color); display: flex; gap: 1rem; justify-content: flex-end; background: var(--surface-color);">
+              <button class="btn btn-secondary" @click="cancelEdit">{{ t('tracker.form.cancel') }}</button>
+              <button class="btn btn-primary" @click="saveInvestment">{{ t('tracker.form.save') }}</button>
             </div>
-            <button class="close-btn" @click="cancelEdit">&times;</button>
-          </div>
-          
-          <div class="drawer-body" style="flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
-            <fieldset class="form-fieldset">
-              <legend>{{ t('tracker.form.name') }}</legend>
-              <input type="text" v-model="formInv.name" placeholder="e.g. NuBank Savings" />
-            </fieldset>
-            
-            <fieldset class="form-fieldset">
-              <legend>{{ t('tracker.form.type') }}</legend>
-              <select v-model="formInv.type">
-                <option value="Stocks">{{ t('tracker.types.stocks') }}</option>
-                <option value="Crypto">{{ t('tracker.types.crypto') }}</option>
-                <option value="Real Estate">{{ t('tracker.types.realEstate') }}</option>
-                <option value="Savings">{{ t('tracker.types.savings') }}</option>
-                <option value="Other">{{ t('tracker.types.other') }}</option>
-              </select>
-            </fieldset>
-            
-            <fieldset class="form-fieldset">
-              <legend>{{ t('tracker.form.actualStartDate') }}</legend>
-              <div style="display: flex; gap: 0.5rem; align-items: center;">
-                <select v-model="formInv.startMonth" style="flex: 1;">
-                  <option value="01">{{ t('tracker.months.01') }}</option><option value="02">{{ t('tracker.months.02') }}</option><option value="03">{{ t('tracker.months.03') }}</option>
-                  <option value="04">{{ t('tracker.months.04') }}</option><option value="05">{{ t('tracker.months.05') }}</option><option value="06">{{ t('tracker.months.06') }}</option>
-                  <option value="07">{{ t('tracker.months.07') }}</option><option value="08">{{ t('tracker.months.08') }}</option><option value="09">{{ t('tracker.months.09') }}</option>
-                  <option value="10">{{ t('tracker.months.10') }}</option><option value="11">{{ t('tracker.months.11') }}</option><option value="12">{{ t('tracker.months.12') }}</option>
-                </select>
-                <input type="number" v-model.number="formInv.startYear" min="1900" :max="currentYear" step="1" style="flex: 1;" placeholder="YYYY" @input="formInv.startYear = formInv.startYear > currentYear ? currentYear : formInv.startYear" />
-              </div>
-              <span v-if="formInv.startYear && formInv.startYear < 1900" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
-                ⚠️ {{ t('validation.minYear') }}
-              </span>
-              <span v-if="formInv.startYear && formInv.startYear > currentYear" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
-                ⚠️ {{ t('validation.maxYear') }}
-              </span>
-            </fieldset>
-            
-            <fieldset class="form-fieldset">
-              <legend>{{ t('tracker.form.gapYear') }}</legend>
-              <input type="number" v-model.number="formInv.earlyStartYear" min="1900" :max="currentYear" step="1" @input="formInv.earlyStartYear = formInv.earlyStartYear > currentYear ? currentYear : formInv.earlyStartYear" />
-              <span v-if="formInv.earlyStartYear && formInv.earlyStartYear < 1900" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
-                ⚠️ {{ t('validation.minYear') }}
-              </span>
-              <span v-if="formInv.earlyStartYear && formInv.earlyStartYear > currentYear" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
-                ⚠️ {{ t('validation.maxYear') }}
-              </span>
-            </fieldset>
-            
-            <fieldset class="form-fieldset">
-              <legend>{{ t('tracker.form.currentApport') }}</legend>
-              <input type="number" v-model.number="formInv.monthly" min="0" max="999999999999999" step="0.01" @input="formInv.monthly = formInv.monthly > 999999999999999 ? 999999999999999 : formInv.monthly" />
-              <span v-if="formInv.monthly > 999999999999999" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
-                ⚠️ {{ t('validation.maxLimit') }}
-              </span>
-            </fieldset>
-            
-            <fieldset class="form-fieldset">
-              <legend>{{ t('tracker.form.increase') }}</legend>
-              <input type="number" v-model.number="formInv.increase" min="0" max="100" step="0.01" @input="formInv.increase = formInv.increase > 100 ? 100 : formInv.increase" />
-              <span v-if="formInv.increase >= 100" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
-                ⚠️ {{ t('validation.maxRate') }}
-              </span>
-            </fieldset>
-            
-            <fieldset class="form-fieldset">
-              <legend>{{ t('tracker.form.investedValue') }}</legend>
-              <input type="number" v-model.number="formInv.investedValue" min="0" max="999999999999999" step="0.01" @input="formInv.investedValue = formInv.investedValue > 999999999999999 ? 999999999999999 : formInv.investedValue" />
-              <span v-if="formInv.investedValue > 999999999999999" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
-                ⚠️ {{ t('validation.maxLimit') }}
-              </span>
-            </fieldset>
-            
-            <fieldset class="form-fieldset">
-              <legend>{{ t('tracker.form.balance') }}</legend>
-              <input type="number" v-model.number="formInv.balance" min="0" max="999999999999999" step="0.01" @input="formInv.balance = formInv.balance > 999999999999999 ? 999999999999999 : formInv.balance" />
-              <span v-if="formInv.balance > 999999999999999" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
-                ⚠️ {{ t('validation.maxLimit') }}
-              </span>
-              
-              <div style="margin-top: 0.35rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: var(--text-secondary);">
-                <input type="checkbox" v-model="formInv.alreadyMade" id="alreadyMade_edit" style="accent-color: var(--primary-accent);" />
-                <label for="alreadyMade_edit" style="margin: 0; cursor: pointer; color: inherit;">{{ t('tracker.form.alreadyMade') }}</label>
-              </div>
-            </fieldset>
-            
-            <fieldset class="form-fieldset" style="margin-bottom: 0;">
-              <legend>{{ t('tracker.form.rate') }}</legend>
-              <input type="number" v-model.number="formInv.rate" min="0" max="100" step="0.01" @input="formInv.rate = formInv.rate > 100 ? 100 : formInv.rate" />
-              <span v-if="formInv.rate >= 100" style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem; display: block; font-weight: 500;">
-                ⚠️ {{ t('validation.maxRate') }}
-              </span>
-            </fieldset>
-          </div>
-          
-          <div style="padding: 1.5rem; border-top: 1px solid var(--border-color); display: flex; gap: 1rem; justify-content: flex-end; background: var(--surface-color);">
-            <button class="btn btn-secondary" @click="cancelEdit">{{ t('tracker.form.cancel') }}</button>
-            <button class="btn btn-primary" @click="saveInvestment">{{ t('tracker.form.save') }}</button>
           </div>
         </div>
-      </div>
-    </transition>
+      </transition>
+    </Teleport>
 
     <!-- CUSTOM DELETE CONFIRMATION DIALOG -->
-    <transition name="fade">
-      <div v-if="showDeleteConfirm" class="modal-overlay" @click.self="showDeleteConfirm = false">
-        <div class="card modal-content" style="max-width: 400px; text-align: center; padding: 2rem;">
-          <div style="font-size: 3rem; margin-bottom: 1rem; color: #ef4444;">⚠️</div>
-          <h3 style="margin-bottom: 1rem;">{{ t('tracker.confirmDeleteTitle') }}</h3>
-          <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.95rem;">
-            {{ t('tracker.confirmDelete') }}
-          </p>
-          <div style="display: flex; gap: 1rem; justify-content: center;">
-            <button class="btn btn-secondary" @click="showDeleteConfirm = false" style="flex: 1;">
-              {{ t('tracker.form.cancel') }}
-            </button>
-            <button class="btn class-danger" @click="confirmDeleteInv" style="flex: 1; background: #dc2626; border-color: #dc2626; color: white;">
-              {{ t('tracker.actions.del') }}
-            </button>
+    <Teleport to="body">
+      <transition name="fade">
+        <div v-if="showDeleteConfirm" class="modal-overlay" @click.self="showDeleteConfirm = false">
+          <div class="card modal-content" style="max-width: 400px; text-align: center; padding: 2rem;">
+            <div style="font-size: 3rem; margin-bottom: 1rem; color: #ef4444;">⚠️</div>
+            <h3 style="margin-bottom: 1rem;">{{ t('tracker.confirmDeleteTitle') }}</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.95rem;">
+              {{ t('tracker.confirmDelete') }}
+            </p>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+              <button class="btn btn-secondary" @click="showDeleteConfirm = false" style="flex: 1;">
+                {{ t('tracker.form.cancel') }}
+              </button>
+              <button class="btn class-danger" @click="confirmDeleteInv" style="flex: 1; background: #dc2626; border-color: #dc2626; color: white;">
+                {{ t('tracker.actions.del') }}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    </transition>
+      </transition>
+    </Teleport>
   </div>
 </template>
 
 <script setup>
-import { ref, watch, onMounted, inject } from 'vue';
+import { ref, watch, onMounted, inject, computed } from 'vue';
 import { repository } from '../services/indexedDbRepository';
 import { calculateCompoundInterest, calculateRequiredMonthlyContribution } from '../services/financialCalculations';
 
@@ -368,6 +391,24 @@ const currentMonthStr = `${currentYear}-${String(currentDate.getMonth() + 1).pad
 const investments = ref([]);
 const projectionYears = ref(10);
 const showDeleteConfirm = ref(false);
+
+const baseYear = computed(() => {
+  if (investments.value.length === 0) return currentYear;
+  const years = investments.value.map(inv => {
+    if (inv.actualStartDate) {
+      const [sy] = inv.actualStartDate.split('-');
+      const syInt = Number.parseInt(sy);
+      if (!Number.isNaN(syInt)) return syInt;
+    }
+    if (inv.startYear) {
+      const syInt = Number.parseInt(inv.startYear);
+      if (!Number.isNaN(syInt)) return syInt;
+    }
+    return currentYear;
+  });
+  return Math.min(...years);
+});
+
 const indexToDelete = ref(null);
 const editingIndex = ref(null);
 const expandedRows = ref({});
@@ -694,5 +735,49 @@ function calculateCatchupApport(inv) {
 }
 .slide-panel-enter-from .drawer-panel, .slide-panel-leave-to .drawer-panel {
   transform: translateX(100%);
+}
+
+/* Premium Interactive 50-Year Ruler Slider */
+.ruler-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  outline: none;
+  transition: background 0.15s ease;
+  cursor: pointer;
+}
+
+.ruler-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--primary-accent);
+  cursor: pointer;
+  box-shadow: 0 0 10px var(--primary-accent);
+  transition: transform 0.1s ease;
+}
+
+.ruler-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+.ruler-slider::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--primary-accent);
+  cursor: pointer;
+  box-shadow: 0 0 10px var(--primary-accent);
+  border: none;
+  transition: transform 0.1s ease;
+}
+
+.ruler-slider::-moz-range-thumb:hover {
+  transform: scale(1.15);
 }
 </style>

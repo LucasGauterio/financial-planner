@@ -263,6 +263,7 @@ export default {
     confirmDeleteProfile: 'Are you sure you want to delete the profile "{name}" and ALL its data? This cannot be undone.',
     authMethodLabel: 'Login Method',
     authMethodPin: 'PIN Code',
-    authMethodPassword: 'Old Password (Legacy)'
+    authMethodPassword: 'Old Password (Deprecated)',
+    chooseNewPinDesc: 'Password login is deprecated. Please choose a new 4-digit PIN to secure your data.'
   }
 };

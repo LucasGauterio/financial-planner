@@ -104,14 +104,14 @@
       <div v-else>
         <h2 style="margin-bottom: 0.5rem; color: var(--text-primary);">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 8px; color: var(--primary-accent);"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-          {{ status === 'new_setup' ? t('auth.setMasterPassword') : (status === 'migration_needed' ? t('auth.secureYourData') : t('auth.unlockPlanner')) }}
+          {{ status === 'new_setup' ? t('auth.setMasterPassword') : ((status === 'migration_needed' || status === 'legacy_pin_needed') ? t('auth.secureYourData') : t('auth.unlockPlanner')) }}
         </h2>
         
         <p style="color: var(--text-secondary); margin-bottom: 2rem; font-size: 0.9rem;">
           {{ 
             status === 'new_setup' 
             ? t('auth.newSetupPinDesc') 
-            : (status === 'migration_needed' ? t('auth.migrationDesc') : t('auth.unlockDesc')) 
+            : (status === 'legacy_pin_needed' ? t('auth.chooseNewPinDesc') : (status === 'migration_needed' ? t('auth.migrationDesc') : t('auth.unlockDesc'))) 
           }}
         </p>
 
@@ -141,7 +141,7 @@
         <form @submit.prevent="submitPassword" style="display: flex; flex-direction: column; gap: 1rem; text-align: left;">
           
           <!-- BRAND NEW PIN SETUP (OR DATA MIGRATION) -->
-          <div v-if="status === 'new_setup' || status === 'migration_needed'" style="display: flex; flex-direction: column; gap: 1rem;">
+          <div v-if="status === 'new_setup' || status === 'migration_needed' || status === 'legacy_pin_needed'" style="display: flex; flex-direction: column; gap: 1rem;">
             <!-- MULTI-INPUT DIGITS FOR NEW PIN SETUP -->
             <fieldset class="form-fieldset" style="border: none !important; background: transparent !important; padding: 0 !important; box-shadow: none !important; margin-bottom: 0.25rem;">
               <legend style="text-align: center; margin-bottom: 0.5rem; width: 100%;">{{ t('auth.pinPlaceholder') }}</legend>
@@ -237,7 +237,7 @@
               </fieldset>
             </div>
 
-            <!-- LEGACY PASSWORD METHOD -->
+            <!-- DEPRECATED PASSWORD METHOD -->
             <div v-else>
               <fieldset class="form-fieldset">
                 <legend>{{ t('auth.passwordPlaceholder') }}</legend>
@@ -280,7 +280,7 @@
           </div>
         </form>
         
-        <div v-if="status === 'new_setup' || status === 'migration_needed'" style="margin-top: 1.5rem; font-size: 0.75rem; color: var(--text-secondary);">
+        <div v-if="status === 'new_setup' || status === 'migration_needed' || status === 'legacy_pin_needed'" style="margin-top: 1.5rem; font-size: 0.75rem; color: var(--text-secondary);">
           {{ t('auth.warningNoRecover') }}
         </div>
       </div>
@@ -362,7 +362,7 @@ async function fetchAuthStatus() {
     
     // Auto focus PIN or password input when status is fetched
     setTimeout(() => {
-      if (status.value === 'new_setup' || status.value === 'migration_needed') {
+      if (status.value === 'new_setup' || status.value === 'migration_needed' || status.value === 'legacy_pin_needed') {
         const firstInput = document.getElementById('setup-pin-digit-0');
         if (firstInput) firstInput.focus();
       } else if (authMethod.value === 'pin') {
@@ -480,7 +480,7 @@ async function submitPassword() {
   errorMsg.value = '';
   
   // Enforce 4-digit PIN for new setups/migrations
-  if (status.value === 'new_setup' || status.value === 'migration_needed') {
+  if (status.value === 'new_setup' || status.value === 'migration_needed' || status.value === 'legacy_pin_needed') {
     if (!/^\d{4}$/.test(password.value)) {
       errorMsg.value = t('auth.pinRequired');
       loading.value = false;
@@ -494,17 +494,34 @@ async function submitPassword() {
   }
   
   try {
-    const success = await repository.authenticate(password.value);
-    if (!success) {
-      errorMsg.value = t('auth.incorrectPassword');
-      // If unlock failed with PIN, clear the pin input fields
-      if (status.value === 'locked' && authMethod.value === 'pin') {
-        pinDigits.value = ['', '', '', ''];
+    if (status.value === 'locked' && authMethod.value === 'password') {
+      const success = await repository.authenticateLegacyPassword(password.value);
+      if (!success) {
+        errorMsg.value = t('auth.incorrectPassword');
+      } else {
+        status.value = 'legacy_pin_needed';
         password.value = '';
+        confirmPassword.value = '';
+        pinDigits.value = ['', '', '', ''];
+        confirmPinDigits.value = ['', '', '', ''];
         setTimeout(() => {
-          const firstInput = document.getElementById('pin-digit-0');
+          const firstInput = document.getElementById('setup-pin-digit-0');
           if (firstInput) firstInput.focus();
         }, 100);
+      }
+    } else {
+      const success = await repository.authenticate(password.value);
+      if (!success) {
+        errorMsg.value = t('auth.incorrectPassword');
+        // If unlock failed with PIN, clear the pin input fields
+        if (status.value === 'locked' && authMethod.value === 'pin') {
+          pinDigits.value = ['', '', '', ''];
+          password.value = '';
+          setTimeout(() => {
+            const firstInput = document.getElementById('pin-digit-0');
+            if (firstInput) firstInput.focus();
+          }, 100);
+        }
       }
     }
   } catch (error) {
