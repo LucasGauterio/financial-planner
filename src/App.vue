@@ -84,6 +84,13 @@
         >
           {{ t('tabs.loans') }}
         </button>
+        <button 
+          class="btn" 
+          :class="activeTab === 'privacy' ? 'btn-primary' : 'btn-secondary'"
+          @click="activeTab = 'privacy'"
+        >
+          {{ t('tabs.privacy') }}
+        </button>
       </div>
 
       <transition name="fade" mode="out-in">
@@ -93,6 +100,7 @@
         <PortfolioTracker v-else-if="activeTab === 'portfolio'" />
         <InvestmentTimeline v-else-if="activeTab === 'timeline'" />
         <LoanTracker v-else-if="activeTab === 'loans'" />
+        <PrivacyPolicy v-else-if="activeTab === 'privacy'" />
       </transition>
       
       <BackupManager v-if="showBackup" @close="showBackup = false" />
@@ -112,6 +120,7 @@ import TimeGapComparator from './components/TimeGapComparator.vue';
 import LockScreen from './components/LockScreen.vue';
 import BackupManager from './components/BackupManager.vue';
 import LoanTracker from './components/LoanTracker.vue';
+import PrivacyPolicy from './components/PrivacyPolicy.vue';
 
 const i18n = useI18n();
 const { t, locale, currency, setLocale, setCurrency } = i18n;

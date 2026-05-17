@@ -9,7 +9,8 @@ export default {
     goal: 'Calculadora de Metas',
     portfolio: 'Rastreador de Carteira',
     timeline: 'Linha do Tempo',
-    loans: 'Empréstimos'
+    loans: 'Empréstimos',
+    privacy: 'Política de Privacidade'
   },
   settings: {
     language: 'Idioma',

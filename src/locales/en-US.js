@@ -9,7 +9,8 @@ export default {
     goal: 'Goal Calculator',
     portfolio: 'Portfolio Tracker',
     timeline: 'Life Timeline',
-    loans: 'Loan Tracker'
+    loans: 'Loan Tracker',
+    privacy: 'Privacy Policy'
   },
   settings: {
     language: 'Language',
