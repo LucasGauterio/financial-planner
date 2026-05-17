@@ -103,6 +103,11 @@ select {
   width: 100%;
 }
 
+select option {
+  background-color: var(--surface-color);
+  color: var(--text-primary);
+}
+
 input:focus,
 select:focus {
   outline: none;
