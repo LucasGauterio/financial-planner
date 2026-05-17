@@ -153,6 +153,7 @@ export default {
     deleteLoan: 'Delete Loan',
     archiveLoan: 'Archive Loan',
     unarchiveLoan: 'Restore Loan',
+    confirmDeleteTitle: 'Delete Loan?',
     confirmDelete: 'Are you sure you want to delete this loan and all associated history?',
     confirmArchive: 'Are you sure you want to archive this loan?',
     form: {

@@ -438,6 +438,29 @@
       </div>
     </transition>
     </Teleport>
+
+    <!-- CUSTOM DELETE CONFIRMATION DIALOG -->
+    <Teleport to="body">
+      <transition name="fade">
+        <div v-if="showDeleteConfirm" class="modal-overlay" @click.self="showDeleteConfirm = false">
+          <div class="card modal-content" style="max-width: 400px; text-align: center; padding: 2rem;">
+            <div style="font-size: 3rem; margin-bottom: 1rem; color: #ef4444;">⚠️</div>
+            <h3 style="margin-bottom: 1rem;">{{ t('loans.confirmDeleteTitle') }}</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.95rem;">
+              {{ t('loans.confirmDelete') }}
+            </p>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+              <button class="btn btn-secondary" @click="showDeleteConfirm = false" style="flex: 1;">
+                {{ t('loans.form.cancel') }}
+              </button>
+              <button class="btn" @click="confirmDeleteLoan" style="flex: 1; background: #dc2626; border-color: #dc2626; color: white;">
+                {{ t('loans.deleteLoan') }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </transition>
+    </Teleport>
   </div>
 </template>
 
@@ -459,6 +482,8 @@ const activeFilter = ref('active');
 const showAddModal = ref(false);
 const showDetailsDrawer = ref(false);
 const selectedLoan = ref(null);
+const showDeleteConfirm = ref(false);
+const loanToDelete = ref(null);
 
 // Form States
 const formDefaults = () => ({
@@ -719,13 +744,21 @@ async function saveLoan() {
   await loadLoans();
 }
 
-async function deleteLoan(loan) {
-  if (confirm(t('loans.confirmDelete'))) {
+function deleteLoan(loan) {
+  loanToDelete.value = loan;
+  showDeleteConfirm.value = true;
+}
+
+async function confirmDeleteLoan() {
+  if (loanToDelete.value) {
+    const loan = loanToDelete.value;
     loans.value = loans.value.filter(l => l.id !== loan.id);
     await repository.saveLoans(loans.value);
     if (selectedLoan.value && selectedLoan.value.id === loan.id) {
       closeDetailsDrawer();
     }
+    showDeleteConfirm.value = false;
+    loanToDelete.value = null;
     await loadLoans();
   }
 }

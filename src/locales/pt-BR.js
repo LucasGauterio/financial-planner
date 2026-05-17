@@ -153,6 +153,7 @@ export default {
     deleteLoan: 'Excluir Empréstimo',
     archiveLoan: 'Arquivar Empréstimo',
     unarchiveLoan: 'Restaurar Empréstimo',
+    confirmDeleteTitle: 'Excluir Empréstimo?',
     confirmDelete: 'Tem certeza de que deseja excluir este empréstimo e todo o histórico associado?',
     confirmArchive: 'Tem certeza de que deseja arquivar este empréstimo?',
     form: {
@@ -210,7 +211,7 @@ export default {
     exportTitle: 'Exportar .json',
     importBtn: 'Importar Arquivo',
     importTitle: 'Importar .json',
-    snapshotBtn: '+ Snapshot',
+    snapshotBtn: 'Snapshot',
     snapshotTitle: 'Criar Snapshot Agora',
     historyTitle: 'Histórico de Snapshots Locais',
     noSnapshots: 'Nenhum snapshot encontrado ainda.',
