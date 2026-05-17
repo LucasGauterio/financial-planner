@@ -473,32 +473,46 @@ function handlePinPaste(event, isConfirm = false, idPrefix = 'pin-digit') {
   }
 }
 
+function validatePinInputs() {
+  if (status.value === 'new_setup' || status.value === 'migration_needed' || status.value === 'legacy_pin_needed') {
+    if (!/^\d{4}$/.test(password.value)) {
+      errorMsg.value = t('auth.pinRequired');
+      return false;
+    }
+    if (password.value !== confirmPassword.value) {
+      errorMsg.value = t('auth.passwordMismatch');
+      return false;
+    }
+  }
+  return true;
+}
+
+function handleFailedPinUnlock() {
+  if (status.value === 'locked' && authMethod.value === 'pin') {
+    pinDigits.value = ['', '', '', ''];
+    password.value = '';
+    setTimeout(() => {
+      const firstInput = document.getElementById('pin-digit-0');
+      if (firstInput) firstInput.focus();
+    }, 100);
+  }
+}
+
 async function submitPassword() {
   if (!password.value) return;
   
   loading.value = true;
   errorMsg.value = '';
   
-  // Enforce 4-digit PIN for new setups/migrations
-  if (status.value === 'new_setup' || status.value === 'migration_needed' || status.value === 'legacy_pin_needed') {
-    if (!/^\d{4}$/.test(password.value)) {
-      errorMsg.value = t('auth.pinRequired');
-      loading.value = false;
-      return;
-    }
-    if (password.value !== confirmPassword.value) {
-      errorMsg.value = t('auth.passwordMismatch');
-      loading.value = false;
-      return;
-    }
+  if (!validatePinInputs()) {
+    loading.value = false;
+    return;
   }
   
   try {
     if (status.value === 'locked' && authMethod.value === 'password') {
       const success = await repository.authenticateLegacyPassword(password.value);
-      if (!success) {
-        errorMsg.value = t('auth.incorrectPassword');
-      } else {
+      if (success) {
         status.value = 'legacy_pin_needed';
         password.value = '';
         confirmPassword.value = '';
@@ -508,20 +522,14 @@ async function submitPassword() {
           const firstInput = document.getElementById('setup-pin-digit-0');
           if (firstInput) firstInput.focus();
         }, 100);
+      } else {
+        errorMsg.value = t('auth.incorrectPassword');
       }
     } else {
       const success = await repository.authenticate(password.value);
       if (!success) {
         errorMsg.value = t('auth.incorrectPassword');
-        // If unlock failed with PIN, clear the pin input fields
-        if (status.value === 'locked' && authMethod.value === 'pin') {
-          pinDigits.value = ['', '', '', ''];
-          password.value = '';
-          setTimeout(() => {
-            const firstInput = document.getElementById('pin-digit-0');
-            if (firstInput) firstInput.focus();
-          }, 100);
-        }
+        handleFailedPinUnlock();
       }
     }
   } catch (error) {

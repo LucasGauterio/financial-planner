@@ -181,7 +181,7 @@ async function authenticateLegacyPassword(legacyPassword) {
       if (raw === undefined || raw === null) return null;
       if (typeof raw === 'string') {
         const dec = await decryptData(legacyKey, raw);
-        return dec !== null ? dec : raw;
+        return dec === null ? raw : dec;
       }
       return raw;
     }
@@ -197,57 +197,62 @@ async function authenticateLegacyPassword(legacyPassword) {
   return false;
 }
 
+async function handleLegacyMigration(key) {
+  const encryptedToken = await encryptData(key, 'VALID_AUTH');
+  await setRaw(ENCRYPTION_TEST_KEY, encryptedToken);
+  
+  useAuth().unlock(key);
+
+  for (const [k, val] of Object.entries(pendingLegacyMigrationData)) {
+    if (val !== null) {
+      const encrypted = await encryptData(key, val);
+      await setRaw(k, encrypted);
+    }
+  }
+  pendingLegacyMigrationData = null;
+  return true;
+}
+
+async function handleSetupOrMigration(key, status) {
+  const encryptedToken = await encryptData(key, 'VALID_AUTH');
+  await setRaw(ENCRYPTION_TEST_KEY, encryptedToken);
+  
+  useAuth().unlock(key);
+  
+  if (status === 'migration_needed') {
+    const legacyInv = await getRaw(INVESTMENTS_KEY);
+    if (legacyInv) await set(INVESTMENTS_KEY, legacyInv);
+    
+    const legacyGoal = await getRaw(GOALS_KEY);
+    if (legacyGoal) await set(GOALS_KEY, legacyGoal);
+    
+    const legacyTime = await getRaw(TIMELINE_KEY);
+    if (legacyTime) await set(TIMELINE_KEY, legacyTime);
+  }
+  return true;
+}
+
 async function authenticate(password) {
   const key = await deriveKey(password);
-  const statusRes = await checkAuthStatus();
 
   if (pendingLegacyMigrationData) {
-    const encryptedToken = await encryptData(key, 'VALID_AUTH');
-    await setRaw(ENCRYPTION_TEST_KEY, encryptedToken);
-    
-    useAuth().unlock(key);
-
-    for (const [k, val] of Object.entries(pendingLegacyMigrationData)) {
-      if (val !== null) {
-        const encrypted = await encryptData(key, val);
-        await setRaw(k, encrypted);
-      }
-    }
-    pendingLegacyMigrationData = null;
-    return true;
+    return await handleLegacyMigration(key);
   }
+
+  const statusRes = await checkAuthStatus();
 
   if (statusRes.status === 'locked') {
     const checkToken = await getRaw(ENCRYPTION_TEST_KEY);
     const decrypted = await decryptData(key, checkToken);
     if (decrypted === 'VALID_AUTH') {
-      // Correct password
       useAuth().unlock(key);
       return true;
     }
-    return false; // Wrong password
+    return false;
   } 
   
   if (statusRes.status === 'new_setup' || statusRes.status === 'migration_needed') {
-    // Set the password by generating the test token
-    const encryptedToken = await encryptData(key, 'VALID_AUTH');
-    await setRaw(ENCRYPTION_TEST_KEY, encryptedToken);
-    
-    useAuth().unlock(key);
-    
-    if (statusRes.status === 'migration_needed') {
-      // Perform migration of existing data using the app flows instead of here.
-      // But we can eagerly save them.
-      const legacyInv = await getRaw(INVESTMENTS_KEY);
-      if (legacyInv) await set(INVESTMENTS_KEY, legacyInv);
-      
-      const legacyGoal = await getRaw(GOALS_KEY);
-      if (legacyGoal) await set(GOALS_KEY, legacyGoal);
-      
-      const legacyTime = await getRaw(TIMELINE_KEY);
-      if (legacyTime) await set(TIMELINE_KEY, legacyTime);
-    }
-    return true;
+    return await handleSetupOrMigration(key, statusRes.status);
   }
   return false;
 }
