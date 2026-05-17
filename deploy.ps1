@@ -65,7 +65,7 @@ try {
     Write-Host ""
     Write-Host "=====================================================================" -ForegroundColor Green
     Write-Host "  🎉 SUCCESS: FinancialPlanner has been deployed successfully to GCP!  " -ForegroundColor Green
-    Write-Host "  URL: https://financial-planner-892026852886.us-east1.run.app" -ForegroundColor Green
+    Write-Host "  URL: https://financialplanner.lgauterio.com.br" -ForegroundColor Green
     Write-Host "=====================================================================" -ForegroundColor Green
     Write-Host ""
 
