@@ -98,6 +98,13 @@
         <div style="margin-top: 1.5rem; font-size: 0.75rem; color: var(--text-secondary);">
           {{ t('auth.warningNoRecover') }}
         </div>
+
+        <div style="margin-top: 1.5rem; text-align: center; border-top: 1px solid var(--border-color); padding-top: 1.25rem;">
+          <a href="#" @click.prevent="showPrivacyModal = true" style="color: var(--primary-accent); font-size: 0.85rem; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;" class="privacy-link">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            {{ t('auth.viewPrivacyPolicy') }}
+          </a>
+        </div>
       </div>
 
       <!-- STANDARD LOGIN / UNLOCK / SETUP SCREEN -->
@@ -283,9 +290,39 @@
         <div v-if="status === 'new_setup' || status === 'migration_needed' || status === 'legacy_pin_needed'" style="margin-top: 1.5rem; font-size: 0.75rem; color: var(--text-secondary);">
           {{ t('auth.warningNoRecover') }}
         </div>
+
+        <div style="margin-top: 1.5rem; text-align: center; border-top: 1px solid var(--border-color); padding-top: 1.25rem;">
+          <a href="#" @click.prevent="showPrivacyModal = true" style="color: var(--primary-accent); font-size: 0.85rem; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;" class="privacy-link">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            {{ t('auth.viewPrivacyPolicy') }}
+          </a>
+        </div>
       </div>
 
     </div>
+
+    <!-- PRIVACY POLICY MODAL FOR LOCK SCREEN -->
+    <Teleport to="body">
+      <transition name="fade">
+        <div v-if="showPrivacyModal" class="modal-overlay" style="position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 1.5rem;" @click.self="showPrivacyModal = false">
+          <div class="card modal-content" style="width: 100%; max-width: 800px; max-height: 90vh; overflow: hidden; position: relative; padding: 0; display: flex; flex-direction: column;">
+            <div style="padding: 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: flex-end; flex-shrink: 0;">
+              <button 
+                type="button" 
+                class="btn btn-secondary" 
+                style="padding: 0.55rem 1.5rem; font-weight: bold;" 
+                @click="showPrivacyModal = false"
+              >
+                {{ t('loans.form.cancel') }}
+              </button>
+            </div>
+            <div style="overflow-y: auto; padding: 0 2rem 2.5rem 2rem; flex: 1;">
+              <PrivacyPolicy />
+            </div>
+          </div>
+        </div>
+      </transition>
+    </Teleport>
   </div>
 </template>
 
@@ -293,6 +330,9 @@
 import { ref, onMounted, inject, watch } from 'vue';
 import { repository } from '../services/indexedDbRepository';
 import { useAuth } from '../composables/useAuth';
+import PrivacyPolicy from './PrivacyPolicy.vue';
+
+const showPrivacyModal = ref(false);
 
 const { t } = inject('i18n');
 const { 

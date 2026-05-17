@@ -245,6 +245,7 @@ export default {
     yearMinAlert: 'O ano não pode ser anterior a 1900.'
   },
   auth: {
+    viewPrivacyPolicy: 'Política de Privacidade & LGPD',
     setMasterPassword: 'Definir PIN Mestre',
     secureYourData: 'Proteger Seus Dados',
     unlockPlanner: 'Desbloquear Planejador',
