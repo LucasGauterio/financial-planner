@@ -22,6 +22,9 @@ export default {
     title: 'Portfolio Tracker',
     subtitle: 'Track your current investments and project your wealth securely stored offline.',
     projHorizon: 'Projection Horizon:',
+    yearSingular: 'Year',
+    yearPlural: 'Years',
+    startedLabel: 'Started:',
     years: '{years} Years',
     alertExists: 'An investment with this name already exists in your portfolio!',
     types: {
@@ -156,6 +159,10 @@ export default {
     confirmDeleteTitle: 'Delete Loan?',
     confirmDelete: 'Are you sure you want to delete this loan and all associated history?',
     confirmArchive: 'Are you sure you want to archive this loan?',
+    alertLentDateMin: 'The lent date cannot be before year 1900.',
+    alertStartMonthMin: 'The starting month cannot be before year 1900.',
+    alertPaymentDateMin: 'The payment date cannot be before year 1900.',
+    confirmAlterParams: 'Altering these credit parameters will RE-GENERATE all installments, clearing past payment flags. Continue?',
     form: {
       type: 'Loan Type',
       friendName: 'Entity Name (Borrower/Lender)',
@@ -234,7 +241,8 @@ export default {
     minYear: 'Minimum year allowed is 1900',
     maxYear: 'Maximum year allowed is 2200',
     maxLimit: 'Maximum limit allowed is 999 Trillion (under 1 Quadrillion)',
-    maxRate: 'Maximum percentage allowed is 100%'
+    maxRate: 'Maximum percentage allowed is 100%',
+    yearMinAlert: 'Year cannot be before 1900.'
   },
   auth: {
     setMasterPassword: 'Set Master PIN',

@@ -649,14 +649,14 @@ function validateLoanForm() {
     if (form.dateLent) {
       const year = Number.parseInt(form.dateLent.split('-')[0]);
       if (Number.isNaN(year) || year < 1900) {
-        alert("The lent date cannot be before year 1900.");
+        alert(t('loans.alertLentDateMin'));
         return false;
       }
     }
   } else if (form.startMonth) {
     const year = Number.parseInt(form.startMonth.split('-')[0]);
     if (Number.isNaN(year) || year < 1900) {
-      alert("The starting month cannot be before year 1900.");
+      alert(t('loans.alertStartMonthMin'));
       return false;
     }
   }
@@ -680,7 +680,7 @@ function updateExistingLoan(existing) {
                           existing.dueDay !== form.dueDay;
 
   if (isParamsChanged) {
-    if (confirm("Altering these credit parameters will RE-GENERATE all installments, clearing past payment flags. Continue?")) {
+    if (confirm(t('loans.confirmAlterParams'))) {
       existing.totalAmount = form.totalAmount;
       existing.installmentsCount = form.installmentsCount;
       existing.startMonth = form.startMonth;
@@ -779,7 +779,7 @@ async function addRepayment() {
   if (paymentForm.date) {
     const year = Number.parseInt(paymentForm.date.split('-')[0]);
     if (Number.isNaN(year) || year < 1900) {
-      alert("The payment date cannot be before year 1900.");
+      alert(t('loans.alertPaymentDateMin'));
       return;
     }
   }

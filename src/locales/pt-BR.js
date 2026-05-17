@@ -22,6 +22,9 @@ export default {
     title: 'Monitor de Carteira',
     subtitle: 'Acompanhe seus investimentos atuais e projete sua riqueza armazenada offline de forma segura.',
     projHorizon: 'Horizonte de Projeção:',
+    yearSingular: 'Ano',
+    yearPlural: 'Anos',
+    startedLabel: 'Iniciado:',
     years: '{years} Anos',
     alertExists: 'Um investimento com esse nome já existe na sua carteira!',
     types: {
@@ -156,6 +159,10 @@ export default {
     confirmDeleteTitle: 'Excluir Empréstimo?',
     confirmDelete: 'Tem certeza de que deseja excluir este empréstimo e todo o histórico associado?',
     confirmArchive: 'Tem certeza de que deseja arquivar este empréstimo?',
+    alertLentDateMin: 'A data do empréstimo não pode ser anterior ao ano 1900.',
+    alertStartMonthMin: 'O mês de início não pode ser anterior ao ano 1900.',
+    alertPaymentDateMin: 'A data do pagamento não pode ser anterior ao ano 1900.',
+    confirmAlterParams: 'Alterar estes parâmetros de crédito irá REGERAR todas as parcelas, limpando o histórico de pagamentos anteriores. Continuar?',
     form: {
       type: 'Tipo de Empréstimo',
       friendName: 'Nome da Entidade (Devedor/Credor)',
@@ -234,7 +241,8 @@ export default {
     minYear: 'O ano mínimo permitido é 1900',
     maxYear: 'O ano máximo permitido é 2200',
     maxLimit: 'O limite máximo permitido é 999 Trilhões (abaixo de 1 Quatrilhão)',
-    maxRate: 'A porcentagem máxima permitida é 100%'
+    maxRate: 'A porcentagem máxima permitida é 100%',
+    yearMinAlert: 'O ano não pode ser anterior a 1900.'
   },
   auth: {
     setMasterPassword: 'Definir PIN Mestre',

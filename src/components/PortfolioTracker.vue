@@ -8,7 +8,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
           <span style="font-weight: 600; color: var(--text-primary); font-size: 1rem;">{{ t('tracker.projHorizon') }}</span>
           <div style="background: var(--primary-accent); color: #000; font-weight: bold; padding: 0.35rem 0.85rem; border-radius: var(--radius-full); font-size: 0.9rem; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);">
-            {{ projectionYears }} {{ projectionYears === 1 ? 'year' : 'years' }} / {{ baseYear + projectionYears }}
+            {{ projectionYears }} {{ projectionYears === 1 ? t('tracker.yearSingular') : t('tracker.yearPlural') }} / {{ baseYear + projectionYears }}
           </div>
         </div>
         
@@ -59,7 +59,7 @@
             <tr :style="editingIndex === index ? 'background: rgba(255,255,255,0.05);' : ''">
               <td>
                 <span style="display: block; font-weight: bold;">{{ inv.name }}</span>
-                <span style="font-size: 0.75rem; color: var(--text-secondary);">Started: {{ formatMonth(inv.actualStartDate) }}</span>
+                <span style="font-size: 0.75rem; color: var(--text-secondary);">{{ t('tracker.startedLabel') }} {{ formatMonth(inv.actualStartDate) }}</span>
               </td>
               <td>{{ getTranslatedType(inv.type) }}</td>
               <td>{{ formatCurrency(inv.computedInvestedValue || inv.investedValue) }}</td>
@@ -497,7 +497,7 @@ function saveInvestment() {
   const startY = Number(formInv.value.startYear);
   const earlyY = Number(formInv.value.earlyStartYear);
   if (Number.isNaN(startY) || startY < 1900 || Number.isNaN(earlyY) || earlyY < 1900) {
-    alert("Year cannot be before 1900.");
+    alert(t('validation.yearMinAlert'));
     return;
   }
   
