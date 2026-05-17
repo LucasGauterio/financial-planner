@@ -27,6 +27,13 @@
               </select>
             </div>
             <div class="control-group">
+              <span class="control-label">&nbsp;</span>
+              <a href="#" @click.prevent="activeTab = 'privacy'" class="privacy-link" :class="{ active: activeTab === 'privacy' }" :title="t('tabs.privacy')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px; margin-top: -2px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                {{ t('tabs.privacy') }}
+              </a>
+            </div>
+            <div class="control-group">
               <span class="control-label">Security</span>
               <div class="security-buttons">
                 <button class="btn btn-secondary btn-icon" @click="showBackup = true" title="Backup / Restore">
@@ -83,13 +90,6 @@
           @click="activeTab = 'loans'"
         >
           {{ t('tabs.loans') }}
-        </button>
-        <button 
-          class="btn" 
-          :class="activeTab === 'privacy' ? 'btn-primary' : 'btn-secondary'"
-          @click="activeTab = 'privacy'"
-        >
-          {{ t('tabs.privacy') }}
         </button>
       </div>
 
@@ -148,5 +148,33 @@ watch(activeTab, (newTab) => {
 .fade-leave-to {
   opacity: 0;
   transform: translateY(10px);
+}
+
+.privacy-link {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 0.75rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background-color: rgba(255, 255, 255, 0.01);
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.privacy-link:hover {
+  color: var(--primary-accent);
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.privacy-link.active {
+  color: var(--primary-accent);
+  background-color: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.2);
+  font-weight: 600;
 }
 </style>
