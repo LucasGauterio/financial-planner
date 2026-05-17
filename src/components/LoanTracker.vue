@@ -668,9 +668,18 @@ function updateExistingLoan(existing) {
   }
 }
 
+function generateSecureId() {
+  if (globalThis.crypto !== undefined) {
+    const array = new Uint32Array(1);
+    globalThis.crypto.getRandomValues(array);
+    return Date.now().toString(36) + array[0].toString(36).substring(0, 5);
+  }
+  return Date.now().toString(36) + String(Date.now() % 100000);
+}
+
 function createNewLoan() {
   const newLoan = {
-    id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+    id: generateSecureId(),
     type: form.type,
     friendName: form.friendName,
     loanName: form.loanName,
@@ -743,7 +752,7 @@ async function addRepayment() {
   }
 
   const newPayment = {
-    id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+    id: generateSecureId(),
     amount: Number.parseFloat(paymentForm.amount),
     date: paymentForm.date,
     notes: paymentForm.notes
