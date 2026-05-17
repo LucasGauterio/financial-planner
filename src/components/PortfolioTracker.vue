@@ -449,7 +449,7 @@ onMounted(async () => {
 watch(investments, async (newVal) => {
   if (isLoaded.value) {
     try {
-      const plainObj = structuredClone(newVal);
+      const plainObj = JSON.parse(JSON.stringify(newVal));
       await repository.saveInvestments(plainObj);
     } catch (e) {
       console.error("Failed to strip structural proxies for IndexedDB:", e);

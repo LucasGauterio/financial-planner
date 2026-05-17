@@ -222,12 +222,12 @@ function generateTimeline() {
 
 function saveState() {
   try {
-    const plainObj = structuredClone(stateMap.value);
+    const plainObj = JSON.parse(JSON.stringify(stateMap.value));
     repository.saveTimelineState(plainObj);
     
     // Dynamic Balance Synchronization organically natively
     if (investments.value && investments.value.length > 0) {
-      const updatedInvs = structuredClone(investments.value);
+      const updatedInvs = JSON.parse(JSON.stringify(investments.value));
       updatedInvs.forEach(inv => {
          let currentBal = Number.parseFloat(inv.investedValue || 0);
          let currentInvested = Number.parseFloat(inv.investedValue || 0);
