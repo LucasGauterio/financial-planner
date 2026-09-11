@@ -5,6 +5,8 @@ description: "Stage 1 of the plan pipeline (phase and task modes). Consolidates 
 
 # Plan Pipeline — Stage 1: Context
 
+> ⚠️ **PRECONDITION WARNING**: In phase mode, `/research phase NN` MUST be executed BEFORE running `/plan-context NN`. Running `/plan-context NN` without prior `/research phase NN` will abort with: `"Run /research phase NN first"`.
+
 Consolidate the planning inputs into a lean, indexed `CONTEXT.md`. This stage is a **pure consolidator** — it reads sources via subagents, produces a short structured artifact, and nothing else. It does not detect inconsistencies (that is `plan-validate`'s job), does not ask the user questions beyond slug confirmation and correlated-decisions confirmation, does not edit decisions docs.
 
 Read `plan-pipeline/SKILL.md` for shared conventions (mode detection, slug discovery, `sources_mtime`, abort-with-command protocol, subagent dispatch, frontmatter format, read strategy rules). This file references those conventions by name without repeating them.

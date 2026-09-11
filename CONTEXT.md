@@ -6,32 +6,26 @@ This document is the authoritative single source of truth for **FinancialPlanner
 
 ## 🏛 1. Project Overview & Architecture
 
-- **Project Domain**: Single Page Application (SPA) for tracking, calculating, and simulating financial scenarios (Investment Timeline, Goal Calculator, Past Investment Simulator, Time Gap Comparator, Portfolio Tracker, Loan Tracker).
-- **Framework / Runtime**: Vue 3 (Composition API with `<script setup>`)
+- **Project Domain**: Vue 3 SPA for tracking, calculating, and simulating financial scenarios (Investment Timeline, Goal Calculator, Past Investment Simulator, Time Gap Comparator, Portfolio Tracker, Loan Tracker).
+- **Framework / Runtime**: Vue 3 (Composition API with <script setup>)
 - **Build Tool**: Vite
-- **Testing Framework**: Vitest (`@vue/test-utils`, `jsdom`)
-- **Styling / UI**: Vanilla CSS (modern dark theme in `src/style.css`, scoped component styles; **NO TailwindCSS**)
-- **State & Storage**: IndexedDB + LocalStorage for client-side persistent storage
-- **Cryptography**: Native Web Crypto API (`window.crypto.subtle`) for PBKDF2 key derivation and AES-GCM vault encryption
-- **Localization (i18n)**: Custom reactive i18n hook (`useI18n.js`), supporting `en-US` and `pt-BR`. Currency agnostic.
+- **Testing Framework**: Vitest (@vue/test-utils, jsdom)
+- **Styling / UI**: Vanilla CSS (modern dark theme in src/style.css; NO TailwindCSS)
+- **State & Storage**: IndexedDB + LocalStorage (AES-GCM encryption)
+- **Database / Backend**: Client-side Web Crypto API
 
 ### Directory Tree
 ```
 FinancialPlanner/
-├── src/
-│   ├── components/      # Vue 3 UI components (PortfolioTracker.vue, LoanTracker.vue, etc.)
-│   ├── composables/     # Vue hooks (useAuth.js, useI18n.js, useStorage.js)
-│   ├── services/        # Core business logic & math (financialCalculations.js, loanCalculations.js)
-│   ├── locales/         # Translation dictionaries (en-US.js, pt-BR.js)
-│   └── style.css        # Core design system tokens & dark theme
-├── docs/                # Greenfield plans, phase docs (phase-01 to phase-06), PRD, RFC, FDD, ADRs, TRACKER
+├── src/          # Application source code
+├── docs/                 # System documentation & Greenfield roadmap
 │   ├── project-plan.md   # Master Greenfield roadmap & phase list
 │   ├── PRD.md            # Product Requirements Document
 │   ├── RFC.md            # Technical Architecture & Trade-offs
-│   ├── FDD.md            # Functional Design Document + Embedded Mermaid Diagrams
+│   ├── FDD.md            # Functional Design Document + Embedded Diagrams
 │   ├── TRACKER.md        # Line-level Traceability Matrix (file.ext#Lnn-Lmm)
-│   ├── phases/           # Phased implementation plan documents (phase-01 to phase-06)
-│   └── adrs/             # Architecture Decision Records (ADR-001..004)
+│   ├── phases/           # Phased implementation plan documents
+│   └── adrs/             # Architecture Decision Records (ADR-001..NNN)
 ├── AGENTS.md             # Universal agent entrypoint (points to CONTEXT.md)
 ├── CLAUDE.md             # Claude Code CLI entrypoint (points to CONTEXT.md)
 ├── CONTEXT.md            # Authoritative Single Source of Truth
@@ -39,23 +33,15 @@ FinancialPlanner/
 └── .claude/              # Native Claude Code CLI skills, commands, rules, agents, and references
 ```
 
-### Key Feature Modules
-1. **Time Gap**: Compares chronologically offset investment scenarios (`TimeGapComparator.vue`).
-2. **Past Simulator**: Simulates wealth growth based on consistent past investments (`PastInvestmentSimulator.vue`).
-3. **Goal Calculator**: Determines required deposits to reach a timeframe-based goal (`GoalCalculator.vue`).
-4. **Portfolio Tracker**: Manages active investments, profits, yields, and growth rates (`PortfolioTracker.vue`).
-5. **Loan Tracker**: Manages casual friend loans and credit card limit installment schedules (`LoanTracker.vue`, `loanCalculations.js`).
-6. **Life/Investment Timeline**: Dynamic row-based interactive timeline projecting net worth across months and years (`InvestmentTimeline.vue`).
-
 ---
 
 ## 🛠 2. Environment Setup & Execution Commands
 
-- **Start Dev Server**: `npm run dev` *(Run ONLY when explicitly asked by user; starts Vite at http://localhost:5173)*
-- **Production Build**: `npm run build` *(Builds production bundle into dist/)*
-- **Preview Build**: `npm run preview`
-- **Run Unit Tests**: `npx vitest run` or `npm run test`
-- **Run Single Test File**: `npx vitest run src/services/loanCalculations.test.js`
+- **Start Dev Server**: `npm run dev` *(Only when user explicitly requests running the server)*
+- **Production Build**: `npm run build`
+- **Run Unit Tests**: `npx vitest run`
+- **Run Single Test**: `npx vitest run src/services/financialCalculations.test.js`
+- **Lint / Code Format**: `npm run lint`
 
 ---
 
@@ -65,44 +51,59 @@ FinancialPlanner/
 
 When a user requests a new feature, bugfix, or architectural refactoring:
 1. **NEVER modify source code directly** as a first step.
-2. **Scan Existing Documentation**: Read `docs/PRD.md`, `docs/RFC.md`, `docs/FDD.md`, `docs/TRACKER.md`, and `docs/project-plan.md`.
-3. **Update / Create Documentation**:
-   - Use `/design-docs-prd`, `/design-docs-rfc`, and `/design-docs-fdd` to update core technical specs.
-   - Update `docs/project-plan.md` and add/update phase plans under `docs/phases/phase-NN-*/phase-NN-*.md`.
-   - Ensure all step implementations (SIs) and requirements include **explicit line-anchored file links** (`file.ext#Lnn-Lmm`).
-4. **Obtain Alignment**: Confirm plan and documentation updates before starting code implementation.
+2. **Scan Existing System Documentation**: Read `docs/PRD.md`, `docs/RFC.md`, `docs/FDD.md`, `docs/TRACKER.md`, and `docs/project-plan.md`.
+3. **System Design & Roadmap Phase**: Update system design docs (`PRD.md`, `RFC.md`, `FDD.md`, `adrs/`) and master roadmap (`docs/project-plan.md`) BEFORE running technical slicing pipelines.
+4. **Execute Unified New Feature Workflow**: Follow the 9-step **New Feature & Phase Slicing Workflow** detailed in Section 4 below.
+5. **Obtain Alignment**: Confirm system documentation and phase plan updates before starting code implementation.
 
 ---
 
-## 📋 4. Feature Planning & Slicing Workflow
+## 📋 4. Feature Planning & New Phase Workflow
 
-1. **Architectural Specification (`/plan-build`)**:
-   - Generate technical specifications using templates (`api-contracts`, `data-model`, `error-catalog`, `frontend-runtime`, `traceability-matrix`, `ui-contracts`).
-2. **Phase Plan Slicing (`/plan-pipeline`)**:
-   - Slicing orchestrator breaking feature scope into atomic, verifiable Step Implementations (SIs).
-   - Document dependency maps, prerequisites, and explicit line anchors in `docs/phases/`.
+When a user requests a new feature or a new implementation phase (e.g. Phase 07), execute the following end-to-end 9-step workflow:
+
+1. **Update System Design Docs (`design-docs`)**:
+   - Update `docs/PRD.md` (`/design-docs-prd`), `docs/RFC.md` (`/design-docs-rfc`), `docs/FDD.md` (`/design-docs-fdd`), and `docs/adrs/` (`/design-docs-adr`) to capture system-level requirements and C4/Mermaid architecture diagrams.
+2. **Amend Master Greenfield Roadmap (`docs/project-plan.md`)**:
+   - Add a `### Phase NN: <name>` section to `docs/project-plan.md` detailing capability bullets, target file links (`file.ext#Lnn-Lmm`), and subprojects. This is the authoritative source of truth for phase capability discovery.
+3. **Discover Technical Decisions (`/research phase NN`) [MANDATORY PRECONDITION]**:
+   - Run `/research phase NN` to generate `docs/decisions/technical-decisions-{slug}.md`. **This MUST be executed BEFORE `/plan-context`**. `/plan-context` relies on the decisions doc as its primary input.
+4. **Consolidate Phase Context (`/plan-context NN`)**:
+   - Run `/plan-context NN` (or slug) AFTER `/research` completes to consolidate `project-plan.md` + technical decisions + prior phase conventions into `docs/phases/phase-NN-{slug}/CONTEXT.md`.
+5. **Validate Architectural Consistency (`/plan-validate NN`)**:
+   - Run `/plan-validate NN` to verify consistency and produce `docs/phases/phase-NN-{slug}/validation.md` with status `clean` or `dirty`.
+6. **Resolve Open Issues (`/plan-resolve NN`)**:
+   - If validation is `dirty`, run `/plan-resolve NN` to answer open questions and update decisions docs until status is `clean`. Re-run `/plan-validate NN`.
+7. **Emit Implementation Plan & Specs (`/plan-build NN` & `/plan-test-specs NN`)**:
+   - Run `/plan-build NN` to emit `docs/phases/phase-NN-{slug}/phase-NN-{slug}.md` containing atomic Step Implementations (SIs), Dependency Map, and Deliverables.
+   - Run `/plan-test-specs NN` (optional) if SIs include UI/controller test scenario placeholders.
+8. **Execute Sequential Code Implementation (`/implement phase NN`)**:
+   - Run `/implement phase NN` (or `/implement-phase`) to execute SIs sequentially with strict separation of concerns (UI components decoupled from pure service logic).
+9. **Verify Quality Gate & Update Traceability Matrix (`vitest` + `TRACKER.md` + `design-docs-validate`)**:
+   - Execute the unit test runner (`npx vitest run`) to ensure 100% test pass rate.
+   - Run `/design-docs-tracker` to update `docs/TRACKER.md` with line-anchored file links (`file.ext#Lnn-Lmm`) mapping requirements to code lines.
+   - Run `/design-docs-validate` to confirm complete document consistency and link integrity.
 
 ---
 
 ## 💻 5. Development & Code Execution Workflow
 
 1. **Step Implementation (`/implement` & `/implement-phase`)**:
-   - Execute SIs sequentially as specified in the phase plan.
-   - Maintain strict **Separation of Concerns**: offload heavy financial calculations, compound interest formulas, and loan schedules to pure JS functions in `src/services/financialCalculations.js` and `src/services/loanCalculations.js`.
-2. **Zero-Trust Security & Encryption**:
-   - Data stored in IndexedDB/LocalStorage MUST be encrypted via `AES-GCM` using the user's Master Password key (`useAuth.js`, `cryptoService.js`).
-   - NEVER use `v-html` to render user inputs (prevents XSS).
-3. **Strict Bi-Lingual i18n**:
-   - User-facing text must NEVER be hardcoded.
-   - All text keys MUST exist in BOTH `src/locales/en-US.js` and `src/locales/pt-BR.js`.
+   - **Autonomous Continuous Mode Default**: Execute all SIs and phase transitions sequentially and automatically without pausing for user confirmation or asking "should I continue?". Interactive step-by-step review is OPT-IN ONLY when explicitly requested by the user ("modo interativo"). Prompt the user ONLY when unresolvable blockers or explicit decisions occur.
+   - Maintain clean **Separation of Concerns**: offload calculation, business logic, and data storage to pure service modules in `src/services`.
+2. **Zero-Trust Security**:
+   - Never write raw API keys or passwords in source code.
+   - Sanitize all user inputs to prevent XSS vulnerabilities (`v-html` prohibited).
+3. **Strict Internationalization (i18n)**:
+   - User-facing text must be externalized in locale dictionaries.
 
 ---
 
 ## 🧪 6. Testing, Validation & Delivery Gate
 
 1. **Unit Testing**:
-   - Every function added to `src/services/` MUST have a corresponding Vitest unit test file.
-   - Execute `npx vitest run` and verify **100% of unit tests pass** (currently 33/33 tests passing).
+   - Every function added to service modules MUST have an accompanying unit test file.
+   - Execute `npx vitest run` and ensure **100% of tests pass**.
 2. **Traceability Matrix (`TRACKER.md`)**:
    - Update `docs/TRACKER.md` to map new/modified requirements directly to code lines (`file.ext#Lnn-Lmm`).
 3. **Validation Report (`/design-docs-validate`)**:
