@@ -15,6 +15,7 @@ const INVESTMENTS_KEY = 'financial_planner_investments';
 const GOALS_KEY = 'financial_planner_goals';
 const TIMELINE_KEY = 'financial_planner_timeline';
 const LOANS_KEY = 'financial_planner_loans';
+const INCOME_KEY = 'financial_planner_income';
 const ENCRYPTION_TEST_KEY = 'financial_planner_auth_check';
 const BACKUPS_KEY = 'financial_planner_backups';
 
@@ -136,6 +137,7 @@ async function saveBackupSnapshot() {
       [GOALS_KEY]: await getRaw(GOALS_KEY),
       [TIMELINE_KEY]: await getRaw(TIMELINE_KEY),
       [LOANS_KEY]: await getRaw(LOANS_KEY),
+      [INCOME_KEY]: await getRaw(INCOME_KEY),
       [ENCRYPTION_TEST_KEY]: await getRaw(ENCRYPTION_TEST_KEY)
   };
 
@@ -270,6 +272,9 @@ export const repository = {
   getLoans: async () => await get(LOANS_KEY),
   saveLoans: async (data) => await set(LOANS_KEY, data),
 
+  getIncome: async () => await get(INCOME_KEY),
+  saveIncome: async (data) => await set(INCOME_KEY, data),
+
   // New Export/Import logic
   exportRawBackup: async () => {
     return {
@@ -277,6 +282,7 @@ export const repository = {
       [GOALS_KEY]: await getRaw(GOALS_KEY),
       [TIMELINE_KEY]: await getRaw(TIMELINE_KEY),
       [LOANS_KEY]: await getRaw(LOANS_KEY),
+      [INCOME_KEY]: await getRaw(INCOME_KEY),
       [ENCRYPTION_TEST_KEY]: await getRaw(ENCRYPTION_TEST_KEY)
     };
   },
@@ -285,6 +291,7 @@ export const repository = {
     if (backupData[GOALS_KEY]) await setRaw(GOALS_KEY, backupData[GOALS_KEY]);
     if (backupData[TIMELINE_KEY]) await setRaw(TIMELINE_KEY, backupData[TIMELINE_KEY]);
     if (backupData[LOANS_KEY]) await setRaw(LOANS_KEY, backupData[LOANS_KEY]);
+    if (backupData[INCOME_KEY]) await setRaw(INCOME_KEY, backupData[INCOME_KEY]);
     if (backupData[ENCRYPTION_TEST_KEY]) await setRaw(ENCRYPTION_TEST_KEY, backupData[ENCRYPTION_TEST_KEY]);
   },
 
