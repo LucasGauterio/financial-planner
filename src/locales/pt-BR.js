@@ -11,6 +11,7 @@ export default {
     portfolio: 'Rastreador de Carteira',
     timeline: 'Linha do Tempo',
     loans: 'Empréstimos',
+    income: 'Renda Mensal',
     privacy: 'Política de Privacidade'
   },
   settings: {
@@ -210,6 +211,32 @@ export default {
       active: 'Ativos',
       completed: 'Concluídos',
       archived: 'Arquivados'
+    }
+  },
+  income: {
+    title: 'Renda Mensal',
+    subtitle: 'Registre salários, dividendos e pagamentos recebidos, e projete-os mês a mês.',
+    addSource: 'Adicionar Fonte de Renda',
+    horizon: 'Horizonte de Projeção',
+    horizonYears: '{years} Ano(s)',
+    sourcesCount: 'Fontes Cadastradas',
+    empty: 'Nenhuma fonte de renda cadastrada. Pressione "Adicionar Fonte de Renda" para começar!',
+    emptyProjection: 'Nenhuma projeção para o horizonte selecionado.',
+    received: 'Recebido',
+    pending: 'Pendente',
+    total: 'Total',
+    status: {
+      received: 'Recebido',
+      pending: 'Pendente'
+    },
+    form: {
+      name: 'Nome da Fonte',
+      type: 'Tipo (Salário, Dividendo, Pagamento...)',
+      amount: 'Valor',
+      startMonth: 'Mês de Início',
+      recurring: 'Recorrente (mensal)',
+      cancel: 'Cancelar',
+      add: 'Adicionar'
     }
   },
   backup: {

@@ -98,12 +98,19 @@
         >
           {{ t('tabs.timeline') }}
         </button>
-        <button 
-          class="btn" 
+        <button
+          class="btn"
           :class="activeTab === 'loans' ? 'btn-primary' : 'btn-secondary'"
           @click="activeTab = 'loans'"
         >
           {{ t('tabs.loans') }}
+        </button>
+        <button
+          class="btn"
+          :class="activeTab === 'income' ? 'btn-primary' : 'btn-secondary'"
+          @click="activeTab = 'income'"
+        >
+          {{ t('tabs.income') }}
         </button>
       </div>
 
@@ -114,6 +121,7 @@
         <PortfolioTracker v-else-if="activeTab === 'portfolio'" />
         <InvestmentTimeline v-else-if="activeTab === 'timeline'" />
         <LoanTracker v-else-if="activeTab === 'loans'" />
+        <IncomeTracker v-else-if="activeTab === 'income'" />
         <PrivacyPolicy v-else-if="activeTab === 'privacy'" />
       </transition>
       
@@ -134,6 +142,7 @@ import TimeGapComparator from './components/TimeGapComparator.vue';
 import LockScreen from './components/LockScreen.vue';
 import BackupManager from './components/BackupManager.vue';
 import LoanTracker from './components/LoanTracker.vue';
+import IncomeTracker from './components/IncomeTracker.vue';
 import PrivacyPolicy from './components/PrivacyPolicy.vue';
 
 const i18n = useI18n();

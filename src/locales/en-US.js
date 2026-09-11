@@ -11,6 +11,7 @@ export default {
     portfolio: 'Portfolio Tracker',
     timeline: 'Life Timeline',
     loans: 'Loan Tracker',
+    income: 'Monthly Income',
     privacy: 'Privacy Policy'
   },
   settings: {
@@ -210,6 +211,32 @@ export default {
       active: 'Active',
       completed: 'Completed',
       archived: 'Archived'
+    }
+  },
+  income: {
+    title: 'Monthly Income',
+    subtitle: 'Register salaries, dividends and received payments, and project them month by month.',
+    addSource: 'Add Income Source',
+    horizon: 'Projection Horizon',
+    horizonYears: '{years} Year(s)',
+    sourcesCount: 'Registered Sources',
+    empty: 'No income sources registered yet. Press "Add Income Source" to get started!',
+    emptyProjection: 'No projection for the selected horizon.',
+    received: 'Received',
+    pending: 'Pending',
+    total: 'Total',
+    status: {
+      received: 'Received',
+      pending: 'Pending'
+    },
+    form: {
+      name: 'Source Name',
+      type: 'Type (Salary, Dividend, Payment...)',
+      amount: 'Amount',
+      startMonth: 'Start Month',
+      recurring: 'Recurring (monthly)',
+      cancel: 'Cancel',
+      add: 'Add'
     }
   },
   backup: {
