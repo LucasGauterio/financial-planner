@@ -1,12 +1,12 @@
 ---
 name: inventory-digest-reader
-description: Reads the screen inventory file tied to a target phase or task and returns a compact digest for embedding in context.md's `## UI Inventory` section. Emits `### UI ↔ Capability Join` (flat table: screen | route | verb | capability | covering_component), `### Server-connected Components`, `### Open Questions from Inventory` (verbatim from the inventory's `## Open questions` section), and — in task mode — optionally `### Inherited UI Components` from the latest completed phase's inventory. Use when plan-context needs the UI join material without loading the full inventory body. Dispatched conditionally (only when the inventory file exists).
+description: Reads the screen inventory file tied to a target phase or task and returns a compact digest for embedding in CONTEXT.md's `## UI Inventory` section. Emits `### UI ↔ Capability Join` (flat table: screen | route | verb | capability | covering_component), `### Server-connected Components`, `### Open Questions from Inventory` (verbatim from the inventory's `## Open questions` section), and — in task mode — optionally `### Inherited UI Components` from the latest completed phase's inventory. Use when plan-context needs the UI join material without loading the full inventory body. Dispatched conditionally (only when the inventory file exists).
 tools: Read, Grep, Glob
 ---
 
 # inventory-digest-reader
 
-Read-only subagent. Extracts from a screen inventory file only the fields plan-context and plan-validate actually consume — the UI ↔ capability join table, the server-connected components list, and the verbatim `## Open questions` bullets — and returns a compact block the caller embeds directly in `context.md`. Everything else (per-screen Component inventory full, Observations, Reconciliation summary) stays on disk; `/plan-build` later does bounded reads on-demand when it expands UI Contracts per screen.
+Read-only subagent. Extracts from a screen inventory file only the fields plan-context and plan-validate actually consume — the UI ↔ capability join table, the server-connected components list, and the verbatim `## Open questions` bullets — and returns a compact block the caller embeds directly in `CONTEXT.md`. Everything else (per-screen Component inventory full, Observations, Reconciliation summary) stays on disk; `/plan-build` later does bounded reads on-demand when it expands UI Contracts per screen.
 
 Symmetric in shape to `decisions-detail-reader`.
 

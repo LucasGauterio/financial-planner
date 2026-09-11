@@ -49,29 +49,43 @@
       </header>
 
       <div class="tabs">
-        <button 
-          class="btn" 
-          :class="activeTab === 'gap' ? 'btn-primary' : 'btn-secondary'"
-          @click="activeTab = 'gap'"
-        >
-          {{ t('tabs.timeGap') }}
-        </button>
-        <button 
-          class="btn" 
-          :class="activeTab === 'past' ? 'btn-primary' : 'btn-secondary'"
-          @click="activeTab = 'past'"
-        >
-          {{ t('tabs.past') }}
-        </button>
-        <button 
-          class="btn" 
-          :class="activeTab === 'goal' ? 'btn-primary' : 'btn-secondary'"
-          @click="activeTab = 'goal'"
-        >
-          {{ t('tabs.goal') }}
-        </button>
-        <button 
-          class="btn" 
+        <div class="tab-dropdown" ref="simDropdownRef">
+          <button
+            class="btn"
+            :class="simulationTabs.includes(activeTab) ? 'btn-primary' : 'btn-secondary'"
+            @click="simDropdownOpen = !simDropdownOpen"
+          >
+            {{ t('tabs.simulations') }}
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="tab-dropdown-chevron" :class="{ open: simDropdownOpen }"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <transition name="dropdown-fade">
+            <div v-if="simDropdownOpen" class="tab-dropdown-menu">
+              <button
+                class="tab-dropdown-item"
+                :class="{ active: activeTab === 'gap' }"
+                @click="selectSimulation('gap')"
+              >
+                {{ t('tabs.timeGap') }}
+              </button>
+              <button
+                class="tab-dropdown-item"
+                :class="{ active: activeTab === 'past' }"
+                @click="selectSimulation('past')"
+              >
+                {{ t('tabs.past') }}
+              </button>
+              <button
+                class="tab-dropdown-item"
+                :class="{ active: activeTab === 'goal' }"
+                @click="selectSimulation('goal')"
+              >
+                {{ t('tabs.goal') }}
+              </button>
+            </div>
+          </transition>
+        </div>
+        <button
+          class="btn"
           :class="activeTab === 'portfolio' ? 'btn-primary' : 'btn-secondary'"
           @click="activeTab = 'portfolio'"
         >
@@ -109,7 +123,7 @@
 </template>
 
 <script setup>
-import { ref, provide, watch } from 'vue';
+import { ref, provide, watch, onMounted, onUnmounted } from 'vue';
 import { useI18n } from './composables/useI18n';
 import { useAuth } from './composables/useAuth';
 import PortfolioTracker from './components/PortfolioTracker.vue';
@@ -131,6 +145,29 @@ provide('i18n', i18n);
 
 const activeTab = ref(localStorage.getItem('fp_activeTab') || 'gap');
 const showBackup = ref(false);
+
+const simulationTabs = ['gap', 'past', 'goal'];
+const simDropdownOpen = ref(false);
+const simDropdownRef = ref(null);
+
+function selectSimulation(tab) {
+  activeTab.value = tab;
+  simDropdownOpen.value = false;
+}
+
+function handleClickOutside(event) {
+  if (simDropdownRef.value && !simDropdownRef.value.contains(event.target)) {
+    simDropdownOpen.value = false;
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside);
+});
 
 // Persist tab state dynamically whenever structurally altered across boundaries
 watch(activeTab, (newTab) => {
@@ -176,5 +213,70 @@ watch(activeTab, (newTab) => {
   background-color: rgba(59, 130, 246, 0.1);
   border-color: rgba(59, 130, 246, 0.2);
   font-weight: 600;
+}
+
+.tab-dropdown {
+  position: relative;
+  display: inline-flex;
+}
+
+.tab-dropdown-chevron {
+  transition: transform 0.2s ease;
+}
+
+.tab-dropdown-chevron.open {
+  transform: rotate(180deg);
+}
+
+.tab-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  min-width: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
+  padding: 0.35rem;
+  gap: 0.15rem;
+  z-index: 20;
+}
+
+.tab-dropdown-item {
+  white-space: nowrap;
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.55rem 0.85rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.tab-dropdown-item:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+.tab-dropdown-item.active {
+  color: var(--primary-accent);
+  background-color: rgba(16, 185, 129, 0.12);
+  font-weight: 600;
+}
+
+.dropdown-fade-enter-active,
+.dropdown-fade-leave-active {
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.dropdown-fade-enter-from,
+.dropdown-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
 }
 </style>

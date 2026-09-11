@@ -117,7 +117,7 @@ Based on the answer in Step 2, route to one of:
                                           (autoridade cross-doc per plan-resolve/SKILL.md line 43).
 
   NÃO recomende /plan-resolve diretamente (pulando context/validate). plan-resolve aborta com
-  "validation.md not found" se rodado antes de plan-validate, que por sua vez aborta sem context.md.
+  "validation.md not found" se rodado antes de plan-validate, que por sua vez aborta sem CONTEXT.md.
   ```
 
   - Substitute `<slug-sugerido>` with a kebab-case slug derived from the user input (e.g., `auth-refresh-grace-period`, `openapi-spec-codegen`).
@@ -146,7 +146,7 @@ Generate a dynamic impact report listing **only** the next steps with real trigg
 #### Discovery — which scopes are affected
 
 ```
-Glob 'docs/{phases,tasks}/*/context.md'
+Glob 'docs/{phases,tasks}/*/CONTEXT.md'
 ```
 
 For each match, bounded `Read` of the top frontmatter block only (`---` ... `---`). Parse the `sources_mtime` mapping. A scope is "affected" iff the path of the TD's decision doc (the one just edited) appears as a key in `sources_mtime`.
@@ -160,7 +160,7 @@ For each affected scope, emit applicable subsections:
 - **C. Tests potentially affected.** `grep -rn <old-value> --include='*.spec.*' --include='*.test.*'`. If zero matches, note the absence; if non-zero, list and warn that test updates may be required.
 - **D. Documentation.** Filtered to `*.md` outside `docs/decisions/`, `docs/phases/`, `docs/tasks/` (rules, CLAUDEs, READMEs).
 - **E. Pipeline (rode na ordem, conforme aplicável):**
-  - `/plan-context <scope>` — emit when context.md exists for the scope and cited the doc in `sources_mtime`. Refreshes context.md to reflect the Revision.
+  - `/plan-context <scope>` — emit when CONTEXT.md exists for the scope and cited the doc in `sources_mtime`. Refreshes CONTEXT.md to reflect the Revision.
   - `/plan-validate <scope>` — emit as sanity check companion to plan-context.
   - `/plan-resolve <scope>` — emit only if the Revision changed the `**Libraries:**` line of the TD (compare pre/post Edit). Resolve will refresh `library-refs.md` via Context7.
   - `/plan-build <scope>` — emit only if a plan file exists in the scope dir AND grep of the affected parameter in the plan's SIs returns ≥1 match. Skill explicitly notes that `/plan-build` will operate in append-mode (per `plan-build/SKILL.md`).
@@ -176,7 +176,7 @@ Downstream — rode manualmente conforme aplicável:
 
 A. Plan artifacts:
    - docs/tasks/task-<slug>/task-<slug>.md (3 referências stale)
-   - docs/tasks/task-<slug>/context.md (1 referência)
+   - docs/tasks/task-<slug>/CONTEXT.md (1 referência)
 
 B. Código-fonte:
    - <backend-subproject>/<dependency-manifest> (script Y)

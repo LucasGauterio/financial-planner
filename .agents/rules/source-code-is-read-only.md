@@ -2,4 +2,4 @@
 
 ## Directives
 1. **Zero Code Mutations**: During the documentation reverse-engineering pipeline (`design-docs`), all operations on application source files (`src/`, `lib/`, `configs/`, `prisma/`, tests) MUST be strictly READ-ONLY.
-2. **Output Location**: All reverse-engineered documentation artifacts MUST be written to `context.md`, `CLAUDE.md`, or the `docs/` directory.
+2. **Output Location**: All reverse-engineered documentation artifacts MUST be written to `CONTEXT.md`, `CLAUDE.md`, or the `docs/` directory.

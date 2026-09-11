@@ -9,9 +9,9 @@ Planning is a pipeline of up to **five stages** that works for both project phas
 
 ```
 /research [opcional em task mode]       → docs/decisions/technical-decisions-{slug}.md
-/plan-context <NN | slug | "prose">     → docs/{phases|tasks}/{dir}/context.md
+/plan-context <NN | slug | "prose">     → docs/{phases|tasks}/{dir}/CONTEXT.md
 /plan-validate <NN | slug>              → docs/{phases|tasks}/{dir}/validation.md
-/plan-resolve <NN | slug>               → edits decisions doc + context.md + validation.md + library-refs.md
+/plan-resolve <NN | slug>               → edits decisions doc + CONTEXT.md + validation.md + library-refs.md
 /plan-validate <NN | slug>              → re-run until status: clean
 /plan-build <NN | slug>                 → docs/{phases|tasks}/{dir}/{name}.md
 /plan-test-specs <NN | slug>                 → <subproject>/specs/<scenario>.plan.md
@@ -38,14 +38,14 @@ Every stage skill detects the mode from the argument format. Phase slicing means
 - **0-match (integer arg):** `"Run /research phase NN first"`
 - **≥2-match (integer arg):** `"Phase NN has multiple slices: <list>. Pass an explicit slice slug."`
 
-Phase and task modes share every artifact shape (`context.md`, `validation.md`, `library-refs.md`, `{name}.md`, `progress.md`), differing only in sources of input, one section (`## Capability Coverage` — phase-only), and a few validate checks. Only `plan-context` in task mode may bootstrap the `docs/tasks/task-{slug}/` directory; all later stages assume it already exists.
+Phase and task modes share every artifact shape (`CONTEXT.md`, `validation.md`, `library-refs.md`, `{name}.md`, `progress.md`), differing only in sources of input, one section (`## Capability Coverage` — phase-only), and a few validate checks. Only `plan-context` in task mode may bootstrap the `docs/tasks/task-{slug}/` directory; all later stages assume it already exists.
 
 ## Stage responsibilities (one-line each)
 
-- **plan-context** — consolidates sources (project-plan, decisions docs tied to the phase, prior phases, testing guide) into a lean `context.md`. Pure consolidator; **does not detect issues**; aborts on hard violations (missing/duplicate phase-scope doc).
-- **plan-validate** — reads `context.md` + the decisions doc, regenerates `validation.md` with issues by category and a `status: clean|dirty` verdict.
-- **plan-resolve** — reads `validation.md`, asks the user (batched), applies decisions to the decisions doc + patches `context.md` + marks issues resolved. Writes `library-refs.md` when a new library is decided.
-- **plan-build** — reads `context.md` (lean) and `library-refs.md`, emits the final `phase-NN-{slug}.md` artifact. Hard-blocks when validation.md is not `clean`.
+- **plan-context** — consolidates sources (project-plan, decisions docs tied to the phase, prior phases, testing guide) into a lean `CONTEXT.md`. Pure consolidator; **does not detect issues**; aborts on hard violations (missing/duplicate phase-scope doc).
+- **plan-validate** — reads `CONTEXT.md` + the decisions doc, regenerates `validation.md` with issues by category and a `status: clean|dirty` verdict.
+- **plan-resolve** — reads `validation.md`, asks the user (batched), applies decisions to the decisions doc + patches `CONTEXT.md` + marks issues resolved. Writes `library-refs.md` when a new library is decided.
+- **plan-build** — reads `CONTEXT.md` (lean) and `library-refs.md`, emits the final `phase-NN-{slug}.md` artifact. Hard-blocks when validation.md is not `clean`.
 - **plan-test-specs** — *(optional, post-build)* reads the plan artifact, derives `<subproject>/specs/<scenario>.plan.md` files for screen-wiring / controller-wiring / cross-layer SIs (in Microsoft spec-driven format). Frontend specs are consumed by `/implement` Step 3a (which loads the `playwright-cli` Skill for Playwright pattern reference, then LLM-authors the `.spec.ts`); backend specs guide LLM-authoring of E2E tests using the backend subproject's testing conventions (no external Skill load at 3a — the `testing-guide-{subproject}` Skill loaded earlier at Step 2 informs what-to-test and best practices per artifact). Skippable when the plan is legacy (no `test_specs_aware: true` frontmatter) or has no SI carrying `**Test Specs:**` field.
 
 ## Stage 5 — Test Specs (optional)
@@ -72,7 +72,7 @@ docs/
 │   └── screen-inventory-phase-NN-{slug}.progress.md  # owned by screen-inventory
 ├── phases/
 │   ├── phase-NN-{slug-a}/                  # slice A of phase NN (≥1 per NN; slicing model)
-│   │   ├── context.md                       # owned by plan-context
+│   │   ├── CONTEXT.md                       # owned by plan-context
 │   │   ├── validation.md                    # owned by plan-validate
 │   │   ├── library-refs.md                  # owned by plan-resolve (optional)
 │   │   ├── progress.md                      # owned by implement (optional)
@@ -80,7 +80,7 @@ docs/
 │   └── phase-NN-{slug-b}/                  # additional slices (optional — monolithic phases have 1)
 └── tasks/
     └── task-{slug}/
-        ├── context.md                       # owned by plan-context
+        ├── CONTEXT.md                       # owned by plan-context
         ├── validation.md                    # owned by plan-validate
         ├── library-refs.md                  # owned by plan-resolve (optional)
         ├── inventory.md                     # owned by screen-inventory (optional); read-only to plan-*
@@ -89,7 +89,7 @@ docs/
         └── task-{slug}.md                   # owned by plan-build
 ```
 
-Every artifact is **owned by exactly one stage**. Other stages may read or patch it (e.g., resolve patches context.md), but never recreate it from scratch.
+Every artifact is **owned by exactly one stage**. Other stages may read or patch it (e.g., resolve patches CONTEXT.md), but never recreate it from scratch.
 
 ## Shared convention — Slug discovery
 
@@ -125,7 +125,7 @@ Every stage skill needs the slug for its artifacts. Under the slicing model, **�
 
 ## Shared convention — Staleness via `sources_mtime`
 
-Every artifact (`context.md`, `validation.md`, `library-refs.md`) carries a `sources_mtime:` dict in its frontmatter listing every upstream file it was built from, with the source's mtime at build time.
+Every artifact (`CONTEXT.md`, `validation.md`, `library-refs.md`) carries a `sources_mtime:` dict in its frontmatter listing every upstream file it was built from, with the source's mtime at build time.
 
 **Before any stage reads a prior artifact, it checks `sources_mtime`:**
 
@@ -197,16 +197,16 @@ Heavy reads (project-plan, globbing all decisions docs, scanning prior phases) a
 - `decisions-reader` — globs and filters decisions docs; returns a structured TD index.
   - Phase mode: filter by `NN ∈ related_phases`.
   - Task mode: filter by filename match on the task's own decisions doc (if it exists).
-- `decisions-detail-reader` — extracts `**Recommendation**` prose + `**Libraries**` for each decided TD; output is embedded in context.md's `## Decisions Detail` section. Same mode-aware filter as `decisions-reader`.
+- `decisions-detail-reader` — extracts `**Recommendation**` prose + `**Libraries**` for each decided TD; output is embedded in CONTEXT.md's `## Decisions Detail` section. Same mode-aware filter as `decisions-reader`.
 - `decisions-correlator` — (new) semantic filter across decisions docs by candidate pool.
   - Phase mode pool: `scope_type: ad-hoc` with `related_phases: []` (origin 3 — standalone and task research that would otherwise be invisible to phase mode).
   - Task mode pool: every decisions doc EXCEPT the task's own.
   Returns a ranked shortlist; the caller confirms inclusion via `AskUserQuestion`.
-- `phases-reader` — reads prior phases; returns Conventions to Match AND Inherited TD Details AND **Inherited Deferred Capabilities** (extracted from each prior phase's context.md `## Non-UI / Deferred Capabilities` rows where `Status: deferred`).
+- `phases-reader` — reads prior phases; returns Conventions to Match AND Inherited TD Details AND **Inherited Deferred Capabilities** (extracted from each prior phase's CONTEXT.md `## Non-UI / Deferred Capabilities` rows where `Status: deferred`).
   - Phase mode: all prior phases (NN-1, NN-2, …).
   - Task mode: the latest completed phase (NN where every `phase-NN-*/progress.md` reports `Status: completed`). Sliced phases count as completed only when ALL slices are done.
 - `plan-reader` — extracts target phase + neighbors from project-plan.md. **Only dispatched in phase mode** (project-plan.md is phase-exclusive).
-- `inventory-digest-reader` — reads the screen inventory file and returns a compact digest for embedding in context.md's `## UI Inventory` section (includes `### UI ↔ Capability Join`, `### Server-connected Components`, `### Open Questions from Inventory` verbatim).
+- `inventory-digest-reader` — reads the screen inventory file and returns a compact digest for embedding in CONTEXT.md's `## UI Inventory` section (includes `### UI ↔ Capability Join`, `### Server-connected Components`, `### Open Questions from Inventory` verbatim).
   - Phase mode: slug-exact lookup at `docs/inventories/screen-inventory-phase-NN-{slug}.md` (no wildcard). Caller must pass `slug` alongside `NN`.
   - Task mode: reads `docs/tasks/task-{slug}/inventory.md`.
   - Dispatched **conditionally** — only when the inventory file exists. Absence is handled by the caller via fallback placeholder (not an error).
@@ -219,7 +219,7 @@ Dispatch them **in parallel** via the `Agent` tool with `subagent_type: <name>`.
 **When to use subagents vs direct reads:**
 
 - Subagent — a file is large (>100 lines) OR multiple similar files need filtering OR the main thread only needs a distilled summary.
-- Direct Read — a file is small enough to fit in a single bounded Read AND the main thread needs its structure (e.g., you are about to Edit it — Read is a prerequisite). `context.md` exception: read in full per stage despite size — single read beats scattered TD reads.
+- Direct Read — a file is small enough to fit in a single bounded Read AND the main thread needs its structure (e.g., you are about to Edit it — Read is a prerequisite). `CONTEXT.md` exception: read in full per stage despite size — single read beats scattered TD reads.
 
 ## Shared convention — Read strategy rules
 
@@ -269,7 +269,7 @@ Decisions docs with `scope_type: phase` MAY exist in multiples per NN (slices). 
 - Every `scope_type: ad-hoc` doc whose `related_phases` contains NN.
 - Sibling phase-scope docs listed in this slice's `depends_on_slices` (via inheritance — see Phase slicing section).
 
-Both phase-scope and ad-hoc docs contribute TDs to the `Decisions Index` in `context.md`. TD references use the form `{slug}/TD-NN` — the slug part disambiguates across source docs (phase-scope slices AND ad-hoc docs).
+Both phase-scope and ad-hoc docs contribute TDs to the `Decisions Index` in `CONTEXT.md`. TD references use the form `{slug}/TD-NN` — the slug part disambiguates across source docs (phase-scope slices AND ad-hoc docs).
 
 **Term — `task-sem-research`** (used across `plan-context`, `plan-validate`, `plan-resolve`, `plan-build`): a task created via `/plan-context {slug}` (or higher-level entry) **without** a prior `/research` dispatch — so `docs/decisions/technical-decisions-{slug}.md` does not exist. The pipeline detects this via the absence of the file and emits placeholder sections (e.g., `## Decisions Index` empty, `## Decisions Detail` placeholder); `plan-resolve` may resolve it inline by creating the decisions doc on the fly when the user answers an `MD-N` issue. This is a recognized branch, not an error.
 
@@ -290,7 +290,7 @@ When a slice `S` depends on sibling `T`, pipeline stages that inherit from `T` r
 
 ### Sibling-restamp sequencing (slicing migration)
 
-When a previously-built sibling `T`'s decisions doc frontmatter is mutated (e.g., adding `covers_capabilities` during slicing migration), `T`'s `context.md` / `validation.md` / phase artifact all carry `sources_mtime` entries that become stale. **Restamp `T` BEFORE planning any dependent slice `S`**: run `/plan-context T` to refresh `T`'s `context.md` with the new mtime. Skipping this step causes `S`'s first `/plan-context S` to record a fresh stamp for `T`'s `context.md` that is then immediately invalidated when `T` is later restamped, forcing a redundant rerun of `/plan-context S`. The pipeline self-corrects (staleness detection works), but the extra rerun is avoidable by restamping siblings first.
+When a previously-built sibling `T`'s decisions doc frontmatter is mutated (e.g., adding `covers_capabilities` during slicing migration), `T`'s `CONTEXT.md` / `validation.md` / phase artifact all carry `sources_mtime` entries that become stale. **Restamp `T` BEFORE planning any dependent slice `S`**: run `/plan-context T` to refresh `T`'s `CONTEXT.md` with the new mtime. Skipping this step causes `S`'s first `/plan-context S` to record a fresh stamp for `T`'s `CONTEXT.md` that is then immediately invalidated when `T` is later restamped, forcing a redundant rerun of `/plan-context S`. The pipeline self-corrects (staleness detection works), but the extra rerun is avoidable by restamping siblings first.
 
 ### Phase-level coverage gate (advisory/hard split)
 
@@ -339,7 +339,7 @@ Registered values:
 
 | Value | Owner (writes) | Readers (preflight aborts) | Meaning | Clearance |
 |-------|----------------|----------------------------|---------|-----------|
-| `partial-awaiting-inventory` | `plan-context` Step 0.5 option (a), task mode only | `plan-validate` Step 4.5, `plan-build` Step 3.5 | context.md was written with `## Scope` only so `screen-inventory` can read scope prose; pipeline awaiting `/screen-inventory {slug}` + `/plan-context {slug}` rerun to fully populate | Removed automatically when `/plan-context` rerun overwrites context.md end-to-end |
+| `partial-awaiting-inventory` | `plan-context` Step 0.5 option (a), task mode only | `plan-validate` Step 4.5, `plan-build` Step 3.5 | CONTEXT.md was written with `## Scope` only so `screen-inventory` can read scope prose; pipeline awaiting `/screen-inventory {slug}` + `/plan-context {slug}` rerun to fully populate | Removed automatically when `/plan-context` rerun overwrites CONTEXT.md end-to-end |
 
 Parsing obligation for readers is documented in each stage's SKILL.md (the preflight step that resolves `kind:` also captures `state:` in the same bounded-frontmatter read). The preflight position of the state-marker check sits immediately after the `kind:` resolution step and before any body read, so partial artifacts are detected early with a dedicated actionable message (not masked by later "section missing" aborts).
 
@@ -349,8 +349,8 @@ Stage-specific fields (`status`, `issue_count`, `issues`, `libs`, …) are docum
 
 Planning artifacts:
 
-- **Phase mode (in `docs/phases/phase-NN-{slug}/`):** `context.md`, `validation.md`, `phase-NN-{slug}.md`.
-- **Task mode (in `docs/tasks/task-{slug}/`):** `context.md`, `validation.md`, `task-{slug}.md`.
+- **Phase mode (in `docs/phases/phase-NN-{slug}/`):** `CONTEXT.md`, `validation.md`, `phase-NN-{slug}.md`.
+- **Task mode (in `docs/tasks/task-{slug}/`):** `CONTEXT.md`, `validation.md`, `task-{slug}.md`.
 
 Both follow the minimum frontmatter shape above.
 
@@ -362,9 +362,9 @@ Both follow the minimum frontmatter shape above.
 
 ## Conventions inherited from existing phase docs
 
-The format of the final planning artifact — `phase-NN-{slug}.md` or `task-{slug}.md` — (Step Implementations, Technical Specifications, Dependency Map, Deliverables) is established by `docs/phases/phase-01-base-setup/phase-01-base-setup.md`. `plan-build` replicates this format regardless of mode. Cross-phase conventions (Portuguese prose + English identifiers, per-TD traceability via inline backticked refs, SI template structure, etc.) propagate through `context.md`'s `## Inherited Conventions` section: `phases-reader` extracts them from prior phases (reading each phase's `context.md`, with a fallback to a `## Conventions to Match` section in the phase doc for legacy phases that still carry one), and `plan-context` flattens them into the current phase's (or task's) `## Inherited Conventions`. Final artifacts never emit a conventions section themselves — inheritance flows through `context.md`.
+The format of the final planning artifact — `phase-NN-{slug}.md` or `task-{slug}.md` — (Step Implementations, Technical Specifications, Dependency Map, Deliverables) is established by `docs/phases/phase-01-base-setup/phase-01-base-setup.md`. `plan-build` replicates this format regardless of mode. Cross-phase conventions (Portuguese prose + English identifiers, per-TD traceability via inline backticked refs, SI template structure, etc.) propagate through `CONTEXT.md`'s `## Inherited Conventions` section: `phases-reader` extracts them from prior phases (reading each phase's `CONTEXT.md`, with a fallback to a `## Conventions to Match` section in the phase doc for legacy phases that still carry one), and `plan-context` flattens them into the current phase's (or task's) `## Inherited Conventions`. Final artifacts never emit a conventions section themselves — inheritance flows through `CONTEXT.md`.
 
-When UI is in scope, the same format contract for the final artifact applies: `UI Contracts` and `UI ↔ API Traceability Matrix` subsections in Technical Specifications follow the templates under `.claude/skills/plan-build/templates/tech-specs/` (`ui-contracts.md`, `traceability-matrix.md`). Cross-phase UI conventions (component naming, reuse patterns, routing conventions) propagate through `context.md`'s `## Inherited Conventions` section like any other convention — `phases-reader` extracts them as-is.
+When UI is in scope, the same format contract for the final artifact applies: `UI Contracts` and `UI ↔ API Traceability Matrix` subsections in Technical Specifications follow the templates under `.claude/skills/plan-build/templates/tech-specs/` (`ui-contracts.md`, `traceability-matrix.md`). Cross-phase UI conventions (component naming, reuse patterns, routing conventions) propagate through `CONTEXT.md`'s `## Inherited Conventions` section like any other convention — `phases-reader` extracts them as-is.
 
 ## What lives here vs. in stage skills
 

@@ -1,66 +1,26 @@
-# AGENTS.md
+# AGENTS.md / CLAUDE.md — FinancialPlanner
 
-This document provides instructions for AI Agents (Antigravity, Claude Code, Cursor, Codex, Windsurf) working in the **FinancialPlanner** repository.
+This document serves as the root entrypoint for AI Agents (Claude Code, Antigravity, Cursor, Codex, Windsurf) working in **FinancialPlanner**.
+
+> 📖 **Single Source of Truth Notice**:
+> To eliminate duplication across configuration files, authoritative repository context, workflows, environment setup, Git conventions, documentation-first policies, and validation procedures are maintained in [`CONTEXT.md`](CONTEXT.md).
+> All AI Agents MUST read [`CONTEXT.md`](CONTEXT.md) at the start of a session or when planning tasks.
 
 ---
 
 ## 🚀 Quick Reference & Commands
 
-- **Dev Server**: `npm run dev` (starts Vite dev server at `http://localhost:5173`)
+- **Dev Server**: `npm run dev` (run ONLY when explicitly requested by user; starts Vite at `http://localhost:5173`)
 - **Build**: `npm run build` (builds production bundle via Vite into `dist/`)
 - **Preview**: `npm run preview`
-- **Tests**: `npm run test` (runs Vitest unit tests)
+- **Run Tests**: `npx vitest run` or `npm run test`
 - **Single Test**: `npx vitest run src/services/financialCalculations.test.js`
 
 ---
 
-## 🛠 Project Architecture & Tech Stack
+## ⚡ Core Directives
 
-- **Framework**: Vue 3 (Composition API with `<script setup>`)
-- **Build Tool**: Vite
-- **Testing**: Vitest (`@vue/test-utils`, `jsdom`)
-- **Styling**: Vanilla CSS (modern dark theme defined in `src/style.css`, scoped CSS in components; **NO TailwindCSS**)
-- **State & Storage**: IndexedDB + LocalStorage for client-side persistent storage
-- **Cryptography**: Native Web Crypto API (`window.crypto.subtle`) for PBKDF2 key derivation and AES-GCM vault encryption.
-- **Localization (i18n)**: Custom reactive i18n hook (`useI18n.js`), supporting `en-US` and `pt-BR`. Currency agnostic.
-
----
-
-## 📂 Key Directory Structure
-
-```
-FinancialPlanner/
-├── src/
-│   ├── components/      # Vue 3 UI components (PortfolioTracker.vue, etc.)
-│   ├── composables/     # Vue hooks (useAuth.js, useI18n.js, useStorage.js)
-│   ├── services/        # Core business logic & math (financialCalculations.js)
-│   ├── locales/         # Translation dictionaries (en-US.js, pt-BR.js)
-│   └── style.css        # Core design system tokens & dark theme
-├── docs/                # Feature & function documentation
-├── .agents/             # AI agent rules & skills
-│   ├── rules/           # Scoped guardrails (security, i18n, vue-composition)
-│   └── skills/          # Custom workflow skills
-└── .claude/             # Claude Code CLI native configurations
-```
-
----
-
-## ⚠️ Mandatory Agent Guidelines
-
-1. **Zero-Trust Security & Encryption**:
-   - Data stored in IndexedDB/LocalStorage MUST be encrypted via `AES-GCM` using the user's Master Password key.
-   - NEVER use `v-html` to render user inputs (prevents XSS).
-   - Component state reads/writes must handle vault lock/unlock lifecycle safely (`useAuth.js`).
-
-2. **Business Logic Separation**:
-   - Keep Vue components clean. Offload heavy calculations, compound interest formulas, and financial projections to pure JS functions in `src/services/financialCalculations.js`.
-   - Every function in `src/services/` MUST have a corresponding Vitest unit test.
-
-3. **Strict Bi-Lingual i18n**:
-   - User-facing text must NEVER be hardcoded.
-   - All text keys MUST exist in BOTH `src/locales/en-US.js` and `src/locales/pt-BR.js`.
-   - Format numbers, yields, and balances dynamically using `formatCurrency` or locale helpers.
-
-4. **Verification Loop**:
-   - Always verify changes by running `npm run test` before completing a task.
-   - Build bundle with `npm run build` if changing Vite configurations or core dependencies.
+1. **Consult `CONTEXT.md`**: Refer to [`CONTEXT.md`](CONTEXT.md) for full project architecture, GitFlow conventions, testing rules, and skills index.
+2. **Documentation-First Policy**: ALL feature additions, bugfixes, or architectural changes MUST start by updating/scaffolding documentation in `docs/` via available workflows before modifying source code.
+3. **Workspace Boundary (`restricao_escopo`)**: Restrict all read, edit, and execution operations strictly to `FinancialPlanner`.
+4. **Quality Gate**: Run `npx vitest run` and verify 100% test pass rate before declaring any task complete.
