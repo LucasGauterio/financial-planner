@@ -5,6 +5,6 @@ dist
 .gitignore
 .gemini
 README.md
-context.md
+CONTEXT.md
 Dockerfile
 .dockerignore

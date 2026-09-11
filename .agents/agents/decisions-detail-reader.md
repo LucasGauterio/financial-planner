@@ -1,12 +1,12 @@
 ---
 name: decisions-detail-reader
-description: Reads the decisions documents tied to a target phase or task and extracts, per decided TD, only the `**Recommendation:**` prose + `**Libraries:**` line. Returns a compact `## Decisions Detail for Phase NN` / `## Decisions Detail for Task {slug}` block ready for direct embedding in context.md. Use when a stage of the plan pipeline needs the per-TD prose that `/plan-build` consumes when drafting Technical actions, without loading full TD bodies into the main thread.
+description: Reads the decisions documents tied to a target phase or task and extracts, per decided TD, only the `**Recommendation:**` prose + `**Libraries:**` line. Returns a compact `## Decisions Detail for Phase NN` / `## Decisions Detail for Task {slug}` block ready for direct embedding in CONTEXT.md. Use when a stage of the plan pipeline needs the per-TD prose that `/plan-build` consumes when drafting Technical actions, without loading full TD bodies into the main thread.
 tools: Read, Grep, Glob
 ---
 
 # decisions-detail-reader
 
-Read-only subagent. Extracts only the prose the build pipeline consumes from each decided TD — `**Recommendation:**` and `**Libraries:**` — and returns a compact section the caller embeds in `context.md`.
+Read-only subagent. Extracts only the prose the build pipeline consumes from each decided TD — `**Recommendation:**` and `**Libraries:**` — and returns a compact section the caller embeds in `CONTEXT.md`.
 
 ## Input contract
 

@@ -1,6 +1,6 @@
 ---
 name: plan-build
-description: "Stage 4 of the plan pipeline (phase and task modes). Runs abort-fast preflight checks (mode detection, context.md + validation.md present and fresh, status clean, library-refs.md present if required, resume detection) and writes the final phase-NN-{slug}.md or task-{slug}.md artifact directly from the main thread. The procedure is split across companion files: phase-a.md (scaffold + Technical Specifications + pause), phase-b.md (Step Implementations + Dependency Map + Deliverables), phase-c.md (append-mode for incremental delta builds). The pause between Phase A and Phase B creates a natural review checkpoint. Use as the final stage after validation.md reports clean. Triggers: 'plan-build NN', 'plan-build <slug>', 'build the phase NN', 'build task <slug>'."
+description: "Stage 4 of the plan pipeline (phase and task modes). Runs abort-fast preflight checks (mode detection, CONTEXT.md + validation.md present and fresh, status clean, library-refs.md present if required, resume detection) and writes the final phase-NN-{slug}.md or task-{slug}.md artifact directly from the main thread. The procedure is split across companion files: phase-a.md (scaffold + Technical Specifications + pause), phase-b.md (Step Implementations + Dependency Map + Deliverables), phase-c.md (append-mode for incremental delta builds). The pause between Phase A and Phase B creates a natural review checkpoint. Use as the final stage after validation.md reports clean. Triggers: 'plan-build NN', 'plan-build <slug>', 'build the phase NN', 'build task <slug>'."
 ---
 
 # Plan Pipeline — Stage 4: Build (orchestrator)
@@ -13,7 +13,7 @@ This file is the **dispatcher**. It runs preflight gates, decides which phase to
 - `templates/screen-si.md` — Screen SI Xa/Xb templates (read on demand from Phase B when `ui_in_scope: true`).
 - `templates/tech-specs/*.md` — per-subsection Tech Specs templates (read on demand from Phase A4).
 
-This skill is **main-writes**: the main thread reads `context.md`, decomposes scope into Step Implementations, expands Technical Specifications, and writes the final artifact via incremental `Edit` calls. The runtime is **2-phase + append**, with a pause point between Technical Specifications and Step Implementations — the format of the final file is **unchanged** (`## Step Implementations` precedes `## Technical Specifications` per the canonical artifact shape; sentinelas preserve section order during the split).
+This skill is **main-writes**: the main thread reads `CONTEXT.md`, decomposes scope into Step Implementations, expands Technical Specifications, and writes the final artifact via incremental `Edit` calls. The runtime is **2-phase + append**, with a pause point between Technical Specifications and Step Implementations — the format of the final file is **unchanged** (`## Step Implementations` precedes `## Technical Specifications` per the canonical artifact shape; sentinelas preserve section order during the split).
 
 Read `plan-pipeline/SKILL.md` for shared conventions (mode detection, slug discovery, `sources_mtime` staleness, `status: clean|dirty` gate, frontmatter format).
 
@@ -33,23 +33,23 @@ Mode detection follows `plan-pipeline/SKILL.md`:
 
 ## Preflight — abort-fast checks
 
-Run in order. Every check is O(1) or bounded; no full reads of `context.md`, `library-refs.md`, or decisions docs happen here. Any failed gate aborts immediately with an actionable next-command, never falls through.
+Run in order. Every check is O(1) or bounded; no full reads of `CONTEXT.md`, `library-refs.md`, or decisions docs happen here. Any failed gate aborts immediately with an actionable next-command, never falls through.
 
 ### Gate 1 — Mode detection + slug discovery
 
 Per `plan-pipeline/SKILL.md`. Output is `mode`, `identifier` (NN or slug), `slug`, `{target_dir}`, `{target_path}`.
 
-### Gate 2 — context.md existence
+### Gate 2 — CONTEXT.md existence
 
-Check `{target_dir}/context.md`. Abort with `"context.md not found for {phase NN | task {slug}}. Run /plan-context <arg> first."` if missing.
+Check `{target_dir}/CONTEXT.md`. Abort with `"CONTEXT.md not found for {phase NN | task {slug}}. Run /plan-context <arg> first."` if missing.
 
-### Gate 3 — context.md frontmatter kind match
+### Gate 3 — CONTEXT.md frontmatter kind match
 
-Bounded Read of the top `---` block. **Parse the full frontmatter into memory** — capture all standard fields (`kind`, `name`, `sources_mtime`) AND any transient-state markers (`state:` per `plan-pipeline/SKILL.md`'s Artifact frontmatter format). Infer `kind` per the reading rules in `plan-pipeline/SKILL.md` (rules 1–4). The inferred kind must match the detected input mode. Mismatch aborts with: `"context.md is a {inferred} artifact but you ran plan-build in {detected} mode."` Legacy phase artifacts with `phase:` integer and no `kind:` are accepted as phase mode via the `name:` prefix rules. Keep the parsed frontmatter in memory — downstream gates and Phase A/B/C reuse it without re-reading.
+Bounded Read of the top `---` block. **Parse the full frontmatter into memory** — capture all standard fields (`kind`, `name`, `sources_mtime`) AND any transient-state markers (`state:` per `plan-pipeline/SKILL.md`'s Artifact frontmatter format). Infer `kind` per the reading rules in `plan-pipeline/SKILL.md` (rules 1–4). The inferred kind must match the detected input mode. Mismatch aborts with: `"CONTEXT.md is a {inferred} artifact but you ran plan-build in {detected} mode."` Legacy phase artifacts with `phase:` integer and no `kind:` are accepted as phase mode via the `name:` prefix rules. Keep the parsed frontmatter in memory — downstream gates and Phase A/B/C reuse it without re-reading.
 
-### Gate 3.5 — Partial context.md detection (Decisão #28, task mode only)
+### Gate 3.5 — Partial CONTEXT.md detection (Decisão #28, task mode only)
 
-Reuse the frontmatter already parsed in Gate 3. If `state: partial-awaiting-inventory` is present → abort: `"context.md for task {slug} is partial (state: partial-awaiting-inventory — plan-context wrote minimum scope-only context for screen-inventory to read). Run /screen-inventory {slug} to create inventory, then rerun /plan-context {slug} to complete context.md before building."`. **No additional reads** — reuses Gate 3's parsed frontmatter.
+Reuse the frontmatter already parsed in Gate 3. If `state: partial-awaiting-inventory` is present → abort: `"CONTEXT.md for task {slug} is partial (state: partial-awaiting-inventory — plan-context wrote minimum scope-only context for screen-inventory to read). Run /screen-inventory {slug} to create inventory, then rerun /plan-context {slug} to complete CONTEXT.md before building."`. **No additional reads** — reuses Gate 3's parsed frontmatter.
 
 ### Gate 4 — validation.md existence
 
@@ -70,11 +70,11 @@ From the validation.md frontmatter in memory:
 
 Run:
 
-`Grep -nP '^\|.*\| decided \|.*\| [^—]' {target_dir}/context.md`
+`Grep -nP '^\|.*\| decided \|.*\| [^—]' {target_dir}/CONTEXT.md`
 
 Interpret:
 - **Zero matches** → `library_refs_required: false`.
-- **≥1 match** AND `{target_dir}/library-refs.md` missing → abort: `"Libraries are decided in context.md's Decisions Index but {target_dir}/library-refs.md is missing. Run /plan-resolve <arg> to refresh the library cache before building."`
+- **≥1 match** AND `{target_dir}/library-refs.md` missing → abort: `"Libraries are decided in CONTEXT.md's Decisions Index but {target_dir}/library-refs.md is missing. Run /plan-resolve <arg> to refresh the library cache before building."`
 - **≥1 match** AND `library-refs.md` exists → `library_refs_required: true`.
 
 The per-library coverage check happens later (Phase B step B2.5); this gate only guarantees the file exists when required.
@@ -87,21 +87,21 @@ The per-library coverage check happens later (Phase B step B2.5); this gate only
 
 ### Gate 8 — Decisions Detail sections presence
 
-Bounded grep on context.md:
+Bounded grep on CONTEXT.md:
 
-`Grep -n '^## Decisions Detail$' {target_dir}/context.md`
+`Grep -n '^## Decisions Detail$' {target_dir}/CONTEXT.md`
 
 Interpret:
-- **Zero matches** → context.md is malformed or legacy. Abort: `"context.md for {phase NN | task {slug}} is in old format (no ## Decisions Detail section). Run /plan-context <arg> to regenerate it, then retry /plan-build <arg>."`
+- **Zero matches** → CONTEXT.md is malformed or legacy. Abort: `"CONTEXT.md for {phase NN | task {slug}} is in old format (no ## Decisions Detail section). Run /plan-context <arg> to regenerate it, then retry /plan-build <arg>."`
 - **≥1 match** → proceed.
 
 Note: this check does not verify `## Inherited Decisions Detail` because it may legitimately be empty (Phase 1 with no prior phases, or task mode with no inherited phase + no correlator-confirmed docs).
 
 ### Gate 9 — Inventory staleness check (when applicable)
 
-Bounded grep on context.md:
+Bounded grep on CONTEXT.md:
 
-`Grep -n '^## UI Inventory$' {target_dir}/context.md`
+`Grep -n '^## UI Inventory$' {target_dir}/CONTEXT.md`
 
 Interpret (the four pattern tests below are mutually exclusive by token-anchor construction; order of evaluation does not matter):
 
@@ -109,7 +109,7 @@ Interpret (the four pattern tests below are mutually exclusive by token-anchor c
 - **≥1 match** — bounded read of the section body, then test the body content against two independent pattern tests:
   - **Body matches `_No screen inventory —[^_]*deferred[^_]*_`** → `ui_in_scope: deferred`; skip the staleness check (deferred state is legitimate).
   - **Body matches `_Frontend-runtime only —[^_]*_`** → `ui_in_scope: logic-only`; skip the staleness check (logic-only state is legitimate, parallel to deferred — user opted out of inventory because the phase only introduces FE-runtime architectural-transversal TDs and no UI surface). The token-anchor `_Frontend-runtime only —` is mutually exclusive with the deferred placeholder's `_No screen inventory —` token by construction (per `plan-context/SKILL.md` Step 0.5).
-  - **Body has populated digest** (neither placeholder matched) → `ui_in_scope: true`. Extract the `**Source:** \`{path}\`` line via bounded read; `stat` that path; compare against `sources_mtime` entry in context.md frontmatter for the same key. If inventory file mtime is newer → abort: `"Screen inventory at {path} has been updated since context.md was generated. Run /plan-context <arg> to regenerate."`.
+  - **Body has populated digest** (neither placeholder matched) → `ui_in_scope: true`. Extract the `**Source:** \`{path}\`` line via bounded read; `stat` that path; compare against `sources_mtime` entry in CONTEXT.md frontmatter for the same key. If inventory file mtime is newer → abort: `"Screen inventory at {path} has been updated since CONTEXT.md was generated. Run /plan-context <arg> to regenerate."`.
 
 After this gate, `ui_in_scope` is one of `true | false | deferred | logic-only` and is held in memory through every phase.
 
@@ -148,7 +148,7 @@ Branches:
 - Only `<!-- phase-a-complete -->` present (no SIs sentinela) → Phase B started and replaced the SIs sentinela (case 4); the file is mid-build but Phase B partially advanced. Fresh Phase A (Write overwrites).
 - Neither sentinela present → file is a completed prior artifact (case 5); route to **Append-mode** (Phase C) by default, OR fresh Phase A when the user passed the `--rebuild` flag.
 
-No `AskUserQuestion`, no parsing of frontmatter, no extra staleness check (staleness of `context.md` is covered by Gates 1–9 via `validation.md`).
+No `AskUserQuestion`, no parsing of frontmatter, no extra staleness check (staleness of `CONTEXT.md` is covered by Gates 1–9 via `validation.md`).
 
 ---
 
@@ -246,13 +246,13 @@ No prose preamble. No closing summary. No "Done." line beyond the structured rep
 These invariants apply across every phase. They are listed here (and only here) so any future cross-cutting change has a single place to land. The phase files reference this section by name.
 
 - **Never write the full file in a single Write call.** Incremental (scaffold → Tech Specs subsections via Edit → SI-by-SI Edits → Dep Map Edit → Deliverables Edit) is mandatory — it respects output size limits and the SI-by-SI no-lookback rule.
-- **No decisions-doc reads (TDs in memory from context.md).** All TD detail is in context.md's `## Decisions Detail` (current-scope) and `## Inherited Decisions Detail` (inherited). Any reference to a TD in Technical actions uses the Recommendation prose already in memory from whichever of A1 or B1 ran.
-- **Never re-read context.md within a phase by default.** Read once at A1 in Phase A. In Phase B, B1(a) reads context.md only on new-session resume (same-session continuation skips B1 entirely — the content is in the message log). Re-reads are the on-demand fallback documented at the end of Phase B § B1 — fire only when working memory recall fails.
+- **No decisions-doc reads (TDs in memory from CONTEXT.md).** All TD detail is in CONTEXT.md's `## Decisions Detail` (current-scope) and `## Inherited Decisions Detail` (inherited). Any reference to a TD in Technical actions uses the Recommendation prose already in memory from whichever of A1 or B1 ran.
+- **Never re-read CONTEXT.md within a phase by default.** Read once at A1 in Phase A. In Phase B, B1(a) reads CONTEXT.md only on new-session resume (same-session continuation skips B1 entirely — the content is in the message log). Re-reads are the on-demand fallback documented at the end of Phase B § B1 — fire only when working memory recall fails.
 - **Phase B Technical actions must align with Phase A Tech Specs.** Tech Specs become available to Phase B either through the message log (same-session continuation, from the A4 Edit arguments) or through B1(b) (new-session resume, bounded read of `## Technical Specifications` from `{target_path}`). Either way, B2 and B4 consume those normalized specs (Data Model field names, API Contracts shapes, Authorization Matrix rows, Error Catalog codes, UI Contracts per screen). Do not re-derive these from raw TD prose in Phase B — the only canonical surface is what Phase A wrote.
 - **Never re-read already-written SIs.** After Edit appends an SI block to the file, do not Read it back. Grep headers only if a cross-ref is needed (`Grep -n '^### SI-' {target_path}`).
-- **Do not invent TDs or conventions.** Every citation must be sourced from context.md — `## Decisions Index`, `## Decisions Detail`, `## Inherited Decisions Detail`, or `## Inherited Conventions`.
+- **Do not invent TDs or conventions.** Every citation must be sourced from CONTEXT.md — `## Decisions Index`, `## Decisions Detail`, `## Inherited Decisions Detail`, or `## Inherited Conventions`.
 - **Do not emit prose outside the template.** The artifact has a fixed shape; no meta-commentary, no "Notes for the implementer" sections beyond what the template provides.
-- **No Agent dispatch in /plan-build default path.** Reads of context.md, library-refs.md, and inventory bounded sections happen directly from the main thread. The skill may call `Skill` (e.g., `context7` MCP tool) or `AskUserQuestion` (the A5 pause, Phase C diff preview) — both are main-thread tool calls, not subagent dispatches.
+- **No Agent dispatch in /plan-build default path.** Reads of CONTEXT.md, library-refs.md, and inventory bounded sections happen directly from the main thread. The skill may call `Skill` (e.g., `context7` MCP tool) or `AskUserQuestion` (the A5 pause, Phase C diff preview) — both are main-thread tool calls, not subagent dispatches.
 - **Aborts replace writes (per Gate 10).** Gate 10 requires both `<!-- SIs will be written in Phase B -->` AND `<!-- phase-a-complete -->` to enter the resume branch. The 5 abort outcomes:
   - Abort before A3 → no file exists. Next `/plan-build <arg>` runs fresh Phase A.
   - Abort mid-A4 OR mid-A4.5 (some Tech Specs subsections written, optionally a `<!-- {rule-id}-pending -->` sentinel from a `docs/rules/plan-build/` rule abort, A4.6 didn't run, phase-a-complete absent) → next run sees only the SIs sentinela; routes to fresh Phase A; Write in A3 overwrites the half-built file (including any custom-rule sentinel). Partial Tech Specs are discarded — never read by Phase B; A4.5 re-runs all rules against the freshly-rendered Tech Specs.
@@ -283,9 +283,9 @@ These extend the rules above with append-mode-specific invariants:
 Cases (Gate 10 dispatches):
 
 1. **`/plan-build NN` with no existing artifact** → fresh Phase A (Write scaffold + Tech Specs + sentinelas + phase-a-complete), pause at A5.
-2. **`/plan-build NN` with both required sentinelas present** (`<!-- SIs will be written in Phase B -->` AND `<!-- phase-a-complete -->`) → Gate 10 skips Phase A, enters Phase B directly (resume case). B1 reloads context.md and bounded-reads Tech Specs.
+2. **`/plan-build NN` with both required sentinelas present** (`<!-- SIs will be written in Phase B -->` AND `<!-- phase-a-complete -->`) → Gate 10 skips Phase A, enters Phase B directly (resume case). B1 reloads CONTEXT.md and bounded-reads Tech Specs.
 3. **`/plan-build NN` with only the SIs sentinela** (no phase-a-complete) → Phase A errored mid-A4 in a prior run, OR a rule from `docs/rules/plan-build/` aborted in A4.5 with a `<!-- {rule-id}-pending -->` sentinel injected. Partial Tech Specs (and any custom-rule abort sentinel) are not trustworthy. Fresh Phase A overwrites.
 4. **`/plan-build NN` with only phase-a-complete** (no SIs sentinela) → Phase B started and replaced the SIs sentinela in a prior run, then errored. Fresh Phase A overwrites.
 5. **`/plan-build NN` with a fully-completed artifact (no sentinelas)** → **route to Append-mode** (Phase C) by default. To force a fresh full rebuild instead, pass the explicit `--rebuild` flag (`/plan-build NN --rebuild`) and the dispatcher falls back to fresh Phase A (the legacy "idempotent overwrite" semantics).
 
-The skill keeps no state across runs; every invocation starts from the preflight gates. Stability across reruns comes from the upstream artifacts (context.md, library-refs.md, decisions docs) being stable — not from the final artifact itself.
+The skill keeps no state across runs; every invocation starts from the preflight gates. Stability across reruns comes from the upstream artifacts (CONTEXT.md, library-refs.md, decisions docs) being stable — not from the final artifact itself.

@@ -1,14 +1,15 @@
 # Function Documentation
 
-This document serves as a comprehensive reference for the core mathematical and operational functionality abstracted throughout the Financial Planner application.
+This document serves as a comprehensive reference for the core mathematical, scheduling, and operational functionality abstracted throughout the Financial Planner application.
 
 ---
 
 ## 1. Mathematical Algorithms
 
+### 1.1 Financial Growth & Goal Algorithms
 Location: `src/services/financialCalculations.js`
 
-### `calculateCompoundInterest(principal, startingMonthlyContribution, monthlyRate, months, annualApportIncreasePercent = 0, elapsedMonthsSinceStart = 0)`
+#### `calculateCompoundInterest(principal, startingMonthlyContribution, monthlyRate, months, annualApportIncreasePercent = 0, elapsedMonthsSinceStart = 0)`
 
 Calculates the final balance and compound interest progression of an investment over a specific period of time. It supports yearly step-up increases to contributions, mimicking salary growth or adjusting for inflation organically.
 
@@ -27,7 +28,7 @@ Calculates the final balance and compound interest progression of an investment 
 
 ---
 
-### `calculateRequiredMonthlyContribution(targetAmount, principal, monthlyRate, months, annualApportIncreasePercent = 0, elapsedMonthsSinceStart = 0)`
+#### `calculateRequiredMonthlyContribution(targetAmount, principal, monthlyRate, months, annualApportIncreasePercent = 0, elapsedMonthsSinceStart = 0)`
 
 Uses a robust binary search implementation (up to 0.01 mathematical tolerance) to determine precisely what starting monthly contribution is required to hit a specific financial target across a given time scope.
 
@@ -43,6 +44,54 @@ Uses a robust binary search implementation (up to 0.01 mathematical tolerance) t
 **Returns:**
 
 - (Number): The exact required `startingMonthlyContribution` needed to mathematically solve for `targetAmount`.
+
+---
+
+### 1.2 Loan & Credit Scheduling Algorithms
+Location: `src/services/loanCalculations.js`
+
+#### `generateCreditCardInstallments(totalAmount, installmentsCount, startMonthStr, dueDay)`
+
+Generates a scheduled array of monthly installment objects for credit limit loans, dividing total amounts evenly and allocating sub-cent division remainders precisely onto the final installment to avoid floating point drift. Enforces calendar due day validation (clamping max days for shorter months and leap years).
+
+**Parameters:**
+
+- `totalAmount` (Number): Total amount lent or charged.
+- `installmentsCount` (Number): Total number of monthly installments.
+- `startMonthStr` (String): Starting month in `"YYYY-MM"` format.
+- `dueDay` (Number): Preferred day of the month for payment due dates (1–31).
+
+**Returns:**
+
+- (Array): Array of installment objects (`{ number, dueDate, amount, status, paymentDate }`).
+
+---
+
+#### `calculateCasualLoanSummary(loan)`
+
+Computes summary metrics for informal loans (friends/family), evaluating total amount lent, total repayments received, net remaining balance, and repayment progress percentage.
+
+**Parameters:**
+
+- `loan` (Object): The casual loan data object (`{ amountLent, payments }`).
+
+**Returns:**
+
+- (Object): Summary metrics (`{ totalLent, totalPaid, remainingBalance, progressPercent }`).
+
+---
+
+#### `calculateCreditLoanSummary(loan)`
+
+Computes progress metrics and identifies the next pending installment for credit card limit installment loans.
+
+**Parameters:**
+
+- `loan` (Object): The credit card loan object (`{ totalAmount, installments }`).
+
+**Returns:**
+
+- (Object): Installment metrics summary including `nextInstallment` object reference.
 
 ---
 
@@ -77,5 +126,7 @@ These files expose identical API signatures that orchestrate data persistence dy
 - `saveInvestments(data)`: Serializes and commits the investment grid array locally.
 - `getGoals()`: Returns the configured goals settings mapping.
 - `saveGoals(data)`: Serializes and saves goals array dynamically.
+- `getLoans()`: Returns the saved array of casual and credit card limit loan profiles.
+- `saveLoans(data)`: Serializes and commits the loans data array locally.
 - `getTimelineState()`: Yields the history object used to track checked-off historical timeline rows by UI layer composite keys.
 - `saveTimelineState(state)`: Persists tracking row checking state globally to maintain continuity among refresh lifecycles.

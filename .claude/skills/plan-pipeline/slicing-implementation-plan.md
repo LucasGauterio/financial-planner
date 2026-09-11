@@ -129,13 +129,13 @@ The goal is to relax the 1:1 rule and allow **N phase-scope docs per `NN`**, eac
    - plan-reader still runs for neighbors/deliverables/affected-subprojects extraction (subagent dispatch unchanged).
 3. In **Step 0.5 (UI scope detection)**:
    - Phase mode: UI signal = any bullet in `covers_capabilities` (or phase bullets, fallback) matches UI phrasing (`Tela`, `Página`, `Área`, `Login`, `UI`) OR explicit frontmatter `ui_scope: true` (future extension point; ignore if absent).
-4. In **Step 1 (dispatch subagents)**, add `phases-reader` expanded scope: subagent now accepts `depends_on_slices` and resolves sibling slice context.md + library-refs.md as inheritance source.
+4. In **Step 1 (dispatch subagents)**, add `phases-reader` expanded scope: subagent now accepts `depends_on_slices` and resolves sibling slice CONTEXT.md + library-refs.md as inheritance source.
 5. Update `sources_mtime` recording (Step 6) to include sibling slice `library-refs.md` for every entry in `depends_on_slices`.
 6. Remove the "Multiple phase-scope decisions docs" abort error text from Step 3.
 
 **Expected file:** `.claude/skills/plan-context/SKILL.md`
 
-**Tests:** Run `/plan-context auth-frontend` on this repo after all SIs complete; expect `context.md` written under `docs/phases/phase-02-auth-frontend/` inheriting from `auth-backend`.
+**Tests:** Run `/plan-context auth-frontend` on this repo after all SIs complete; expect `CONTEXT.md` written under `docs/phases/phase-02-auth-frontend/` inheriting from `auth-backend`.
 
 ---
 
@@ -200,7 +200,7 @@ The goal is to relax the 1:1 rule and allow **N phase-scope docs per `NN`**, eac
      byte-copy the current target's library-refs.md to each match.
    ```
    This is a mechanical refactor from point-resolution to glob-resolution; behavior for monolithic phases (1 slice) is byte-identical.
-2. Update **`sources_mtime` invariant** (line 255) to note that, when `depends_on_slices` is non-empty on a slice, the slice's `context.md` and `library-refs.md` both record sibling `library-refs.md` mtimes.
+2. Update **`sources_mtime` invariant** (line 255) to note that, when `depends_on_slices` is non-empty on a slice, the slice's `CONTEXT.md` and `library-refs.md` both record sibling `library-refs.md` mtimes.
 3. Mode detection slug-primary.
 
 **Expected file:** `.claude/skills/plan-resolve/SKILL.md`
@@ -325,16 +325,16 @@ The goal is to relax the 1:1 rule and allow **N phase-scope docs per `NN`**, eac
 
 ### SI-10.5. Restamp sources_mtime for already-built slices after migration
 
-**Rationale:** SI-10 mutates the frontmatter of `technical-decisions-auth-backend.md` to add `covers_capabilities`. This bumps the decisions doc's mtime. But `phase-02-auth-backend/context.md` / `validation.md` / `phase-02-auth-backend.md` all recorded the previous mtime in their `sources_mtime`. Next `/plan-*` invocation on auth-backend would abort with "stale sources_mtime, rerun /plan-context".
+**Rationale:** SI-10 mutates the frontmatter of `technical-decisions-auth-backend.md` to add `covers_capabilities`. This bumps the decisions doc's mtime. But `phase-02-auth-backend/CONTEXT.md` / `validation.md` / `phase-02-auth-backend.md` all recorded the previous mtime in their `sources_mtime`. Next `/plan-*` invocation on auth-backend would abort with "stale sources_mtime, rerun /plan-context".
 
 **Technical actions:**
 
 1. After SI-10 completes, immediately run `/plan-context auth-backend`.
-2. Expect context.md overwrite with refreshed `sources_mtime`. Because auth-backend is already built and decisions are all `decided`, the regeneration is a no-op semantically — only mtime fields shift.
-3. Do NOT rerun plan-validate / plan-build for auth-backend. The built artifact remains valid; only context.md's mtime stamps needed refresh.
+2. Expect CONTEXT.md overwrite with refreshed `sources_mtime`. Because auth-backend is already built and decisions are all `decided`, the regeneration is a no-op semantically — only mtime fields shift.
+3. Do NOT rerun plan-validate / plan-build for auth-backend. The built artifact remains valid; only CONTEXT.md's mtime stamps needed refresh.
 4. Repeat for any other phase-scope doc touched by migration (only auth-frontend if it also gains new frontmatter, but it's pending anyway so rerun is expected).
 
-**Pass criteria:** grep `auth-backend` mtime in `docs/phases/phase-02-auth-backend/context.md` frontmatter; must equal `stat` of `technical-decisions-auth-backend.md` post-SI-10.
+**Pass criteria:** grep `auth-backend` mtime in `docs/phases/phase-02-auth-backend/CONTEXT.md` frontmatter; must equal `stat` of `technical-decisions-auth-backend.md` post-SI-10.
 
 ---
 
@@ -344,7 +344,7 @@ The goal is to relax the 1:1 rule and allow **N phase-scope docs per `NN`**, eac
 
 **Technical actions:**
 
-1. `/plan-context auth-frontend` — expect `docs/phases/phase-02-auth-frontend/context.md` written with:
+1. `/plan-context auth-frontend` — expect `docs/phases/phase-02-auth-frontend/CONTEXT.md` written with:
    - `## Inherited Decisions Detail` containing `auth-backend/TD-*` entries (via `depends_on_slices`).
    - `## UI Inventory` populated from `screen-inventory-phase-02-auth-frontend.md` (after SI-10 step 0 renames it from the legacy `cadastro-login-conta` filename).
    - `## Capability Coverage` listing only auth-frontend's declared capabilities.
@@ -393,7 +393,7 @@ SIs 02 through 08 are parallel-independent after SI-01 lands. SIs 09 agent edits
 - **`depends_on_slices` cycle detection.** Two slices can't mutually depend on each other. Not covered in the grilling; recommend adding a preflight cycle check in `plan-context` Step 0.5 (abort if cycle detected).
 - **Inventory file naming collision** — **RESOLVED in SI-10 step 0** (rename chosen over fallback — consistency wins). Today the inventory for phase 02 is `screen-inventory-phase-02-cadastro-login-conta.md` (uses the project-plan.md title as slug). Post-slicing, the naming convention is `screen-inventory-phase-02-{slice-slug}.md`. SI-10 step 0 renames `cadastro-login-conta` → `auth-frontend` (+ `.progress.md` sibling) at migration time.
 - **Cross-layer TD ordering constraint in slice DAG.** A Cross-layer TD decided late (in a downstream slice) may logically impact earlier slices that are already built. Example: auth-backend built + status: completed → user plans auth-frontend → decides Cross-layer TD about contract format → should have changed auth-backend's API but auth-backend is frozen. Not covered by any current SI. Mitigation candidates: (a) plan-validate advisory when Cross-layer TD is created in a slice whose `depends_on_slices` has built predecessors; (b) treat as user responsibility (document in plan-pipeline). Recommendation: defer to a follow-up SI — the current plan does not block on this, but users should be aware.
-- **Migration breaks phase-02-auth-backend's completed state** — **RESOLVED in SI-10.5.** Adding `covers_capabilities` to auth-backend's frontmatter mutates `sources_mtime` for downstream artifacts. Since auth-backend is already built, the next `/plan-*` on that slice would see a stale mtime mismatch. SI-10.5 restamps via `/plan-context auth-backend` rerun immediately after SI-10 — regenerates context.md with fresh mtimes without re-building.
+- **Migration breaks phase-02-auth-backend's completed state** — **RESOLVED in SI-10.5.** Adding `covers_capabilities` to auth-backend's frontmatter mutates `sources_mtime` for downstream artifacts. Since auth-backend is already built, the next `/plan-*` on that slice would see a stale mtime mismatch. SI-10.5 restamps via `/plan-context auth-backend` rerun immediately after SI-10 — regenerates CONTEXT.md with fresh mtimes without re-building.
 
 ## Execution guidance
 

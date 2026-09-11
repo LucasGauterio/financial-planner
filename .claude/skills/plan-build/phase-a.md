@@ -4,15 +4,15 @@ This file is loaded by `.claude/skills/plan-build/SKILL.md` after Gate 10 dispat
 
 Phase A writes the artifact scaffold + Technical Specifications subsections + four sentinelas, then pauses at A5 for the user to confirm continuation into Phase B.
 
-The detected `mode`, `identifier`, `slug`, `{target_dir}`, `{target_path}`, parsed context.md frontmatter (including `state:` markers), `library_refs_required`, and `ui_in_scope` are all carried forward from SKILL.md's preflight gates — Phase A does NOT re-run those checks.
+The detected `mode`, `identifier`, `slug`, `{target_dir}`, `{target_path}`, parsed CONTEXT.md frontmatter (including `state:` markers), `library_refs_required`, and `ui_in_scope` are all carried forward from SKILL.md's preflight gates — Phase A does NOT re-run those checks.
 
-## A1. Read context.md (single full read)
+## A1. Read CONTEXT.md (single full read)
 
-Read `{target_dir}/context.md` in full. This is the only full read of context.md in the entire run. All TD information (Recommendation prose + Libraries) is carried in `## Decisions Detail` (current-scope TDs) and `## Inherited Decisions Detail` (inherited TDs), both loaded during this single read and kept in working memory through Phase A and Phase B (when both phases run in the same session).
+Read `{target_dir}/CONTEXT.md` in full. This is the only full read of CONTEXT.md in the entire run. All TD information (Recommendation prose + Libraries) is carried in `## Decisions Detail` (current-scope TDs) and `## Inherited Decisions Detail` (inherited TDs), both loaded during this single read and kept in working memory through Phase A and Phase B (when both phases run in the same session).
 
-**Kind sanity-check (defensive).** Re-confirm the `kind:` inferred in Gate 3 against the now-fully-loaded frontmatter — if they disagree (should never happen, since Gate 3 already validated), abort: `"FAILED at input-parse. Written so far: none. Error: kind mismatch between context.md frontmatter ({inferred_kind}) and target_path ({path}). Next: rerun /plan-build {identifier} after reconfirming context.md was generated for the right mode."`
+**Kind sanity-check (defensive).** Re-confirm the `kind:` inferred in Gate 3 against the now-fully-loaded frontmatter — if they disagree (should never happen, since Gate 3 already validated), abort: `"FAILED at input-parse. Written so far: none. Error: kind mismatch between CONTEXT.md frontmatter ({inferred_kind}) and target_path ({path}). Next: rerun /plan-build {identifier} after reconfirming CONTEXT.md was generated for the right mode."`
 
-**ui_in_scope cross-check.** Validate that the value computed in Gate 9 still matches a fresh `Grep -n '^## UI Inventory$' {target_dir}/context.md`. On contradiction, abort: `"FAILED at input-parse. Written so far: none. Error: ui_in_scope mismatch between input ({value}) and context.md state ({detected}). Next: rerun /plan-build <arg> to recompute."`
+**ui_in_scope cross-check.** Validate that the value computed in Gate 9 still matches a fresh `Grep -n '^## UI Inventory$' {target_dir}/CONTEXT.md`. On contradiction, abort: `"FAILED at input-parse. Written so far: none. Error: ui_in_scope mismatch between input ({value}) and CONTEXT.md state ({detected}). Next: rerun /plan-build <arg> to recompute."`
 
 **Subproject CLAUDE.md reads.** For each subproject listed under `**Affected subprojects:**` in `## Scope` (excluding any listed under `**Deferred subprojects:**`), if `{subproject}/CLAUDE.md` exists, Read it in full. It is the source-of-truth for Deliverables commands and environment conventions (Docker wrappers, npm scripts, readiness checks). If the file does not exist, skip silently.
 
@@ -55,7 +55,7 @@ Build a per-subsection in-memory list of applicable TD refs for use in A4.
 
 ## A3. Write scaffold with sentinela placeholders
 
-Write `{target_path}` with the full skeleton via a single `Write` call. Populate `sources_mtime` by running `stat -c '%y' <file>` via Bash for each source listed in context.md's `sources_mtime` and recording ISO-8601 timestamps.
+Write `{target_path}` with the full skeleton via a single `Write` call. Populate `sources_mtime` by running `stat -c '%y' <file>` via Bash for each source listed in CONTEXT.md's `sources_mtime` and recording ISO-8601 timestamps.
 
 **Frontmatter emission rules:**
 
@@ -66,7 +66,7 @@ Write `{target_path}` with the full skeleton via a single `Write` call. Populate
 **Objective derivation:**
 
 - **Phase mode:** synthesize one sentence from `## Scope` — `Phase name`, `Deliverables`, and the `Capabilities` bullets (keep verbatim capability language where possible).
-- **Task mode:** copy the `## Scope` prose from context.md verbatim as the Objective body. Do not paraphrase — the task's Objective IS its Scope prose.
+- **Task mode:** copy the `## Scope` prose from CONTEXT.md verbatim as the Objective body. Do not paraphrase — the task's Objective IS its Scope prose.
 
 Scaffold shape:
 
@@ -76,10 +76,10 @@ kind: {phase | task}
 name: {phase-NN-{slug} | task-{slug}}
 test_specs_aware: true
 sources_mtime:
-  {target_dir}/context.md: "ISO-8601-timestamp"
+  {target_dir}/CONTEXT.md: "ISO-8601-timestamp"
   {target_dir}/library-refs.md: "ISO-8601-timestamp"  # only if present
   docs/decisions/technical-decisions-{slug}.md: "ISO-8601-timestamp"  # if exists
-  # one per decisions doc listed in context.md's sources_mtime
+  # one per decisions doc listed in CONTEXT.md's sources_mtime
 ---
 
 # {Phase NN — {Phase Name} | {Task Title}}
@@ -87,7 +87,7 @@ sources_mtime:
 ## Objective
 
 {phase mode: one-sentence summary synthesized from `## Scope`.
- task mode: the `## Scope` prose from context.md verbatim.}
+ task mode: the `## Scope` prose from CONTEXT.md verbatim.}
 
 ---
 
@@ -125,7 +125,7 @@ Decide which spec subsections apply, then for each one in **canonical order (Dec
 1. `### Data Model` — when entities are new/modified.
 2. `### API Contracts` — when HTTP endpoints are exposed. May contain a **backend tier** (Scope-driven, per § A2) and/or a **BFF tier** (join-driven, per § A2's "`### API Contracts` — BFF tier" rule); emit whichever tiers apply, both under the single `### API Contracts` heading (canonical position 2). Append `#### Validation Rules` nested at the end when validation rules are broad enough to warrant a dedicated subsection; otherwise inline under each endpoint.
 3. `### Authorization Matrix` — when behavior depends on auth/roles.
-4. `### Error Catalog` — when there are domain-specific error scenarios. The first HTTP-exposing phase in a subproject also defines the error response format (established at first appearance, then inherited by subsequent phases via `## Inherited Conventions` in context.md).
+4. `### Error Catalog` — when there are domain-specific error scenarios. The first HTTP-exposing phase in a subproject also defines the error response format (established at first appearance, then inherited by subsequent phases via `## Inherited Conventions` in CONTEXT.md).
 5. `### Events/Messages` — when there are queues / async processing.
 6. `### UI Contracts` — emitted only when `ui_in_scope: true`. One `#### Screen: {name}` subsection per screen from `## UI Inventory → UI ↔ Capability Join`.
 7. `### Frontend Runtime` — emitted when ≥1 TD with `Renders in: frontend-runtime` (explicit OR default-by-inference) AND `ui_in_scope ∈ {true, logic-only}`. One `#### {td-slug}/TD-NN — {topic}` subsection per applicable TD, populated via the template at `.claude/skills/plan-build/templates/tech-specs/frontend-runtime.md`.
@@ -179,7 +179,7 @@ After A4 finishes (or after the decision to skip A4 entirely) and **before** mar
 1. `Glob docs/rules/plan-build/*.md`. If empty → skip A4.5; proceed to A4.6.
 2. For each file in alphabetic order:
    a. Bounded-read frontmatter. If `status: disabled`, skip silently.
-   b. Full Read + follow body. The body has access to `context.md` (in memory from A1), the plan file `{target_path}` (in memory after A4), and the disk (Bash, Read, Grep, Glob, Edit).
+   b. Full Read + follow body. The body has access to `CONTEXT.md` (in memory from A1), the plan file `{target_path}` (in memory after A4), and the disk (Bash, Read, Grep, Glob, Edit).
    c. Hard-fail rules abort: the body injects `<!-- {rule-id}-pending -->` into the plan file (Edit anchored on `## Dependency Map`) **before** emitting `FAILED at step-4-{rule-id}. Written so far: scaffold + Technical Specifications + <!-- {rule-id}-pending -->. Error: ... Next: ...`. Phase A then exits — A4.6 does NOT run; `<!-- phase-a-complete -->` is NOT injected. Gate 10 case 3 (SKILL.md) detects any `<!-- *-pending -->` on the next invocation (SIs sentinel present + phase-a-complete absent) and routes through fresh Phase A1.
    d. Advisory rules log to terminal but do NOT abort.
 
@@ -200,7 +200,7 @@ This sentinel is the positive signal Gate 10 reads on rerun to confirm Phase A a
 
 After Tech Specs are written, dispatch `AskUserQuestion` with two options:
 
-- **Continue now (Phase B in this session)** — Read `.claude/skills/plan-build/phase-b.md` and proceed immediately to Phase B; the in-memory context.md from A1 carries over, no re-reads. Phase B's B1 step is a no-op in this same-session continuation path.
+- **Continue now (Phase B in this session)** — Read `.claude/skills/plan-build/phase-b.md` and proceed immediately to Phase B; the in-memory CONTEXT.md from A1 carries over, no re-reads. Phase B's B1 step is a no-op in this same-session continuation path.
 - **Stop here (resume later)** — exit cleanly; emit the partial-artifact message defined in SKILL.md § "Output contract → Phase A pause".
 
 If the user chose "Continue now" → Read `phase-b.md` and fall through into Phase B in the same run.

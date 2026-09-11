@@ -1,6 +1,6 @@
 # Tech Spec subsection — Error Catalog
 
-Applies when there are domain-specific error scenarios. **Convention:** the first HTTP-exposing phase in a subproject also defines the error response shape (established at first appearance, inherited by subsequent phases via `## Inherited Conventions` in context.md).
+Applies when there are domain-specific error scenarios. **Convention:** the first HTTP-exposing phase in a subproject also defines the error response shape (established at first appearance, inherited by subsequent phases via `## Inherited Conventions` in CONTEXT.md).
 
 ````markdown
 ### Error Catalog
