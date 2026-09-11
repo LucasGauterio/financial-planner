@@ -23,7 +23,7 @@ The user invokes via slash command. The argument is **optional free text**:
 Examples of well-formed free-text:
 
 - `/plan-rule-author "preciso de uma regra plan-validate hard-fail que detecta openapi.json com endpoints não mencionados em nenhum decisions doc inherited"`
-- `/plan-rule-author "build-time advisory: avisar quando uma seção rendered cita um arquivo que não foi listado em _Source files:_ do context.md"`
+- `/plan-rule-author "build-time advisory: avisar quando uma seção rendered cita um arquivo que não foi listado em _Source files:_ do CONTEXT.md"`
 - `/plan-rule-author "side-effect resolve: quando uma TD é decidida com Option Z, sincroniza a entry correspondente em library-refs.md"`
 
 If the argument is just a phase reference (`phase NN`, `phase-NN-slug`) — abort: `"This skill authors rules under docs/rules/. For phase research, use /research <phase>; for plan validation, /plan-validate <scope>."`
@@ -63,13 +63,13 @@ Which dispatch point does this rule belong to?
 Pick by (a) WHEN your rule's inputs exist and (b) WHAT it should do:
 
   1. plan-validate — pre-build coherence check on source-of-truth files (decisions docs,
-     context.md, openapi.json, inventory). Emits IC into validation.md for the user to fix.
+     CONTEXT.md, openapi.json, inventory). Emits IC into validation.md for the user to fix.
        · hard-fail → flips `status: dirty`; /plan-build refuses to run until /plan-resolve closes it.
                      Pick when shipping with the finding present would corrupt downstream work.
        · advisory  → goes to `advisories:`; /plan-build proceeds. Pick when the finding is
                      informational (e.g., gaps that only matter on the last slice).
 
-  3. plan-resolve — deterministic side-effect on decisions doc / context.md / library-refs.md.
+  3. plan-resolve — deterministic side-effect on decisions doc / CONTEXT.md / library-refs.md.
      Writes edits directly (no IC, no user review).
      Pick when the job is to PROPAGATE or SYNC after another decision (apply a Revisions block,
      refresh a library cache, mirror a frontmatter flip).
@@ -202,7 +202,7 @@ Ask in one turn:
 Two body sections to draft:
 
   1. Inputs — which files / sections / variables does this rule read?
-     List every artifact the predicate touches: context.md sections (`## Scope`,
+     List every artifact the predicate touches: CONTEXT.md sections (`## Scope`,
      `_Source files:_`, `## Decisions Detail`...), the just-rendered plan file at
      {target_path} (build-time only), on-disk files like openapi.json or decisions
      docs (cite by path or by template `{subproject}/openapi.json`), and any in-memory
@@ -484,7 +484,7 @@ This split exists because the abort flow is too verbose to nest inside the contr
 
 - **Prefix:** Side-effect; does not emit IC.
 - **Severity:** side-effect.
-- **Destination:** {describe what the rule edits — decisions doc / context.md / library-refs.md}; appended summary line to host's next-command output.
+- **Destination:** {describe what the rule edits — decisions doc / CONTEXT.md / library-refs.md}; appended summary line to host's next-command output.
 ```
 
 ### Suppressions — plan-validate (hard-fail or advisory)
@@ -492,7 +492,7 @@ This split exists because the abort flow is too verbose to nest inside the contr
 ```markdown
 ## Suppressions
 
-1. Read `{target_dir}/suppressions.md` if present; no-op silently if absent. (`{target_dir}` is the host scope dir — `docs/phases/phase-NN-{slug}/` in phase mode or `docs/tasks/task-{slug}/` in task mode; resolved by the host from context.md `kind` + `name`.)
+1. Read `{target_dir}/suppressions.md` if present; no-op silently if absent. (`{target_dir}` is the host scope dir — `docs/phases/phase-NN-{slug}/` in phase mode or `docs/tasks/task-{slug}/` in task mode; resolved by the host from CONTEXT.md `kind` + `name`.)
 2. For each entry under `suppressions:` whose `id` matches `{PREFIX}-N`, add the ID to the per-rule suppressed set. Missing/malformed entries are skipped silently.
 3. Filter emissions against the suppressed set. Honored IDs render in `validation.md`'s `## Active Suppressions` instead of `## Findings`.
 ```

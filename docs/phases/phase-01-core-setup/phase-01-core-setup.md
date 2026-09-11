@@ -8,14 +8,18 @@ Establish the core Vue 3 Composition API infrastructure, Vite build toolchain, V
 
 ## Step Implementations (SIs)
 
-### SI-01: Vue 3 + Vite Setup
-- Verify `package.json` dependencies and Vite configuration.
-- Target files: `vite.config.js`, `package.json`.
+### SI-01: Vue 3 + Vite Build & Test Toolchain
+- Verify Vite configuration and Vitest test runner setup.
+- Target files:
+  - [`vite.config.js`](file:///G:/Projects/FinancialPlanner/vite.config.js#L1-L20)
+  - [`package.json`](file:///G:/Projects/FinancialPlanner/package.json#L1-L26)
 - Tests: `npx vitest run`.
 
 ### SI-02: Styling System & Tokens
-- Establish CSS custom properties and modern dark theme layout tokens in `src/style.css`.
-- Target files: `src/style.css`.
+- Establish CSS custom properties, dark theme layout tokens, and micro-animations.
+- Target files:
+  - [`src/style.css`](file:///G:/Projects/FinancialPlanner/src/style.css#L1-L150)
+- Tests: `npm run build`.
 
 ## Deliverables
 - Functional Vue 3 SPA build toolchain.

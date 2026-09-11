@@ -4,14 +4,14 @@ This file is loaded by `.claude/skills/plan-build/SKILL.md` after Gate 10 dispat
 
 Phase B runs in two scenarios with **different B1 cost profiles**:
 
-- **Same-session continuation** — user picked "Continue now" in A5. `context.md` was fully read at A1 in the same conversation, and each Tech Spec subsection was emitted as an `Edit` `new_string` argument during A4 → both are present in the message log. **B1 is a no-op**; the model proceeds directly to B2 with the inherited working memory.
+- **Same-session continuation** — user picked "Continue now" in A5. `CONTEXT.md` was fully read at A1 in the same conversation, and each Tech Spec subsection was emitted as an `Edit` `new_string` argument during A4 → both are present in the message log. **B1 is a no-op**; the model proceeds directly to B2 with the inherited working memory.
 - **New-session resume** — Gate 10 detected the sentinelas; the model entered Phase B fresh with no Phase A working memory. **B1(a) and B1(b) are both mandatory.**
 
 ## B1. Load Phase B inputs (only on new-session resume)
 
 Skip this entire step in same-session continuation. On new-session resume, run both sub-reads:
 
-(a) **`{target_dir}/context.md`** — single full read. Loads `## Decisions Detail` and `## Inherited Decisions Detail` (B4's TD lookups), the scope sections (`## Capability Coverage` + capability bullets in phase mode; `## Scope` prose in task mode — B2's decomposition), the `**Affected subprojects:**` field within `## Scope` (B6's Deliverables command parameterization), and `## Testing Requirements` (per-subproject test command hints for B6).
+(a) **`{target_dir}/CONTEXT.md`** — single full read. Loads `## Decisions Detail` and `## Inherited Decisions Detail` (B4's TD lookups), the scope sections (`## Capability Coverage` + capability bullets in phase mode; `## Scope` prose in task mode — B2's decomposition), the `**Affected subprojects:**` field within `## Scope` (B6's Deliverables command parameterization), and `## Testing Requirements` (per-subproject test command hints for B6).
 
 (b) **`## Technical Specifications` from `{target_path}`** — bounded read of the section Phase A wrote. Locate via `Grep -n '^## Technical Specifications$\|^## Dependency Map$' {target_path}` to get the start and end line numbers (Dep Map heading always sits immediately after Tech Specs, even when its body is still the sentinela). `Read` the line range between them. This loads the materialized Data Model entities, API Contracts endpoints + request/response shapes, Authorization Matrix rows, Error Catalog `errorCode`s, Events/Messages payloads, and (when present) UI Contracts per screen + Traceability Matrix.
 
@@ -19,11 +19,11 @@ The Tech Specs from (b) are the **canonical concrete surface** for B2 and B4 —
 
 If `## Technical Specifications` does not exist in the artifact (Phase A skipped it because no subsection applied AND `ui_in_scope: false` — rare backend-foundations-only case), skip (b).
 
-**On-demand re-read fallback (defensive).** If during B2/B4/B6 the model finds itself unable to recall content that should be in working memory (e.g., a `## Decisions Detail` entry for a cited TD ref is not retrievable; a Tech Spec subsection field needed for an SI Technical action is unclear), the model re-reads on demand from the same source it would have used in B1 (full context.md read; bounded Tech Specs read). This is the recovery path for the rare case where same-session continuation experienced context-window compaction over a long A→B run. Re-reads are not the default — they fire only when needed.
+**On-demand re-read fallback (defensive).** If during B2/B4/B6 the model finds itself unable to recall content that should be in working memory (e.g., a `## Decisions Detail` entry for a cited TD ref is not retrievable; a Tech Spec subsection field needed for an SI Technical action is unclear), the model re-reads on demand from the same source it would have used in B1 (full CONTEXT.md read; bounded Tech Specs read). This is the recovery path for the rare case where same-session continuation experienced context-window compaction over a long A→B run. Re-reads are not the default — they fire only when needed.
 
 ## B2. Decompose scope into Step Implementations (in memory)
 
-Using the scope in context.md (phase mode: `## Capability Coverage` + capability bullets; task mode: `## Scope` prose), the **Tech Specs available to Phase B** (from B1(b) on new-session resume, or from the message log on same-session continuation — see SKILL.md § "Hard rules" → "Phase B Technical actions must align with Phase A Tech Specs") — Data Model entities, API Contracts endpoints, UI Contracts screens that define the concrete implementation surface SIs must collectively cover — and the rules in this file's "Template: SI block" section, the "Template: Screen SI blocks" file (`templates/screen-si.md`, read on demand when `ui_in_scope: true`), and the "Overflow policy" section, draft the list of SIs as a plain list of titles and brief descriptions **in memory** (not in a file). One SI = one cohesive unit of work. Apply the size heuristics:
+Using the scope in CONTEXT.md (phase mode: `## Capability Coverage` + capability bullets; task mode: `## Scope` prose), the **Tech Specs available to Phase B** (from B1(b) on new-session resume, or from the message log on same-session continuation — see SKILL.md § "Hard rules" → "Phase B Technical actions must align with Phase A Tech Specs") — Data Model entities, API Contracts endpoints, UI Contracts screens that define the concrete implementation surface SIs must collectively cover — and the rules in this file's "Template: SI block" section, the "Template: Screen SI blocks" file (`templates/screen-si.md`, read on demand when `ui_in_scope: true`), and the "Overflow policy" section, draft the list of SIs as a plain list of titles and brief descriptions **in memory** (not in a file). One SI = one cohesive unit of work. Apply the size heuristics:
 
 - Maximum 5 technical actions per SI.
 - Maximum 5 test files per SI.
@@ -420,12 +420,12 @@ Nothing else. Even though the post-A4.6 sentinel is unique in the file and feels
 
 For each SI:
 
-1. **Identify the TDs cited by this SI.** The coverage table in context.md says which TDs support which capability; pick the subset that governs this SI.
+1. **Identify the TDs cited by this SI.** The coverage table in CONTEXT.md says which TDs support which capability; pick the subset that governs this SI.
 
 2. **Look up cited TDs.** For each TD ref cited by this SI, search for its `### {ref}` entry in this order:
    a. `## Decisions Detail` (current-scope TDs — phase-scope + ad-hoc tied to NN in phase mode, or the task's own TDs in task mode).
    b. `## Inherited Decisions Detail` (inherited TDs — prior phases in phase mode, or latest completed phase + correlated docs in task mode).
-   Take the first match. Extract `**Recommendation:**` prose and `**Libraries:**` value from the matched entry. Both sections are already in memory from whichever of A1 or B1 ran — no file reads needed. If the ref is found in neither section, return `FAILED at step-3-si-{N}. Written so far: {list of SIs already appended, or "scaffold + Technical Specifications"}. Error: {SI-id} cites TD <ref> which is not present in context.md's `## Decisions Detail` nor `## Inherited Decisions Detail`. Next: regenerate context.md via /plan-context with the missing entries, then retry the build.`
+   Take the first match. Extract `**Recommendation:**` prose and `**Libraries:**` value from the matched entry. Both sections are already in memory from whichever of A1 or B1 ran — no file reads needed. If the ref is found in neither section, return `FAILED at step-3-si-{N}. Written so far: {list of SIs already appended, or "scaffold + Technical Specifications"}. Error: {SI-id} cites TD <ref> which is not present in CONTEXT.md's `## Decisions Detail` nor `## Inherited Decisions Detail`. Next: regenerate CONTEXT.md via /plan-context with the missing entries, then retry the build.`
 
 3. **Consult library-refs.md** for any library cited by this SI **from a current-scope TD** (i.e., the ref matched in section `## Decisions Detail` in item 2 above). Bounded grep `^### {lib-name}` → Read the bounded range. Libraries from inherited TDs (ref matched in `## Inherited Decisions Detail`) do NOT require library-refs lookup — their Recommendation prose from that section is sufficient to write correct Technical actions. Coverage for current-scope libs is already guaranteed by B2.5, so a missing `### {lib-name}` here is a bug (B2.5 was bypassed or library-refs.md was mutated mid-run). If it happens, return `FAILED at step-3-si-{N}. Written so far: {list}. Error: library <Y> cited by {SI-id} but missing from library-refs.md. Next: rerun /plan-build <arg> after fixing library-refs.md.`
 
@@ -465,7 +465,7 @@ Generate the Deliverables flat checklist with three blocks, in order:
 
 1. **SI checklist** — one line per SI (including screen SIs with letter suffix / BE auto-split dotted sub where present).
 2. **Per-screen deliverables (when `ui_in_scope: true`)** — one line per screen from the UI Inventory join table.
-3. **Full test suites** — parameterized per subproject from context.md's Affected subprojects.
+3. **Full test suites** — parameterized per subproject from CONTEXT.md's Affected subprojects.
 
 See "Template: Deliverables" below for the exact shape and the parameterized command lines.
 

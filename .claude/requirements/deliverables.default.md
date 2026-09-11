@@ -6,7 +6,7 @@ Este perfil define os critérios de aceite padrão para a geração do pacote de
 
 ## 1. Artefatos de Entrada & Configuração Básica
 
-- [ ] **Contexto Inicial**: `CLAUDE.md` e `context.md` gerados na raiz do projeto.
+- [ ] **Contexto Inicial**: `CLAUDE.md` e `CONTEXT.md` gerados na raiz do projeto.
 - [ ] **Rastreabilidade de Fontes**: Todo requisito e decisão deve ser derivado do código-fonte existente e/ou especificações/transcrições de entrada fornecidas.
 - [ ] **Prosa Limpa**: PRD, RFC, FDD e ADRs não devem conter timestamps ou marcações inline poluentes; a rastreabilidade linha a linha fica centralizada no `docs/TRACKER.md`.
 

@@ -1,11 +1,11 @@
 ---
 name: plan-validate
-description: "Stage 2 of the plan pipeline (phase and task modes). Reads context.md (which embeds `## Decisions Detail` and `## Inherited Decisions Detail` with Recommendation + Libraries per TD), detects inconsistencies, ambiguities, missing decisions, dependency gaps (phase mode), and inherited-constraint conflicts. Produces or regenerates validation.md with a status: clean|dirty verdict. Use after /plan-context <arg> and after each /plan-resolve <arg> cycle. Triggers: 'plan-validate NN', 'plan-validate <slug>', 'valida a fase NN', 'run validation stage'."
+description: "Stage 2 of the plan pipeline (phase and task modes). Reads CONTEXT.md (which embeds `## Decisions Detail` and `## Inherited Decisions Detail` with Recommendation + Libraries per TD), detects inconsistencies, ambiguities, missing decisions, dependency gaps (phase mode), and inherited-constraint conflicts. Produces or regenerates validation.md with a status: clean|dirty verdict. Use after /plan-context <arg> and after each /plan-resolve <arg> cycle. Triggers: 'plan-validate NN', 'plan-validate <slug>', 'valida a fase NN', 'run validation stage'."
 ---
 
 # Plan Pipeline — Stage 2: Validate
 
-Inspect context.md for coherence issues. Emit a fresh `validation.md` with per-section issue IDs and a `status: clean|dirty` verdict. Preserve the history of resolved issues across reruns.
+Inspect CONTEXT.md for coherence issues. Emit a fresh `validation.md` with per-section issue IDs and a `status: clean|dirty` verdict. Preserve the history of resolved issues across reruns.
 
 Read `plan-pipeline/SKILL.md` for shared conventions (mode detection, issue IDs, `sources_mtime`, staleness abort, frontmatter format, read strategy). This file references them without repeating.
 
@@ -22,27 +22,27 @@ One argument: the target phase number `NN` (integer, phase mode) OR a task slug 
    - On ≥2 matches with integer arg: `"Phase NN has multiple slices: <list>. Pass an explicit slice slug."`
    - Slug-primary: when a slice slug is passed directly, lookup resolves the single matching phase-scope doc; only 0-match aborts apply.
 
-3. **context.md existence**. If `docs/{phases|tasks}/{dir}/context.md` does not exist, abort: `"context.md not found for {phase NN | task {slug}}. Run /plan-context <arg> first."`
+3. **CONTEXT.md existence**. If `docs/{phases|tasks}/{dir}/CONTEXT.md` does not exist, abort: `"CONTEXT.md not found for {phase NN | task {slug}}. Run /plan-context <arg> first."`
 
-4. **context.md frontmatter kind check**. Bounded-read the frontmatter. **Parse the full frontmatter into memory** — capture all standard fields (`kind`, `name`, `sources_mtime`) AND any transient-state markers (`state:` per `plan-pipeline/SKILL.md`'s Artifact frontmatter format). Infer `kind` per the rules in `plan-pipeline/SKILL.md` (rule 1 → `kind:`; rule 2 → `name:` prefix `task-`; rule 3/4 → `name:` prefix `phase-`). Must match the detected input mode. If mismatch, abort: `"context.md is a {inferred} artifact but you ran plan-validate in {detected} mode. Check the argument and retry."`. Keep the parsed frontmatter in memory — Step 4.5 and Step 5 reuse it without re-reading.
+4. **CONTEXT.md frontmatter kind check**. Bounded-read the frontmatter. **Parse the full frontmatter into memory** — capture all standard fields (`kind`, `name`, `sources_mtime`) AND any transient-state markers (`state:` per `plan-pipeline/SKILL.md`'s Artifact frontmatter format). Infer `kind` per the rules in `plan-pipeline/SKILL.md` (rule 1 → `kind:`; rule 2 → `name:` prefix `task-`; rule 3/4 → `name:` prefix `phase-`). Must match the detected input mode. If mismatch, abort: `"CONTEXT.md is a {inferred} artifact but you ran plan-validate in {detected} mode. Check the argument and retry."`. Keep the parsed frontmatter in memory — Step 4.5 and Step 5 reuse it without re-reading.
 
-4.5. **Partial context.md detection (Decisão #28, task mode only).** From the frontmatter just read in step 4, if `state: partial-awaiting-inventory` is present, abort immediately: `"context.md for task {slug} is partial (state: partial-awaiting-inventory — plan-context wrote minimum scope-only context for screen-inventory to read). Run /screen-inventory {slug} to create inventory, then rerun /plan-context {slug} to complete context.md."` This check runs before any body read of context.md — do not try to validate a partial artifact.
+4.5. **Partial CONTEXT.md detection (Decisão #28, task mode only).** From the frontmatter just read in step 4, if `state: partial-awaiting-inventory` is present, abort immediately: `"CONTEXT.md for task {slug} is partial (state: partial-awaiting-inventory — plan-context wrote minimum scope-only context for screen-inventory to read). Run /screen-inventory {slug} to create inventory, then rerun /plan-context {slug} to complete CONTEXT.md."` This check runs before any body read of CONTEXT.md — do not try to validate a partial artifact.
 
-5. **context.md staleness** (shared convention). For each key in context.md's `sources_mtime`, `stat` the source and compare. If any source is newer than recorded → abort: `"context.md is stale relative to {source}. Run /plan-context <arg> to regenerate, then retry /plan-validate <arg>."`
+5. **CONTEXT.md staleness** (shared convention). For each key in CONTEXT.md's `sources_mtime`, `stat` the source and compare. If any source is newer than recorded → abort: `"CONTEXT.md is stale relative to {source}. Run /plan-context <arg> to regenerate, then retry /plan-validate <arg>."`
 
 6. **Prior validation.md** (optional). If `validation.md` already exists, read its frontmatter to recover the `issues:` list. The markdown body will be fully regenerated; the frontmatter preserves the audit trail.
 
 ## Scope of reads
 
-Per shared convention, this stage reads **only** `context.md`. It does not re-read project-plan.md, prior phase docs, decisions docs, or testing-guide skills — those were consolidated into context.md by stage 1.
+Per shared convention, this stage reads **only** `CONTEXT.md`. It does not re-read project-plan.md, prior phase docs, decisions docs, or testing-guide skills — those were consolidated into CONTEXT.md by stage 1.
 
 > **Load-bearing invariant — DO NOT extend this stage to cover specs / SIs.** plan-validate has NO knowledge of `**Test Specs:**` fields, `test_specs_aware: true` frontmatter, `<subproject>/specs/*.plan.md` files, or any `/plan-test-specs` machinery. Spec-related gates live exclusively in `/plan-test-specs` (delta report — Stage 5) and `/implement` preflight (MISSING / STALE / PENDING TEST SPECS aborts). Extending plan-validate to cover specs would create asymmetric responsibility between Stage 2 (validate) and Stage 5 (specs) — plan-validate would have to read artefacts não-existentes na sua timeline (specs só existem após Stages 3-5 rodarem). This invariant is documented in `docs/plan-spec-driven-test-skill.md` § "NO CHANGE — `.claude/skills/plan-validate/SKILL.md`" and was a deliberate decision of the 2026-05-02 grill session (Q10).
 
-- **context.md** — Read in full. Contains all TD information needed for the coherence checks: `## Decisions Index`, `## Decisions Detail` (current-scope TDs), `## Inherited Decisions Detail` (inherited TDs), `## Inherited Conventions`, `## Inherited Deferred Capabilities` (informational-only), `## Testing Requirements`, **plus `## Capability Coverage` in phase mode only** (omitted entirely in task mode), **plus `## UI Inventory` (present-only when UI scope detected)** and **`## Non-UI / Deferred Capabilities` (always emitted in context.md regenerated post-integration — empty or populated; omitted in partial context.md per Decisão #28, which aborts this stage anyway via preflight state marker detection). **Legacy context.md pre-integration may lack `## Non-UI / Deferred Capabilities`** — treated as empty by this stage; absence never fires a false issue.
+- **CONTEXT.md** — Read in full. Contains all TD information needed for the coherence checks: `## Decisions Index`, `## Decisions Detail` (current-scope TDs), `## Inherited Decisions Detail` (inherited TDs), `## Inherited Conventions`, `## Inherited Deferred Capabilities` (informational-only), `## Testing Requirements`, **plus `## Capability Coverage` in phase mode only** (omitted entirely in task mode), **plus `## UI Inventory` (present-only when UI scope detected)** and **`## Non-UI / Deferred Capabilities` (always emitted in CONTEXT.md regenerated post-integration — empty or populated; omitted in partial CONTEXT.md per Decisão #28, which aborts this stage anyway via preflight state marker detection). **Legacy CONTEXT.md pre-integration may lack `## Non-UI / Deferred Capabilities`** — treated as empty by this stage; absence never fires a false issue.
 
 ## Procedure
 
-1. **Read context.md.** You are about to regenerate validation.md — having context.md fully in memory is the budget for this stage.
+1. **Read CONTEXT.md.** You are about to regenerate validation.md — having CONTEXT.md fully in memory is the budget for this stage.
 
 2. **Run the coherence checks** (below) AND any custom validation rules in `docs/rules/plan-validate/` (see `## Custom validation rules` further down). Each check is a focused pass; all checks AND all rules run before emitting the artifact. Built-in check IDs (`IC-N`, `AMB-N`, `MD-N`, `DG-N`, `ICC-N`, `OQ-N`, `UIG-N`, `CC-N`, `MC-cross-N`) and custom rule IDs (prefix declared in each rule body, e.g., `CSF-N`, `CXE-N`, …) all accumulate into the same `issues:` / `advisories:` lists; Step 3 (Merge with prior issue state) processes them uniformly. Accumulate findings into the applicable categories for the current mode:
 
@@ -94,7 +94,7 @@ Per shared convention, this stage reads **only** `context.md`. It does not re-re
 
    If any check raises an issue OR a decisions doc exists, fast path does not apply — normal verdict computation runs. Fast path only affects the verdict; it does not change how checks are executed.
 
-6. **Write `validation.md`** using the template below. Record `sources_mtime` for `context.md` and every decisions doc listed in context.md's `_Source files:_` subsection (or empty in task-sem-research). **If Check 8 ran (phase mode, ≥2 slices)**, additionally record `docs/project-plan.md` and every **sibling** phase-scope decisions doc (the other slices of NN, excluding self — self is already recorded via the standard `_Source files:_` path above) whose `covers_capabilities` was read by 8.a/8.b. Check 8 reads those files directly, so their mtimes must be tracked to surface staleness on subsequent reruns. Only new-to-Step-6 files (project-plan.md + siblings) require explicit addition here.
+6. **Write `validation.md`** using the template below. Record `sources_mtime` for `CONTEXT.md` and every decisions doc listed in CONTEXT.md's `_Source files:_` subsection (or empty in task-sem-research). **If Check 8 ran (phase mode, ≥2 slices)**, additionally record `docs/project-plan.md` and every **sibling** phase-scope decisions doc (the other slices of NN, excluding self — self is already recorded via the standard `_Source files:_` path above) whose `covers_capabilities` was read by 8.a/8.b. Check 8 reads those files directly, so their mtimes must be tracked to surface staleness on subsequent reruns. Only new-to-Step-6 files (project-plan.md + siblings) require explicit addition here.
 
 ## Coherence checks
 
@@ -105,7 +105,7 @@ Compare the scope against the TDs listed in `## Decisions Index`:
 > **Note (decisions history model):** an `IC-N` does NOT always require a Supersede or new TD. When the user resolves the issue in `/plan-resolve` and the chosen option matches the existing decided letter (parameter/prose drift only), the resolution is classified as **Append revision** and `/plan-resolve` appends a `**Revisions:**` block to the existing TD instead of flipping its `Decision:` field. See `plan-resolve/SKILL.md` § "Per-issue action classification" → "Append revision to TD-YY". `/decide` is the alternative front-door for the same primitive when the user starts from a free-text need rather than from a validation issue. Validate's job here is unchanged — emit the IC-N; resolve decides the primitive.
 
 
-- **Phase mode:** compare each capability bullet from `## Scope` against decided TDs. (Legacy context.md may use `## Phase Scope` — accept either heading during transition; the canonical heading is `## Scope`.)
+- **Phase mode:** compare each capability bullet from `## Scope` against decided TDs. (Legacy CONTEXT.md may use `## Phase Scope` — accept either heading during transition; the canonical heading is `## Scope`.)
 - **Task mode:** compare the prose `## Scope` paragraph against decided TDs semantically.
 
 Flag:
@@ -168,7 +168,7 @@ Fires when **all** of the following hold:
 2. Mode is **phase mode** (task mode skips this check — tasks assume contract strategy was decided in a prior phase).
 3. No TD (current-scope OR inherited) with `Scope: Cross-layer | Repo-wide` covers contract-sync strategy.
 
-**Keyword heuristic (tech-agnostic)** applied to TWO context.md sources per TD:
+**Keyword heuristic (tech-agnostic)** applied to TWO CONTEXT.md sources per TD:
 - (a) **Topic column** of `## Decisions Index` table (value derived from TD heading `## TD-NN: [Decision name]` by decisions-reader during plan-context assembly; there is NO `**Topic:**` literal field in the TD itself per `research/SKILL.md:230`).
 - (b) **`**Recommendation:**` prose** of `## Decisions Detail` (current-scope) AND `## Inherited Decisions Detail` (inherited).
 
@@ -206,8 +206,8 @@ Inherited TD suppression: if phase 01 (or any prior phase) already has a matchin
 
 **Inventory open questions (when `## UI Inventory` is populated):**
 
-- Read `### Open Questions from Inventory` sub-block inside `## UI Inventory` (already in context.md via inventory-digest-reader). Each bullet becomes an OQ-N with summary verbatim and resolution hint: `"Resolution: resolve via /plan-resolve <arg>, which will present AskUserQuestion for this item."`. Distinct from OQ-N emitted from pending TDs.
-- **Invariant preserved:** zero reads of the inventory file — `inventory-digest-reader` pre-processed the block into the digest in `context.md`.
+- Read `### Open Questions from Inventory` sub-block inside `## UI Inventory` (already in CONTEXT.md via inventory-digest-reader). Each bullet becomes an OQ-N with summary verbatim and resolution hint: `"Resolution: resolve via /plan-resolve <arg>, which will present AskUserQuestion for this item."`. Distinct from OQ-N emitted from pending TDs.
+- **Invariant preserved:** zero reads of the inventory file — `inventory-digest-reader` pre-processed the block into the digest in `CONTEXT.md`.
 
 ### Check 7 — UI Coverage Gap (`UIG-N`)
 
@@ -300,9 +300,9 @@ name: phase-NN-{slug} | task-{slug}
 status: clean | dirty
 issue_count: {number of open issues in this revision}
 sources_mtime:
-  docs/{phases|tasks}/{dir}/context.md: "ISO-8601-timestamp"
+  docs/{phases|tasks}/{dir}/CONTEXT.md: "ISO-8601-timestamp"
   docs/decisions/technical-decisions-{slug}.md: "ISO-8601-timestamp"   # if exists
-  # one per decisions doc listed in context.md's _Source files:_ subsection
+  # one per decisions doc listed in CONTEXT.md's _Source files:_ subsection
 issues:
   - id: AMB-1
     status: open
@@ -392,17 +392,17 @@ If any category has no open issues, still include the heading and render `_None.
 
 ## Hard rules
 
-- **Do not edit decisions docs or context.md.** This stage is read-only on upstream artifacts. Writes go only to `validation.md`.
+- **Do not edit decisions docs or CONTEXT.md.** This stage is read-only on upstream artifacts. Writes go only to `validation.md`.
 - **Do not ask the user questions.** If information is needed to classify an issue, phrase the issue as a question under the appropriate category — `plan-resolve` will surface it to the user.
 - **Do not invent issues** to fill categories. Empty categories are normal and healthy.
 - **Always preserve resolved issues** in the frontmatter and the `## Resolved Issues` section — never re-number, never drop. Audit trail is load-bearing.
-- **No decisions-doc reads.** This stage reads only context.md. The preflight staleness check ensures context.md reflects the current state of all source docs.
-- **No staleness auto-regeneration.** If context.md is stale, abort — do not dispatch subagents.
+- **No decisions-doc reads.** This stage reads only CONTEXT.md. The preflight staleness check ensures CONTEXT.md reflects the current state of all source docs.
+- **No staleness auto-regeneration.** If CONTEXT.md is stale, abort — do not dispatch subagents.
 - **Task mode — `MD-N` narrowed.** Only "decision required by scope that no TD resolves" fires. No "uncovered bullet" sub-type applies (there are no capability bullets in task-mode scope).
 - **Task mode — `DG-N` never fires.** The dependency-gap concept belongs to phase lineage, which does not apply to tasks.
 - **Task mode — the `MD-N ≥ 2` advisory is informational only.** It does NOT block `status: clean` when all other checks pass. Fast path + advisory are independent: fast path triggers only when `MD-N` is zero; advisory triggers when `MD-N ≥ 2`.
 - **UIG-N fires only when `## UI Inventory` is populated.** Skip entirely when inventory absent or deferred. Never fabricate UIG-N for phases without UI scope.
-- **Zero inventory-file reads.** All UI information needed for validate (join table, server-connected components, open questions) is pre-processed into `## UI Inventory` by `inventory-digest-reader`. Invariant "validate reads only context.md" preserved.
+- **Zero inventory-file reads.** All UI information needed for validate (join table, server-connected components, open questions) is pre-processed into `## UI Inventory` by `inventory-digest-reader`. Invariant "validate reads only CONTEXT.md" preserved.
 - **Do not classify UIG-N as a subcategory of MD-N or DG-N.** Distinct category with distinct resolution paths (per the principle that each category maps to distinct resolution semantics).
 - **Advisories never flip `status`.** `MC-cross-N` is tracked under the `advisories:` frontmatter array and rendered under `## Cross-slice Advisories`; it is informational and does NOT block `plan-build`. Only hard-error issues (including `CC-N`) flip `status` to `dirty`.
 - **Check 8 is suppressed for monolithic phases.** When `count(phase-scope docs for NN) == 1` — the common case for today's pipeline — skip Check 8 entirely. No `CC-N` and no `MC-cross-N` are emitted, and the `## Cross-slice Advisories` / `## Capability Consistency` sections are omitted from the body. Prevents advisory spam during first-slice bootstrap.
@@ -413,6 +413,6 @@ If any category has no open issues, still include the heading and render `_None.
 Rerunning after `plan-resolve` is the canonical flow. The new run:
 
 - Drops open issues that the prior `issues:` frontmatter marked `resolved` via `resolve`.
-- Re-runs all 7 checks (phase mode) / 6 checks (task mode) against the now-updated context.md.
+- Re-runs all 7 checks (phase mode) / 6 checks (task mode) against the now-updated CONTEXT.md.
 - May find new issues introduced by the resolution (e.g., a newly decided TD conflicts with an inherited constraint).
 - Updates `status` accordingly — only reaches `clean` when every check is empty.

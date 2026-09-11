@@ -125,7 +125,7 @@ The `"use client"` directive, the imports, the `useState(() => ...)` for stable 
 ## Build rules
 
 - **One subsection per applicable TD.** Each TD with `Renders in: frontend-runtime` (explicit or default-by-inference) AND in scope per A2 filter gets its own `#### {td-slug}/TD-NN — {topic}` block.
-- **TD ordering** — same order as `## Decisions Detail` in context.md (phase-scope TDs first, then ad-hoc).
+- **TD ordering** — same order as `## Decisions Detail` in CONTEXT.md (phase-scope TDs first, then ad-hoc).
 - **Inherited TDs** — render as the one-line reference per `phase-a.md` § A2; do NOT materialize the 5 fields. Materialization lives only in the slice that decided the TD.
 - **`Aplicação` adoption-target form depends on `ui_in_scope`:** when `true`, references `## UI Inventory → ### Server-connected Components` by composition (not by relisting); excludes/boundaries are the only per-pattern content. When `logic-only`, the component reference form is not applicable (no `### Server-connected Components` sub-block exists in the placeholder body) — use the capability or file-pattern reference form documented in the `Aplicação` field above.
 - **Field-name verbatim invariant (F2 protection)** applies to:
