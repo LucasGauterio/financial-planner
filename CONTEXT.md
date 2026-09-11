@@ -62,14 +62,14 @@ When a user requests a new feature, bugfix, or architectural refactoring:
 
 When a user requests a new feature or a new implementation phase (e.g. Phase 07), execute the following end-to-end 9-step workflow:
 
-1. **Update System Design Docs (`design-docs`)**:
-   - Update `docs/PRD.md` (`/design-docs-prd`), `docs/RFC.md` (`/design-docs-rfc`), `docs/FDD.md` (`/design-docs-fdd`), and `docs/adrs/` (`/design-docs-adr`) to capture system-level requirements and C4/Mermaid architecture diagrams.
-2. **Amend Master Greenfield Roadmap (`docs/project-plan.md`)**:
+1. **Amend Master Greenfield Roadmap (`docs/project-plan.md`)**:
    - Add a `### Phase NN: <name>` section to `docs/project-plan.md` detailing capability bullets, target file links (`file.ext#Lnn-Lmm`), and subprojects. This is the authoritative source of truth for phase capability discovery.
-3. **Discover Technical Decisions (`/research phase NN`) [MANDATORY PRECONDITION]**:
-   - Run `/research phase NN` to generate `docs/decisions/technical-decisions-{slug}.md`. **This MUST be executed BEFORE `/plan-context`**. `/plan-context` relies on the decisions doc as its primary input.
+2. **Discover Technical Decisions (`/research phase NN`)**:
+   - Run `/research phase NN` to generate `docs/decisions/technical-decisions-{slug}.md`.
+3. **AUTOMATIC SYSTEM DESIGN-DOCS ACTIVATION (`design-docs`) [MANDATORY & AUTOMATIC]**:
+   - Immediately after technical decisions are made, AUTOMATICALLY activate system design-docs skills: `/design-docs-prd` (`docs/PRD.md`), `/design-docs-rfc` (`docs/RFC.md`), `/design-docs-fdd` (`docs/FDD.md`), and `/design-docs-adr` (`docs/adrs/`). **DO NOT ask the user if they want to update documentation — design-docs activation is MANDATORY and AUTOMATIC before implementation.**
 4. **Consolidate Phase Context (`/plan-context NN`)**:
-   - Run `/plan-context NN` (or slug) AFTER `/research` completes to consolidate `project-plan.md` + technical decisions + prior phase conventions into `docs/phases/phase-NN-{slug}/CONTEXT.md`.
+   - Run `/plan-context NN` (or slug) AFTER design-docs are updated to consolidate `project-plan.md` + technical decisions + system design docs into `docs/phases/phase-NN-{slug}/CONTEXT.md`.
 5. **Validate Architectural Consistency (`/plan-validate NN`)**:
    - Run `/plan-validate NN` to verify consistency and produce `docs/phases/phase-NN-{slug}/validation.md` with status `clean` or `dirty`.
 6. **Resolve Open Issues (`/plan-resolve NN`)**:
