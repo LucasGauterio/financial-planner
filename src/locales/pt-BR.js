@@ -4,6 +4,7 @@ export default {
     subtitle: 'Planeje seu futuro com projeções inteligentes.'
   },
   tabs: {
+    simulations: 'Simulações',
     timeGap: 'Salto no Tempo',
     past: 'Simulador Passado',
     goal: 'Calculadora de Metas',
