@@ -1,11 +1,17 @@
-# Rule: Zero-Trust Security & Client-Side Encryption
+# Rule: Security, Zero-Trust & Gitleaks Compliance (security_zero_trust)
 
 ## Directives
-1. **Web Crypto API Encryption**:
-   - Physical storage in `IndexedDB` / `LocalStorage` MUST be encrypted client-side using `AES-GCM` with keys derived via `PBKDF2`.
-   - Never store plain text financial balances, portfolio data, or personal targets in browser storage without passing through the encryption layer (`useStorage.js`).
-2. **XSS Prevention**:
-   - NEVER use Vue's `v-html` directive to output user-supplied data or calculated strings.
-   - Sanitize any string operations before binding.
-3. **Master Password Handling**:
-   - The master password key must reside strictly in volatile memory (`ref`/`reactive` inside `useAuth.js`) and must NEVER be serialized or written to persistent disk/storage.
+1. **Secret & Key Protection**:
+   - NEVER hardcode private keys, tokens, or passwords in source code, documentation, or unit tests.
+   - Use environment variables (`.env`) and `.gitignore` sensitive files.
+
+2. **Gitleaks Compliance for Sample Keys**:
+   - When writing code snippets, mock data, or documentation examples, NEVER use high-entropy random strings, realistic API key prefixes (`pk_live_...`, `sk_live_...`, `AKIA...`, `ghp_...`), or realistic JWT hashes.
+   - ALWAYS use safe, low-entropy placeholders (e.g. `<YOUR_API_KEY>`, `your_secret_key_placeholder`, `REPLACE_WITH_YOUR_KEY`).
+
+3. **Input Sanitization & XSS Prevention**:
+   - Sanitize all user inputs before processing or binding to DOM templates.
+   - Never use unsanitized `v-html` or `dangerouslySetInnerHTML`.
+
+4. **Data Storage Encryption**:
+   - Encrypt persistent sensitive payload data before saving to browser storage or client database.
