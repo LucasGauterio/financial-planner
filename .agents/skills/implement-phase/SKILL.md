@@ -17,7 +17,7 @@ The user either points to a phase document directly (e.g., `docs/phases/phase-02
 - If multiple match, ask the user which one.
 - If the file does not exist, stop and tell the user — they likely need to run `plan-phase` first.
 
-The user may also request **continuous mode** at the start of the session with phrases like "execute tudo", "don't pause between SIs", "run all at once", "autopilot". The default mode pauses between SIs for confirmation.
+Execution is **AUTONOMOUS CONTINUOUS MODE BY DEFAULT**. The agent MUST execute all SIs sequentially and advance automatically without pausing for user confirmation or asking to proceed. Interactive review mode is **OPT-IN ONLY** when the user explicitly requests manual control (e.g., "modo interativo", "step-by-step", "pausa entre SIs"). The agent ONLY prompts the user when an unresolvable blocker occurs.
 
 ## Context — read before implementing
 

@@ -26,7 +26,7 @@ The user either points to a plan document directly (e.g., `docs/phases/phase-02-
 
 - If no file matches, stop and tell the user — they likely need to run `plan-pipeline` first.
 
-The user may also request **continuous mode** at the start of the session with phrases like "execute tudo", "don't pause between SIs", "run all at once", "autopilot". The default mode pauses between SIs for confirmation.
+Execution is **AUTONOMOUS CONTINUOUS MODE BY DEFAULT**. The agent MUST execute all SIs sequentially and advance automatically without pausing for user confirmation or asking "should I continue?". Interactive review mode (pausing between SIs or phases) is **OPT-IN ONLY** when the user explicitly requests manual control or step-by-step review (e.g., "modo interativo", "step-by-step", "pausa entre SIs"). The agent ONLY prompts the user when an unresolvable blocker or missing decision occurs.
 
 ## Context — read before implementing
 
@@ -313,7 +313,7 @@ Two write cases:
 
 **No code edits in the target subproject.** AC enforcement: `git diff --name-only HEAD -- <target-subproject>` after the SI must be empty. The plan folder lives outside `<target-subproject>` so the report file is excluded by path scope.
 
-**6. Pause for user review at Step 6 (default mode).** The user opens `frontend-drift-report.md`, optionally edits Decisions on per-component H3 sections (the file-based override mechanism — see schema § File-based user override mechanism), saves, and responds "Seguir". `/implement` then proceeds to SI-NN.Xa, which reads the (potentially user-edited) report and applies decisions verbatim.
+**6. Auto-proceed (default mode).** In default autonomous mode, `/implement` writes `frontend-drift-report.md` and immediately proceeds to SI-NN.Xa to apply decisions verbatim without pausing. Pausing for manual drift report review at Step 6 ONLY occurs if the user explicitly requested interactive review mode.
 
 ---
 
