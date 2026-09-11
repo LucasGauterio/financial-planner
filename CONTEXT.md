@@ -52,8 +52,8 @@ FinancialPlanner/
 When a user requests a new feature, bugfix, or architectural refactoring:
 1. **NEVER modify source code directly** as a first step.
 2. **Scan Existing System Documentation**: Read `docs/PRD.md`, `docs/RFC.md`, `docs/FDD.md`, `docs/TRACKER.md`, and `docs/project-plan.md`.
-3. **System Design & Roadmap Phase**: Update system design docs (`PRD.md`, `RFC.md`, `FDD.md`, `adrs/`) and master roadmap (`docs/project-plan.md`) BEFORE running technical slicing pipelines.
-4. **Execute Unified New Feature Workflow**: Follow the 9-step **New Feature & Phase Slicing Workflow** detailed in Section 4 below.
+3. **Execute Unified New Feature Workflow**: Follow the 9-step **New Feature & Phase Slicing Workflow** detailed in Section 4 below.
+4. **NO-SKIP WORKFLOW MANDATE**: AI Agents are strictly forbidden from skipping any `design-docs-*` skill (`/design-docs-prd`, `/design-docs-rfc`, `/design-docs-fdd`, `/design-docs-adr`, `/design-docs-tracker`, `/design-docs-validate`) or any pipeline stage (`/plan-context`, `/plan-validate`, `/plan-resolve`, `/plan-build`). Excuses such as "template doesn't fit the stack" or "no new architectural decision" are **STRICTLY INVALID**. All skills adapt dynamically to the target repository's stack (SPAs, client-side encryption, Vue, React, NestJS, Go, etc.). If a phase introduces no new architectural pattern, `/design-docs-adr` MUST still be executed to document pattern evaluation and explicit pattern reuse (`ADR-001`, `ADR-002`).
 5. **Obtain Alignment**: Confirm system documentation and phase plan updates before starting code implementation.
 
 ---

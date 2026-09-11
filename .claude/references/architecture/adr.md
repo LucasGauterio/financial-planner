@@ -1,100 +1,69 @@
-# Reference · ADR (Architecture Decision Record): formato MADR
+# Reference · ADR (Architecture Decision Record): Formato MADR Adaptável
 
-Guia condensado do formato MADR (Markdown Any Decision Records). Uma ADR registra **uma
-decisão arquitetural fechada**, com contexto e consequências.
+Guia do formato MADR (Markdown Any Decision Records). Uma ADR registra **uma decisão arquitetural fechada ou reuso de padrão**, com contexto e consequências. Funciona para QUALQUER stack (SPAs Vue/React, NestJS, Go, Python, etc.).
+
+---
+
+## 🛑 Regra de Execução Obrigatória (No-Skip)
+
+> **ADR é obrigatório em toda fase/feature.** Se nenhuma arquitetura nova for introduzida, a ADR de **Reuso de Padrões & Conformidade Arquitetural** DEVE ser gerada/atualizada, citando os ADRs anteriores e os arquivos reais do código com `#Lnn`.
+
+---
 
 ## Quando algo vira ADR (regra dos 3 Es)
 
-- **Estrutural**: afeta como o sistema é construído ou integrado, cruza fronteiras de módulo.
-- **Evidente**: outra pessoa vai precisar entender o "porquê" no futuro.
-- **Estável**: expectativa de durar meses ou anos, não semanas.
+- **Estrutural**: Afeta como o sistema é construído ou integrado, cruza fronteiras de módulos ou componentes.
+- **Evidente**: Qualquer desenvolvedor ou agente precisará entender o "porquê" no futuro.
+- **Estável**: Expectativa de durar meses ou anos.
 
-Se falta um dos três, não vira ADR. **ADR não é log operacional**: valores de timeout,
-formato de header, nomes de campo isolados ficam no FDD, não viram ADR, a menos que o
-parâmetro sustente uma estratégia arquitetural.
+---
 
-## Uma ADR por decisão
+## Categorias Arquiteturais por Stack
 
-Não juntar várias decisões num arquivo. Não catalogar cada regra de negócio. Decisão
-recorrente vira um ADR e referências.
+1. **Persistência & Armazenamento**:
+   - Backend: Banco SQL/Relacional, NoSQL, ORM, Migrations.
+   - Frontend SPA: IndexedDB, LocalStorage, Criptografia de Vault (AES-GCM), State Store.
+2. **Segurança, Autenticação & Criptografia**:
+   - Backend: JWT Secret, OAuth2, RBAC, Headers de Segurança.
+   - Frontend SPA: Web Crypto API (`window.crypto.subtle`), Derivação de Chaves PBKDF2, Sanitização contra XSS.
+3. **Separação de Responsabilidades**:
+   - Backend: Módulos DDD, Services, Controllers.
+   - Frontend SPA: Desacoplamento entre UI Vue/React e serviços puros de cálculo em `src/services/`.
+4. **Comunicação, Eventos & Async**:
+   - Backend: REST, gRPC, Filas/Workers, Event-Driven Architecture.
+   - Frontend SPA: Reactive i18n, Custom Composables (`useAuth`, `useStorage`), Web Workers.
+5. **Resiliência & Tratamento de Erros**:
+   - Backend: Retry com Backoff Exponencial, DLQ, Circuit Breaker.
+   - Frontend SPA: Boundaries de Erro UI, Fallbacks Reativos, Validação de Formulários.
+6. **Reuso de Padrões Existentes**:
+   - Garantia de alinhamento com convenções globais e ADRs pré-existentes.
 
-## Nomeação
+---
 
-`docs/adrs/ADR-NNN-titulo-em-kebab-case.md`, numeração sequencial.
-Ex.: `ADR-001-storage layer-no-SQL/relational database.md`, `ADR-002-retry-backoff-dlq.md`.
-
-## Formato (MADR, 7 seções, header enxuto)
+## Formato MADR (7 Seções)
 
 ```markdown
-# ADR-NNN: [título específico da decisão]
+# ADR-NNN: [título específico da decisão ou reuso de padrão]
 
 **Status:** Aceito
 **Data:** AAAA-MM-DD
-**Decisões relacionadas:** ADR-XXX, ADR-YYY   (opcional; só quando houver relação técnica real)
+**Decisões relacionadas:** ADR-001, ADR-002
 
 ## Contexto e problema
-[O problema, a motivação, as restrições e as forças em jogo no momento da decisão.
-2 a 3 parágrafos. Mostra em que cenário concreto a decisão fazia sentido. Prosa limpa,
-sem citar timestamps; a origem vai para o Tracker.]
+[O problema, a motivação e as restrições arquiteturais. 2 a 3 parágrafos.]
 
 ## Decisão
-[Qual caminho foi adotado. Direto. 1 a 2 parágrafos.]
+[Qual caminho ou padrão existente foi adotado. Direto. 1 a 2 parágrafos.]
 
 ## Alternativas consideradas
-[Pelo menos 1 alternativa real, discutida na reunião ou plausível. Para cada uma: o que
-era e por que não foi escolhida.]
-- **[Alternativa]:** [descrição]. Descartada porque [trade-off].
+- **[Alternativa 1]:** [descrição e trade-off do porquê foi descartada ou adaptada].
 
 ## Consequências
-[Efeitos da decisão, positivos e negativos, com trade-off explícito.
-- Positivas: [ganhos]
-- Negativas / limitações aceitas: [custos]
-- Impacto operacional / restrições futuras.]
+- Positivas: [ganhos de manutenibilidade, segurança ou performance]
+- Negativas / limitações aceitas: [trade-offs aceitos]
 
 ## Referências
-[3 a 5 itens. Cada arquivo do repo é **link relativo com âncora de linha** a partir de
-`docs/adrs/` (ver `.claude/rules/repo-file-links.md`):
-`[\`order.service.ts\`](../../src/modules/orders/order.service.ts#L120)`. Links para o RFC
-(`../RFC.md`) e outros ADRs (`ADR-002-....md`). SEM trechos de código, SEM timestamps.]
+- [`src/services/exampleService.js`](../../src/services/exampleService.js#L15)
+- [`docs/RFC.md`](../RFC.md)
+- [`ADR-001`](ADR-001-storage-strategy.md)
 ```
-
-Proibido no ADR: campos de header além de Status / Data / Decisões relacionadas; seções
-extras (Validação, Mais informações, Considerações futuras); trechos de código; citações
-de fonte no corpo (`[hh:mm]`); mais de 5 referências de arquivo; sugestões de trabalho
-futuro ("considerar X se..."). Alvo: 100 a 250 linhas.
-
-## O conjunto de ADRs deste project spec
-
-Cobrir no mínimo 5 das 6 decisões principais da reunião (podem virar 5 a 8 arquivos). Os
-timestamps de cada uma estão no `docs/_workbench/transcript-ledger.md`; use o ledger para
-localizar o trecho e o Tracker para materializar a origem.
-
-1. **Padrão Storage layer no SQL/relational database** (contra message queue / event stream e contra disparo síncrono).
-2. **Retry com backoff exponencial mais DLQ** (5 tentativas, 1m/5m/30m/2h/12h; tabela
-   `ERR_dead_letter` separada; replay manual por endpoint admin).
-3. **Autenticação SECURE AUTHENTICATION TOKEN com secret por endpoint** (rotação com grace period de 24h).
-4. **Garantia at-least-once com `X-Event-Id`** (dedupe do lado do cliente).
-5. **Worker em processo separado, polling de 2 s** (sem trigger de banco; single-worker,
-   ordenação por `entity_id`).
-6. **Reuso dos padrões existentes** (`AppError`, Pino, error middleware, módulo em
-   `src/modules/external integration APIs`, prefixo `ERR_`, UUID como id).
-
-Decisões secundárias que **podem** virar ADR adicional ou ficar só no FDD: snapshot do
-payload na inserção, formato do payload, timeout de 10 s, conjunto de headers.
-
-**Pelo menos 1 ADR** deve referenciar explicitamente arquivos/módulos/classes do código
-existente (o ADR de reuso é o candidato natural: cita `src/shared/errors/app-error.ts`,
-`src/shared/logger/index.ts`, `src/modules/orders/order.service.ts`, `src/app.ts`), sempre
-como link relativo com âncora de linha.
-
-## Checklist (cada ADR só está pronto quando)
-
-- [ ] Header só com Status, Data e (se houver) Decisões relacionadas.
-- [ ] As 7 seções presentes: Contexto e problema, Decisão, Alternativas consideradas
-      (mínimo 1), Consequências (positivas **e** negativas com trade-off), Referências.
-- [ ] Sem trechos de código; até 5 referências de arquivo, cada uma link relativo com
-      âncora de linha (`#Lnn`), e cada link resolvendo para um caminho real.
-- [ ] **Sem citações de fonte no corpo** (`[hh:mm]`, colchetes de timestamp).
-- [ ] Toda afirmação verificável do ADR tem linha correspondente no `docs/TRACKER.md`.
-- [ ] O conjunto cobre pelo menos 5 das 6 decisões principais; pelo menos 1 ADR referencia
-      o código real.

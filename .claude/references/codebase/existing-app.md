@@ -39,7 +39,7 @@ Padrão por domínio: `controller.ts` (RequestHandlers `try/catch → next(err)`
 - `order.repository.ts`: `list` (filtro + paginação via `$transaction([findMany, count])`),
   `findByIdWithRelations` (items+product, history asc, customer), `findById`, `deleteById`.
   `OrderWithRelations` = `Order & { items, history, customer }`.
-- `order.service.ts`:
+- `serviceModule.js`:
   - `list(query)` → `paginated(...)`.
   - `getById(id)` → `NotFoundError('Order')` se ausente.
   - `create(input, userId)` → `prisma.$transaction`: valida customer, valida todos os

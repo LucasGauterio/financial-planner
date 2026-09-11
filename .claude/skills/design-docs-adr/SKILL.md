@@ -2,56 +2,51 @@
 name: design-docs-adr
 description: >-
   Escreve os ADRs (Architecture Decision Records, formato MADR) das decisões
-  arquiteturais fechadas na reunião. Produz 5 a 8 arquivos em
-  docs/adrs/ADR-NNN-titulo-kebab.md. Primeira skill de autoria do workflow
-  design-docs; roda depois de design-docs-baseline / -spec / -ledger.
+  arquiteturais fechadas do sistema. Produz arquivos em docs/adrs/ADR-NNN-titulo-kebab.md.
+  Skill obrigatória do workflow design-docs; roda após design-docs-prd e design-docs-rfc.
+  NUNCA PODE SER IGNORADA OU PULADA.
 ---
 
-# design-docs-adr: ADRs das decisões
+# design-docs-adr: ADRs das decisões arquiteturais
+
+## 🛑 Regra Absoluta de Não-Pulo (No-Skip Mandate)
+
+> ⚠️ **NUNCA PULE ESTA SKILL**: O agente está STRICTLY PROIBIDO de pular `design-docs-adr` sob qualquer justificativa.
+> Justificativas como *"o template é para backend SQL/DLQ"*, *"é uma SPA cliente"*, ou *"não há decisão nova"* são **STRICTLY INVÁLIDAS**.
+> Se a fase/feature não introduz um padrão arquitetural inédito, a skill MUST ainda ser executada para documentar a **avaliação arquitetural e reuso explícito de padrões** (referenciando os ADRs existentes como ADR-001/ADR-002 e símbolos reais do código com âncoras `#Lnn`).
+
+---
 
 ## Insumos
 
-- `docs/_workbench/transcript-ledger.md` → seção "Decisões fechadas" + "Detalhes técnicos secundários".
-- `.claude/references/architecture/adr.md` (formato MADR, regra dos 3 Es, lista das 6
-  decisões principais).
-- `.claude/references/codebase/*` (para o ADR que referencia o código).
-- `.claude/rules/*`.
+- `docs/project-plan.md` ou transcrição/decisões da fase.
+- `.claude/references/architecture/adr.md` (formato MADR adaptável ao stack).
+- `docs/PRD.md`, `docs/RFC.md` e arquivos de código em `src/`.
+- ADRs existentes em `docs/adrs/`.
 
 ## Passos
 
-1. Do ledger, listar as decisões candidatas. Confirmar que cada uma passa nos 3 Es
-   (estrutural, evidente, estável). Descartar detalhe operacional isolado (vai pro FDD).
-2. Selecionar de 5 a 8 decisões. Cobrir **no mínimo 5 das 6 principais**:
-   storage layer no SQL/relational database; retry/backoff/DLQ; SECURE AUTHENTICATION TOKEN secret por endpoint; at-least-once com
-   `X-Event-Id`; worker separado em polling; reuso dos padrões do projeto.
-3. Numerar sequencialmente. Nome: `ADR-NNN-titulo-em-kebab-case.md`.
-4. Escrever cada ADR no formato MADR de 7 seções (ver reference). Header só Status/Data/
-   Decisões relacionadas. Sem trechos de código. ≤ 5 referências de arquivo. 100-250 linhas.
-5. No ADR de "reuso dos padrões existentes" (candidato natural), referenciar explicitamente
-   `src/shared/errors/app-error.ts`, `src/shared/logger/index.ts`,
-   `src/modules/orders/order.service.ts`, `src/app.ts`. **Pelo menos 1 ADR** precisa citar
-   o código real.
-6. **Links de arquivo (regra `repo-file-links.md`):** na seção "Referências" e em qualquer
-   menção a arquivo real, usar **link relativo a partir de `docs/adrs/`** (`../../src/...`)
-   com **âncora de linha `#Lnn`** do símbolo. Links para o RFC = `../RFC.md`; para outro
-   ADR = `ADR-00X-....md`. Não linkar caminho que ainda não existe.
-7. **Prosa limpa: nenhum ADR contém `[hh:mm]` nem colchetes de timestamp.** A origem de
-   cada afirmação vai para `docs/TRACKER.md` (gerado depois por `design-docs-tracker`).
-8. Atualizar a linha `adr` em `docs/_workbench/run-state.md`.
+1. **Mapeamento de Categorias Arquiteturais (Adaptável ao Stack)**:
+   Selecione as decisões arquiteturais relevantes para o stack real da aplicação:
+   - **Persistência & Armazenamento**: SQL/NoSQL no backend OR IndexedDB/LocalStorage com criptografia no frontend SPA.
+   - **Segurança & Criptografia**: JWT/OAuth2 no backend OR Web Crypto API (PBKDF2 / AES-GCM) no cliente.
+   - **Separação de Lógica de Negócio**: Camada de serviço DDD no backend OR módulos de serviços JS/TS puros no frontend.
+   - **Comunicação & Reatividade**: REST/GraphQL/Filas no backend OR Hooks reativos / i18n / Web Workers no frontend.
+   - **Tolerância a Falhas**: Retries/Backoff/DLQ no backend OR Fallbacks reativos e limites de UI no frontend.
+   - **Reuso de Padrões Existentes**: Avaliação de conformidade com ADRs pré-existentes (`ADR-001`, `ADR-002`) e regras do projeto.
+
+2. **Geração ou Atualização de ADR**:
+   - Nome: `docs/adrs/ADR-NNN-titulo-kebab.md`.
+   - Se for reuso de padrões existentes, gere o ADR documentando a garantia de reuso e cite símbolos reais do código (`src/...#Lnn`).
+
+3. **Formato MADR (7 seções)**:
+   - Header enxuto: Status, Data, Decisões relacionadas.
+   - Seções: Contexto e problema, Decisão, Alternativas consideradas (≥ 1), Consequências (positivas e negativas), Referências.
+
+4. **Links de Arquivo (Regra `repo-file-links.md`)**:
+   - Na seção Referências, use **links relativos com âncora de linha `#Lnn`** a partir de `docs/adrs/` (`../../src/...#Lnn`).
+   - Links para RFC (`../RFC.md`) e outros ADRs (`ADR-00X-*.md`).
 
 ## Saída
 
-`docs/adrs/ADR-001-*.md` … `docs/adrs/ADR-00N-*.md` (5 a 8 arquivos). Manter o
-`docs/adrs/README.md` existente.
-
-## Checklist antes de concluir
-
-- [ ] 5 a 8 arquivos, formato `ADR-NNN-titulo-kebab.md`.
-- [ ] Cada ADR: Status, Contexto e problema, Decisão, Alternativas consideradas (≥ 1),
-      Consequências (positivas **e** negativas com trade-off), Referências.
-- [ ] Conjunto cobre ≥ 5 das 6 decisões principais.
-- [ ] ≥ 1 ADR referencia arquivos/módulos/classes do código.
-- [ ] Sem trechos de código; ≤ 5 referências por ADR, cada uma link relativo com `#Lnn` que resolve.
-- [ ] **Sem `[hh:mm]` nem citações de fonte no corpo.**
-- [ ] Toda afirmação verificável tem linha correspondente no `docs/TRACKER.md`.
-- [ ] Nenhuma decisão inventada; nenhum item descartado/adiado como decisão.
+`docs/adrs/ADR-001-*.md` … `docs/adrs/ADR-NNN-*.md`. Manter o `docs/adrs/README.md`.
