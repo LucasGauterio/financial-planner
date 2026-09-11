@@ -1,30 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testExecutions version="1">
   <file path="src\components\GoalCalculator.test.js">
-    <testCase name="GoalCalculator.vue - renders title and inputs" duration="76" />
-    <testCase name="GoalCalculator.vue - updates target amounts correctly based on reactive properties" duration="48" />
+    <testCase name="GoalCalculator.vue - renders title and inputs" duration="61" />
+    <testCase name="GoalCalculator.vue - updates target amounts correctly based on reactive properties" duration="35" />
   </file>
   <file path="src\components\InvestmentTimeline.test.js">
-    <testCase name="InvestmentTimeline.vue - renders timeline and handles empty state properly" duration="99" />
+    <testCase name="InvestmentTimeline.vue - renders timeline and handles empty state properly" duration="103" />
   </file>
   <file path="src\components\PastInvestmentSimulator.test.js">
-    <testCase name="PastInvestmentSimulator.vue - renders the component correctly" duration="57" />
-    <testCase name="PastInvestmentSimulator.vue - calculates based on input changes" duration="48" />
+    <testCase name="PastInvestmentSimulator.vue - renders the component correctly" duration="60" />
+    <testCase name="PastInvestmentSimulator.vue - calculates based on input changes" duration="40" />
   </file>
   <file path="src\components\PortfolioTracker.test.js">
-    <testCase name="PortfolioTracker.vue - renders portfolio tracker and handles mock data" duration="249" />
+    <testCase name="PortfolioTracker.vue - renders portfolio tracker and handles mock data" duration="244" />
   </file>
   <file path="src\components\TimeGapComparator.test.js">
-    <testCase name="TimeGapComparator.vue - renders title" duration="152" />
-    <testCase name="TimeGapComparator.vue - displays the early start year logic correctly" duration="33" />
+    <testCase name="TimeGapComparator.vue - renders title" duration="132" />
+    <testCase name="TimeGapComparator.vue - displays the early start year logic correctly" duration="39" />
   </file>
   <file path="src\services\cryptoService.test.js">
-    <testCase name="cryptoService - derives a WebCrypto key from password and salt" duration="143" />
-    <testCase name="cryptoService - encrypts and decrypts JSON data payload correctly" duration="87" />
-    <testCase name="cryptoService - returns null on decryption failure with invalid key or tampered ciphertext" duration="177" />
+    <testCase name="cryptoService - derives a WebCrypto key from password and salt" duration="167" />
+    <testCase name="cryptoService - encrypts and decrypts JSON data payload correctly" duration="105" />
+    <testCase name="cryptoService - returns null on decryption failure with invalid key or tampered ciphertext" duration="129" />
   </file>
   <file path="src\services\financialCalculations.test.js">
-    <testCase name="Financial Calculations - calculates future value of past investments correctly (no principal)" duration="3" />
+    <testCase name="Financial Calculations - calculates future value of past investments correctly (no principal)" duration="2" />
     <testCase name="Financial Calculations - calculates future value with a starting principal" duration="0" />
     <testCase name="Financial Calculations - calculates future value with an annual apport increase" duration="0" />
     <testCase name="Financial Calculations - calculates required monthly contribution for a goal (no principal)" duration="1" />
@@ -37,18 +37,18 @@
     <testCase name="Loan Calculations Service - generateCreditCardInstallments - splits installments equally and handles rounding remainders on the final installment" duration="2" />
     <testCase name="Loan Calculations Service - generateCreditCardInstallments - correctly increments year and month for subsequent installments" duration="1" />
     <testCase name="Loan Calculations Service - generateCreditCardInstallments - caps due date day at max month length" duration="1" />
-    <testCase name="Loan Calculations Service - generateCreditCardInstallments - correctly handles leap years for February due days" duration="1" />
-    <testCase name="Loan Calculations Service - calculateCasualLoanSummary - calculates correct metrics with no payments" duration="0" />
+    <testCase name="Loan Calculations Service - generateCreditCardInstallments - correctly handles leap years for February due days" duration="0" />
+    <testCase name="Loan Calculations Service - calculateCasualLoanSummary - calculates correct metrics with no payments" duration="1" />
     <testCase name="Loan Calculations Service - calculateCasualLoanSummary - calculates correct metrics with multiple payments" duration="0" />
     <testCase name="Loan Calculations Service - calculateCasualLoanSummary - limits progress percent to 100 if paid amount exceeds lent amount" duration="0" />
     <testCase name="Loan Calculations Service - calculateCreditLoanSummary - calculates totals and remaining balance correctly" duration="1" />
-    <testCase name="Loan Calculations Service - calculateCreditLoanSummary - identifies the next pending installment" duration="0" />
+    <testCase name="Loan Calculations Service - calculateCreditLoanSummary - identifies the next pending installment" duration="1" />
     <testCase name="Loan Calculations Service - calculateCreditLoanSummary - returns null for nextPending if all installments are paid" duration="0" />
   </file>
   <file path="src\services\localStorageRepository.test.js">
-    <testCase name="Local Storage Repository - saves and retrieves investments" duration="2" />
+    <testCase name="Local Storage Repository - saves and retrieves investments" duration="3" />
     <testCase name="Local Storage Repository - returns empty array when no investments exist" duration="0" />
-    <testCase name="Local Storage Repository - saves and retrieves goals" duration="0" />
+    <testCase name="Local Storage Repository - saves and retrieves goals" duration="1" />
     <testCase name="Local Storage Repository - saves and retrieves timeline states" duration="0" />
   </file>
 </testExecutions>
