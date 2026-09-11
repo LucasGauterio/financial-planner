@@ -5,6 +5,14 @@ description: "Generate a technical implementation plan for a project phase. Use 
 
 # Plan Phase
 
+> ⚠️ **NO-SKIP STAGE MANDATE**: Phase planning MUST execute the full 5-stage pipeline without skipping any artifact!
+> The pipeline automatically generates ALL four artifacts in `docs/phases/phase-NN-{slug}/`:
+> 1. `CONTEXT.md` (via `/plan-context`)
+> 2. `validation.md` (via `/plan-validate`)
+> 3. `library-refs.md` (via `/plan-resolve` when libraries are decided)
+> 4. `phase-NN-{slug}.md` (via `/plan-build`)
+> Skipping `/plan-context`, `/plan-validate`, or `/plan-resolve` to generate `phase-NN-{slug}.md` directly is STRICTLY FORBIDDEN.
+
 Generate a technical implementation plan for a project phase. This document connects the general plan (what to deliver) with execution (code). It defines technical step implementations, implementation actions, dependencies, and acceptance criteria.
 
 ## Context — read before generating

@@ -40,6 +40,20 @@ Every stage skill detects the mode from the argument format. Phase slicing means
 
 Phase and task modes share every artifact shape (`CONTEXT.md`, `validation.md`, `library-refs.md`, `{name}.md`, `progress.md`), differing only in sources of input, one section (`## Capability Coverage` — phase-only), and a few validate checks. Only `plan-context` in task mode may bootstrap the `docs/tasks/task-{slug}/` directory; all later stages assume it already exists.
 
+## ⚠️ Mandatory No-Skip Stage Guarantee
+
+Every phase and task MUST execute all pipeline stages in strict sequence without skipping any artifact:
+1. `/research phase NN` -> `docs/decisions/technical-decisions-{slug}.md`
+2. System `design-docs` updates (`/design-docs-prd`, `/design-docs-rfc`, `/design-docs-fdd`, `/design-docs-adr`)
+3. `/plan-context NN` -> **MANDATORY ARTIFACT**: `docs/phases/phase-NN-{slug}/CONTEXT.md`
+4. `/plan-validate NN` -> **MANDATORY ARTIFACT**: `docs/phases/phase-NN-{slug}/validation.md`
+5. `/plan-resolve NN` -> **MANDATORY ARTIFACT**: `docs/phases/phase-NN-{slug}/library-refs.md` (when libraries are decided)
+6. `/plan-build NN` -> **MANDATORY ARTIFACT**: `docs/phases/phase-NN-{slug}/phase-NN-{slug}.md`
+7. `/plan-test-specs NN` (optional UI test spec pass)
+8. `/implement phase NN` -> Sequential code execution
+
+Skipping `/plan-context`, `/plan-validate`, or `/plan-resolve` to write `phase-NN-{slug}.md` directly is strictly forbidden!
+
 ## Stage responsibilities (one-line each)
 
 - **plan-context** — consolidates sources (project-plan, decisions docs tied to the phase, prior phases, testing guide) into a lean `CONTEXT.md`. Pure consolidator; **does not detect issues**; aborts on hard violations (missing/duplicate phase-scope doc).

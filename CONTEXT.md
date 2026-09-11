@@ -24,7 +24,7 @@ FinancialPlanner/
 │   ├── RFC.md            # Technical Architecture & Trade-offs
 │   ├── FDD.md            # Functional Design Document + Embedded Diagrams
 │   ├── TRACKER.md        # Line-level Traceability Matrix (file.ext#Lnn-Lmm)
-│   ├── phases/           # Phased implementation plan documents
+│   ├── phases/           # Phased implementation plans (each dir contains CONTEXT.md, validation.md, library-refs.md, phase-NN-{slug}.md)
 │   └── adrs/             # Architecture Decision Records (ADR-001..NNN)
 ├── AGENTS.md             # Universal agent entrypoint (points to CONTEXT.md)
 ├── CLAUDE.md             # Claude Code CLI entrypoint (points to CONTEXT.md)
