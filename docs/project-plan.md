@@ -43,3 +43,7 @@ The application follows a **Zero-Trust Client Security Architecture** using nati
 ### Phase 6: Loan Tracker & Credit Installment Schedules (`docs/phases/phase-06-loan-tracker-and-schedules/`)
 - Implement credit card limit installment scheduling (`generateCreditCardInstallments`) and casual friend loan metrics engine.
 - Target files: [`src/services/loanCalculations.js`](file:///G:/Projects/FinancialPlanner/src/services/loanCalculations.js#L1-L120), [`src/components/LoanTracker.vue`](file:///G:/Projects/FinancialPlanner/src/components/LoanTracker.vue#L1-L250).
+
+### Phase 7: Monthly Income Registration & Projections (`docs/phases/phase-07-monthly-income-tracker/`)
+- Register income sources (salary, dividends, received payments), each optionally flagged as recurring; generate a month-by-month projection list (received vs. pending) with monthly totals, projectable up to 35 years.
+- Target files: `src/services/incomeCalculations.js` (new), `src/components/IncomeTracker.vue` (new).
