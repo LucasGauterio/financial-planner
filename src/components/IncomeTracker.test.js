@@ -118,8 +118,8 @@ describe('IncomeTracker.vue', () => {
     expect(savedSources[0]).toMatchObject({ id: 's1', amount: 5500, startMonth: '2026-01' });
   });
 
-  it('clears statusOverrides when startMonth changes on edit, gated by confirm', async () => {
-    const confirmSpy = vi.spyOn(globalThis, 'confirm').mockReturnValue(true);
+  it('clears statusOverrides when startMonth changes on edit, gated by a ConfirmDialog (not window.confirm)', async () => {
+    const confirmSpy = vi.spyOn(globalThis, 'confirm');
     repository.getIncome.mockResolvedValue([
       { id: 's1', name: 'Salário', type: 'salario', amount: 5000, startMonth: '2026-01', recurring: true, statusOverrides: { '2026-01': 'received' } }
     ]);
@@ -135,14 +135,49 @@ describe('IncomeTracker.vue', () => {
     await body.find('form').trigger('submit.prevent');
     await flushPromises();
 
-    expect(confirmSpy).toHaveBeenCalled();
+    // No native dialog is ever used (dialog-implementation rule, Directive 1).
+    expect(confirmSpy).not.toHaveBeenCalled();
+    // The save is deferred until the ConfirmDialog's own Confirm button is clicked.
+    expect(repository.saveIncome).not.toHaveBeenCalled();
+
+    const confirmBtn = body.findAll('button').find(b => b.text() === 'income.form.save' && b.element.closest('.confirm-dialog-content'));
+    await confirmBtn.trigger('click');
+    await flushPromises();
+
     const savedSources = repository.saveIncome.mock.calls[0][0];
     expect(savedSources[0].statusOverrides).toEqual({});
+    expect(savedSources[0].startMonth).toBe('2026-03');
     confirmSpy.mockRestore();
   });
 
-  it('does not clear statusOverrides when only name/amount change on edit', async () => {
-    const confirmSpy = vi.spyOn(globalThis, 'confirm');
+  it('discards the parameter change but keeps other edits when the params ConfirmDialog is cancelled', async () => {
+    repository.getIncome.mockResolvedValue([
+      { id: 's1', name: 'Salário', type: 'salario', amount: 5000, startMonth: '2026-01', recurring: true, statusOverrides: { '2026-01': 'received' } }
+    ]);
+
+    const wrapper = mount(IncomeTracker, { global: i18nStub });
+    await flushPromises();
+
+    await wrapper.find('.action-icon-btn').trigger('click');
+    await flushPromises();
+
+    const body = new DOMWrapper(document.body);
+    await body.find('input[type="number"]').setValue(6000);
+    await body.find('input[type="month"]').setValue('2026-03');
+    await body.find('form').trigger('submit.prevent');
+    await flushPromises();
+
+    const cancelBtn = body.findAll('button').find(b => b.text() === 'income.form.cancel' && b.element.closest('.confirm-dialog-content'));
+    await cancelBtn.trigger('click');
+    await flushPromises();
+
+    const savedSources = repository.saveIncome.mock.calls[0][0];
+    expect(savedSources[0].startMonth).toBe('2026-01'); // param change discarded
+    expect(savedSources[0].amount).toBe(6000); // non-param edit kept
+    expect(savedSources[0].statusOverrides).toEqual({ '2026-01': 'received' }); // not cleared
+  });
+
+  it('does not open the params ConfirmDialog when only name/amount change on edit', async () => {
     repository.getIncome.mockResolvedValue([
       { id: 's1', name: 'Salário', type: 'salario', amount: 5000, startMonth: '2026-01', recurring: true, statusOverrides: { '2026-01': 'received' } }
     ]);
@@ -158,13 +193,12 @@ describe('IncomeTracker.vue', () => {
     await body.find('form').trigger('submit.prevent');
     await flushPromises();
 
-    expect(confirmSpy).not.toHaveBeenCalled();
+    expect(document.body.querySelector('.confirm-dialog-content')).toBeNull();
     const savedSources = repository.saveIncome.mock.calls[0][0];
     expect(savedSources[0].statusOverrides).toEqual({ '2026-01': 'received' });
-    confirmSpy.mockRestore();
   });
 
-  it('deletes a source after confirming in the delete modal', async () => {
+  it('deletes a source after confirming in the ConfirmDialog', async () => {
     repository.getIncome.mockResolvedValue([
       { id: 's1', name: 'Salário', type: 'salario', amount: 5000, startMonth: '2026-01', recurring: true, statusOverrides: {} }
     ]);
@@ -183,5 +217,30 @@ describe('IncomeTracker.vue', () => {
     expect(repository.saveIncome).toHaveBeenCalled();
     const savedSources = repository.saveIncome.mock.calls[0][0];
     expect(savedSources).toHaveLength(0);
+  });
+
+  it('does not delete when the delete ConfirmDialog is cancelled, and does not close on overlay click', async () => {
+    repository.getIncome.mockResolvedValue([
+      { id: 's1', name: 'Salário', type: 'salario', amount: 5000, startMonth: '2026-01', recurring: true, statusOverrides: {} }
+    ]);
+
+    const wrapper = mount(IncomeTracker, { global: i18nStub });
+    await flushPromises();
+
+    await wrapper.find('.action-icon-btn.danger').trigger('click');
+    await flushPromises();
+
+    const overlay = document.body.querySelector('.modal-overlay');
+    overlay.dispatchEvent(new Event('click', { bubbles: true }));
+    await flushPromises();
+    expect(document.body.querySelector('.confirm-dialog-content')).not.toBeNull();
+
+    const body = new DOMWrapper(document.body);
+    const cancelBtn = body.findAll('button').find(b => b.text() === 'income.form.cancel');
+    await cancelBtn.trigger('click');
+    await flushPromises();
+
+    expect(repository.saveIncome).not.toHaveBeenCalled();
+    expect(document.body.querySelector('.confirm-dialog-content')).toBeNull();
   });
 });

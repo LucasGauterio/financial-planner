@@ -202,8 +202,8 @@ describe('LoanTracker.vue', () => {
     expect(savedLoans[0].installments[0].paymentDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 
-  it('editing a credit loan schedule parameter regenerates installments after confirmation, discarding prior paid status', async () => {
-    vi.stubGlobal('confirm', vi.fn(() => true));
+  it('editing a credit loan schedule parameter regenerates installments after confirming in the ConfirmDialog (not window.confirm), discarding prior paid status', async () => {
+    const confirmSpy = vi.spyOn(globalThis, 'confirm');
 
     const loan = makeCreditLoan();
     loan.installments[0].status = 'paid';
@@ -224,11 +224,79 @@ describe('LoanTracker.vue', () => {
     await body.find('form').trigger('submit.prevent');
     await flushPromises();
 
-    expect(globalThis.confirm).toHaveBeenCalled();
-    expect(repository.saveLoans).toHaveBeenCalled();
+    // No native dialog is ever used (dialog-implementation rule, Directive 1); the save is
+    // deferred until the ConfirmDialog's own Confirm button is clicked.
+    expect(confirmSpy).not.toHaveBeenCalled();
+    expect(repository.saveLoans).not.toHaveBeenCalled();
+
+    // LoanTracker.vue calls useI18n() directly rather than consuming the injected
+    // i18nStub (see beforeEach's comment), so button text is the real en-US translation.
+    const confirmBtn = body.findAll('button').find(b => b.text() === 'Save Loan' && b.element.closest('.confirm-dialog-content'));
+    await confirmBtn.trigger('click');
+    await flushPromises();
+
     const savedLoans = repository.saveLoans.mock.calls[0][0];
     expect(savedLoans[0].installments).toEqual(generateCreditCardInstallments(300, 4, '2026-01', 10));
     expect(savedLoans[0].installments.every(inst => inst.status === 'pending')).toBe(true);
+    confirmSpy.mockRestore();
+  });
+
+  it('discards the schedule regeneration but keeps other edits when the params ConfirmDialog is cancelled', async () => {
+    const loan = makeCreditLoan();
+    loan.installments[0].status = 'paid';
+    loan.installments[0].paymentDate = '2026-01-10';
+    repository.getLoans.mockResolvedValue([loan]);
+
+    const wrapper = mount(LoanTracker, { global: i18nStub });
+    await flushPromises();
+
+    const editBtn = wrapper.findAll('.action-icon-btn')[0];
+    await editBtn.trigger('click');
+    await flushPromises();
+
+    const body = new DOMWrapper(document.body);
+    const textInputs = body.findAll('input[type="text"]');
+    await textInputs[1].setValue('TV Financing (renegotiated)'); // loanName, a non-param field
+    const numberInputs = body.findAll('input[type="number"]');
+    await numberInputs[1].setValue(4); // installmentsCount 3 -> 4
+
+    await body.find('form').trigger('submit.prevent');
+    await flushPromises();
+
+    const cancelBtn = body.findAll('button').find(b => b.text() === 'Cancel' && b.element.closest('.confirm-dialog-content'));
+    await cancelBtn.trigger('click');
+    await flushPromises();
+
+    const savedLoans = repository.saveLoans.mock.calls[0][0];
+    expect(savedLoans[0].loanName).toBe('TV Financing (renegotiated)'); // non-param edit kept
+    expect(savedLoans[0].installmentsCount).toBe(3); // schedule regen discarded
+    expect(savedLoans[0].installments[0].status).toBe('paid'); // prior paid status preserved
+  });
+
+  it('deletes a loan after confirming in the ConfirmDialog, and does not close on overlay click', async () => {
+    const loan = makeCasualLoan();
+    repository.getLoans.mockResolvedValue([loan]);
+
+    const wrapper = mount(LoanTracker, { global: i18nStub });
+    await flushPromises();
+
+    const deleteBtn = wrapper.findAll('.action-icon-btn.danger')[0];
+    await deleteBtn.trigger('click');
+    await flushPromises();
+
+    const overlay = document.body.querySelector('.modal-overlay');
+    overlay.dispatchEvent(new Event('click', { bubbles: true }));
+    await flushPromises();
+    expect(document.body.querySelector('.confirm-dialog-content')).not.toBeNull();
+
+    const body = new DOMWrapper(document.body);
+    const confirmBtn = body.findAll('button').find(b => b.text() === 'Delete Loan' && b.element.closest('.confirm-dialog-content'));
+    await confirmBtn.trigger('click');
+    await flushPromises();
+
+    expect(repository.saveLoans).toHaveBeenCalled();
+    const savedLoans = repository.saveLoans.mock.calls[0][0];
+    expect(savedLoans).toHaveLength(0);
   });
 
   it('recording a repayment on a casual loan appends it to the payments ledger', async () => {

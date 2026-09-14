@@ -84,7 +84,7 @@
     </div>
 
     <Teleport to="body">
-      <div v-if="showAddModal" class="modal-overlay" @click.self="closeAddModal">
+      <div v-if="showAddModal" class="modal-overlay">
         <div class="modal-content">
           <div class="modal-header">
             <h3>{{ form.sourceId ? t('income.editSource') : t('income.addSource') }}</h3>
@@ -129,25 +129,27 @@
       </div>
     </Teleport>
 
-    <Teleport to="body">
-      <div v-if="showDeleteConfirm" class="modal-overlay" @click.self="showDeleteConfirm = false">
-        <div class="card modal-content" style="max-width: 400px; text-align: center; padding: 2rem;">
-          <div style="font-size: 3rem; margin-bottom: 1rem; color: #ef4444;">⚠️</div>
-          <h3 style="margin-bottom: 1rem;">{{ t('income.confirmDeleteTitle') }}</h3>
-          <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.95rem;">
-            {{ t('income.confirmDelete') }}
-          </p>
-          <div style="display: flex; gap: 1rem; justify-content: center;">
-            <button class="btn btn-secondary" @click="showDeleteConfirm = false" style="flex: 1;">
-              {{ t('income.form.cancel') }}
-            </button>
-            <button class="btn" @click="confirmDeleteSource" style="flex: 1; background: #dc2626; border-color: #dc2626; color: white;">
-              {{ t('income.deleteSource') }}
-            </button>
-          </div>
-        </div>
-      </div>
-    </Teleport>
+    <ConfirmDialog
+      :show="showDeleteConfirm"
+      :title="t('income.confirmDeleteTitle')"
+      :message="t('income.confirmDelete')"
+      :confirm-text="t('income.deleteSource')"
+      :cancel-text="t('income.form.cancel')"
+      danger
+      @confirm="confirmDeleteSource"
+      @cancel="cancelDeleteSource"
+    />
+
+    <ConfirmDialog
+      :show="showParamsConfirm"
+      :title="t('income.confirmAlterParamsTitle')"
+      :message="t('income.confirmAlterParams')"
+      :confirm-text="t('income.form.save')"
+      :cancel-text="t('income.form.cancel')"
+      danger
+      @confirm="confirmParamsChange"
+      @cancel="cancelParamsChange"
+    />
   </div>
 </template>
 
@@ -155,6 +157,7 @@
 import { ref, reactive, computed, onMounted, inject } from 'vue';
 import { repository } from '../services/indexedDbRepository';
 import { generateIncomeProjection, calculateMonthlyTotals } from '../services/incomeCalculations';
+import ConfirmDialog from './ConfirmDialog.vue';
 
 const { t, formatCurrency, locale } = inject('i18n');
 
@@ -162,6 +165,8 @@ const sources = ref([]);
 const showAddModal = ref(false);
 const showDeleteConfirm = ref(false);
 const sourceToDelete = ref(null);
+const showParamsConfirm = ref(false);
+const pendingParamsChange = ref(null);
 const horizonOptions = [1, 5, 10, 35];
 const horizonYears = ref(1);
 
@@ -219,16 +224,18 @@ async function saveSource() {
       const existing = sources.value[index];
       const isParamsChanged = existing.startMonth !== form.startMonth || existing.recurring !== form.recurring;
 
-      if (isParamsChanged) {
-        if (confirm(t('income.confirmAlterParams'))) {
-          existing.startMonth = form.startMonth;
-          existing.recurring = form.recurring;
-          existing.statusOverrides = {};
-        }
-      }
+      // Directive 1/2 (dialog-implementation rule): the parameter-change warning is a Vue
+      // dialog (ConfirmDialog), not window.confirm(); non-parameter fields still apply
+      // immediately regardless of the pending confirmation, mirroring LoanTracker's guard.
       existing.name = form.name;
       existing.type = form.type;
       existing.amount = form.amount;
+
+      if (isParamsChanged) {
+        pendingParamsChange.value = { index, startMonth: form.startMonth, recurring: form.recurring };
+        showParamsConfirm.value = true;
+        return;
+      }
     }
   } else {
     sources.value.push({
@@ -246,6 +253,29 @@ async function saveSource() {
   closeAddModal();
 }
 
+async function confirmParamsChange() {
+  const pending = pendingParamsChange.value;
+  if (pending) {
+    const existing = sources.value[pending.index];
+    existing.startMonth = pending.startMonth;
+    existing.recurring = pending.recurring;
+    existing.statusOverrides = {};
+  }
+  showParamsConfirm.value = false;
+  pendingParamsChange.value = null;
+  await repository.saveIncome(sources.value);
+  closeAddModal();
+}
+
+async function cancelParamsChange() {
+  // Per TD-02: on cancel, the parameter change is discarded but the non-parameter
+  // fields already applied in saveSource() are kept and persisted.
+  showParamsConfirm.value = false;
+  pendingParamsChange.value = null;
+  await repository.saveIncome(sources.value);
+  closeAddModal();
+}
+
 function deleteSource(source) {
   sourceToDelete.value = source;
   showDeleteConfirm.value = true;
@@ -258,6 +288,11 @@ async function confirmDeleteSource() {
     showDeleteConfirm.value = false;
     sourceToDelete.value = null;
   }
+}
+
+function cancelDeleteSource() {
+  showDeleteConfirm.value = false;
+  sourceToDelete.value = null;
 }
 
 // Builds the `${sourceId}:${YYYY-MM}` -> status map expected by generateIncomeProjection

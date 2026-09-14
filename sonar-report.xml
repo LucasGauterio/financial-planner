@@ -1,72 +1,85 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testExecutions version="1">
+  <file path="src\components\ConfirmDialog.test.js">
+    <testCase name="ConfirmDialog.vue - renders nothing when show is false" duration="66" />
+    <testCase name="ConfirmDialog.vue - renders title, message, and button labels when show is true" duration="16" />
+    <testCase name="ConfirmDialog.vue - never closes on overlay click — only emits confirm/cancel from its own buttons" duration="24" />
+    <testCase name="ConfirmDialog.vue - emits cancel and confirm from their respective buttons" duration="24" />
+    <testCase name="ConfirmDialog.vue - shows the warning icon only when danger is true" duration="50" />
+  </file>
   <file path="src\components\ExpenseTracker.test.js">
-    <testCase name="ExpenseTracker.vue - renders the empty state when there are no expense sources" duration="127" />
-    <testCase name="ExpenseTracker.vue - projects a recurring source and shows a monthly total row" duration="219" />
-    <testCase name="ExpenseTracker.vue - toggles an entry status between pending and paid and persists the change" duration="88" />
-    <testCase name="ExpenseTracker.vue - adds a new expense source through the form" duration="70" />
-    <testCase name="ExpenseTracker.vue - persists an optional endMonth for a recurring source" duration="95" />
-    <testCase name="ExpenseTracker.vue - does not persist endMonth for a non-recurring source" duration="31" />
-    <testCase name="ExpenseTracker.vue - edits a source in place without duplicating it" duration="78" />
-    <testCase name="ExpenseTracker.vue - clears statusOverrides when endMonth changes on edit, gated by confirm" duration="74" />
-    <testCase name="ExpenseTracker.vue - does not clear statusOverrides when only name/amount change on edit" duration="51" />
-    <testCase name="ExpenseTracker.vue - deletes a source after confirming in the delete modal" duration="113" />
+    <testCase name="ExpenseTracker.vue - renders the empty state when there are no expense sources" duration="98" />
+    <testCase name="ExpenseTracker.vue - projects a recurring source and shows a monthly total row" duration="140" />
+    <testCase name="ExpenseTracker.vue - toggles an entry status between pending and paid and persists the change" duration="100" />
+    <testCase name="ExpenseTracker.vue - adds a new expense source through the form" duration="138" />
+    <testCase name="ExpenseTracker.vue - persists an optional endMonth for a recurring source" duration="58" />
+    <testCase name="ExpenseTracker.vue - does not persist endMonth for a non-recurring source" duration="40" />
+    <testCase name="ExpenseTracker.vue - edits a source in place without duplicating it" duration="71" />
+    <testCase name="ExpenseTracker.vue - clears statusOverrides when endMonth changes on edit, gated by a ConfirmDialog (not window.confirm)" duration="69" />
+    <testCase name="ExpenseTracker.vue - discards the parameter change but keeps other edits when the params ConfirmDialog is cancelled" duration="81" />
+    <testCase name="ExpenseTracker.vue - does not open the params ConfirmDialog when only name/amount change on edit" duration="48" />
+    <testCase name="ExpenseTracker.vue - deletes a source after confirming in the ConfirmDialog" duration="50" />
+    <testCase name="ExpenseTracker.vue - does not delete when the delete ConfirmDialog is cancelled, and does not close on overlay click" duration="50" />
   </file>
   <file path="src\components\GoalCalculator.test.js">
-    <testCase name="GoalCalculator.vue - renders title and inputs" duration="65" />
-    <testCase name="GoalCalculator.vue - updates target amounts correctly based on reactive properties" duration="38" />
+    <testCase name="GoalCalculator.vue - renders title and inputs" duration="78" />
+    <testCase name="GoalCalculator.vue - updates target amounts correctly based on reactive properties" duration="53" />
   </file>
   <file path="src\components\IncomeTracker.test.js">
-    <testCase name="IncomeTracker.vue - renders the empty state when there are no income sources" duration="103" />
-    <testCase name="IncomeTracker.vue - projects a recurring source and shows a monthly total row" duration="114" />
-    <testCase name="IncomeTracker.vue - toggles an entry status between pending and received and persists the change" duration="174" />
-    <testCase name="IncomeTracker.vue - adds a new income source through the form" duration="89" />
-    <testCase name="IncomeTracker.vue - edits a source in place without duplicating it" duration="66" />
-    <testCase name="IncomeTracker.vue - clears statusOverrides when startMonth changes on edit, gated by confirm" duration="57" />
-    <testCase name="IncomeTracker.vue - does not clear statusOverrides when only name/amount change on edit" duration="41" />
-    <testCase name="IncomeTracker.vue - deletes a source after confirming in the delete modal" duration="139" />
+    <testCase name="IncomeTracker.vue - renders the empty state when there are no income sources" duration="138" />
+    <testCase name="IncomeTracker.vue - projects a recurring source and shows a monthly total row" duration="156" />
+    <testCase name="IncomeTracker.vue - toggles an entry status between pending and received and persists the change" duration="64" />
+    <testCase name="IncomeTracker.vue - adds a new income source through the form" duration="80" />
+    <testCase name="IncomeTracker.vue - edits a source in place without duplicating it" duration="79" />
+    <testCase name="IncomeTracker.vue - clears statusOverrides when startMonth changes on edit, gated by a ConfirmDialog (not window.confirm)" duration="94" />
+    <testCase name="IncomeTracker.vue - discards the parameter change but keeps other edits when the params ConfirmDialog is cancelled" duration="121" />
+    <testCase name="IncomeTracker.vue - does not open the params ConfirmDialog when only name/amount change on edit" duration="74" />
+    <testCase name="IncomeTracker.vue - deletes a source after confirming in the ConfirmDialog" duration="69" />
+    <testCase name="IncomeTracker.vue - does not delete when the delete ConfirmDialog is cancelled, and does not close on overlay click" duration="44" />
   </file>
   <file path="src\components\InvestmentTimeline.test.js">
-    <testCase name="InvestmentTimeline.vue - renders timeline and handles empty state properly" duration="108" />
+    <testCase name="InvestmentTimeline.vue - renders timeline and handles empty state properly" duration="117" />
   </file>
   <file path="src\components\LoanTracker.test.js">
-    <testCase name="LoanTracker.vue - renders the empty state when there are no loans" duration="187" />
-    <testCase name="LoanTracker.vue - creates a casual loan through the form and persists it with an empty payments ledger" duration="286" />
-    <testCase name="LoanTracker.vue - creates a credit loan through the form and persists installments generated by generateCreditCardInstallments" duration="140" />
-    <testCase name="LoanTracker.vue - archiving a loan persists archived: true without touching its payment history" duration="49" />
-    <testCase name="LoanTracker.vue - toggling an installment marks it paid and stamps a paymentDate" duration="48" />
-    <testCase name="LoanTracker.vue - editing a credit loan schedule parameter regenerates installments after confirmation, discarding prior paid status" duration="97" />
-    <testCase name="LoanTracker.vue - recording a repayment on a casual loan appends it to the payments ledger" duration="139" />
+    <testCase name="LoanTracker.vue - renders the empty state when there are no loans" duration="205" />
+    <testCase name="LoanTracker.vue - creates a casual loan through the form and persists it with an empty payments ledger" duration="256" />
+    <testCase name="LoanTracker.vue - creates a credit loan through the form and persists installments generated by generateCreditCardInstallments" duration="161" />
+    <testCase name="LoanTracker.vue - archiving a loan persists archived: true without touching its payment history" duration="67" />
+    <testCase name="LoanTracker.vue - toggling an installment marks it paid and stamps a paymentDate" duration="84" />
+    <testCase name="LoanTracker.vue - editing a credit loan schedule parameter regenerates installments after confirming in the ConfirmDialog (not window.confirm), discarding prior paid status" duration="99" />
+    <testCase name="LoanTracker.vue - discards the schedule regeneration but keeps other edits when the params ConfirmDialog is cancelled" duration="86" />
+    <testCase name="LoanTracker.vue - deletes a loan after confirming in the ConfirmDialog, and does not close on overlay click" duration="69" />
+    <testCase name="LoanTracker.vue - recording a repayment on a casual loan appends it to the payments ledger" duration="74" />
   </file>
   <file path="src\components\PastInvestmentSimulator.test.js">
-    <testCase name="PastInvestmentSimulator.vue - renders the component correctly" duration="53" />
-    <testCase name="PastInvestmentSimulator.vue - calculates based on input changes" duration="26" />
+    <testCase name="PastInvestmentSimulator.vue - renders the component correctly" duration="70" />
+    <testCase name="PastInvestmentSimulator.vue - calculates based on input changes" duration="66" />
   </file>
   <file path="src\components\PortfolioTracker.test.js">
-    <testCase name="PortfolioTracker.vue - renders portfolio tracker and handles mock data" duration="398" />
+    <testCase name="PortfolioTracker.vue - renders portfolio tracker and handles mock data" duration="323" />
   </file>
   <file path="src\components\TimeGapComparator.test.js">
-    <testCase name="TimeGapComparator.vue - renders title" duration="293" />
-    <testCase name="TimeGapComparator.vue - displays the early start year logic correctly" duration="78" />
+    <testCase name="TimeGapComparator.vue - renders title" duration="192" />
+    <testCase name="TimeGapComparator.vue - displays the early start year logic correctly" duration="37" />
   </file>
   <file path="src\services\cryptoService.test.js">
-    <testCase name="cryptoService - derives a WebCrypto key from password and salt" duration="134" />
-    <testCase name="cryptoService - encrypts and decrypts JSON data payload correctly" duration="143" />
-    <testCase name="cryptoService - returns null on decryption failure with invalid key or tampered ciphertext" duration="133" />
+    <testCase name="cryptoService - derives a WebCrypto key from password and salt" duration="86" />
+    <testCase name="cryptoService - encrypts and decrypts JSON data payload correctly" duration="83" />
+    <testCase name="cryptoService - returns null on decryption failure with invalid key or tampered ciphertext" duration="204" />
   </file>
   <file path="src\services\expenseCalculations.test.js">
     <testCase name="Expense Calculations Service - generateExpenseProjection - returns empty array for invalid inputs" duration="4" />
-    <testCase name="Expense Calculations Service - generateExpenseProjection - projects a one-off entry only in its start month" duration="4" />
-    <testCase name="Expense Calculations Service - generateExpenseProjection - expands a recurring entry across the full horizon, crossing year boundaries" duration="31" />
-    <testCase name="Expense Calculations Service - generateExpenseProjection - defaults every month to pending when there is no override" duration="1" />
+    <testCase name="Expense Calculations Service - generateExpenseProjection - projects a one-off entry only in its start month" duration="3" />
+    <testCase name="Expense Calculations Service - generateExpenseProjection - expands a recurring entry across the full horizon, crossing year boundaries" duration="27" />
+    <testCase name="Expense Calculations Service - generateExpenseProjection - defaults every month to pending when there is no override" duration="0" />
     <testCase name="Expense Calculations Service - generateExpenseProjection - applies status overrides keyed by sourceId and month" duration="1" />
-    <testCase name="Expense Calculations Service - generateExpenseProjection - projects a recurring source across a multi-year (35-year) horizon" duration="2" />
+    <testCase name="Expense Calculations Service - generateExpenseProjection - projects a recurring source across a multi-year (35-year) horizon" duration="3" />
     <testCase name="Expense Calculations Service - generateExpenseProjection - stops a recurring source at endMonth even when horizonMonths extends further" duration="1" />
     <testCase name="Expense Calculations Service - generateExpenseProjection - does not affect a recurring source with no endMonth (regression)" duration="1" />
     <testCase name="Expense Calculations Service - generateExpenseProjection - produces no entries when endMonth is before startMonth" duration="1" />
     <testCase name="Expense Calculations Service - generateExpenseProjection - merges and sorts entries from multiple sources by month" duration="1" />
     <testCase name="Expense Calculations Service - calculateMonthlyTotals - returns zeroed totals for an empty month" duration="1" />
-    <testCase name="Expense Calculations Service - calculateMonthlyTotals - splits totals between paid and pending" duration="0" />
+    <testCase name="Expense Calculations Service - calculateMonthlyTotals - splits totals between paid and pending" duration="2" />
   </file>
   <file path="src\services\financialCalculations.test.js">
     <testCase name="Financial Calculations - calculates future value of past investments correctly (no principal)" duration="3" />
@@ -74,22 +87,22 @@
     <testCase name="Financial Calculations - calculates future value with an annual apport increase" duration="0" />
     <testCase name="Financial Calculations - calculates required monthly contribution for a goal (no principal)" duration="1" />
     <testCase name="Financial Calculations - calculates required monthly contribution with starting principal" duration="0" />
-    <testCase name="Financial Calculations - calculates required monthly contribution with annual increase" duration="1" />
-    <testCase name="Financial Calculations - handles extremely large targetAmount gracefully without infinite looping" duration="1" />
+    <testCase name="Financial Calculations - calculates required monthly contribution with annual increase" duration="0" />
+    <testCase name="Financial Calculations - handles extremely large targetAmount gracefully without infinite looping" duration="0" />
   </file>
   <file path="src\services\incomeCalculations.test.js">
     <testCase name="Income Calculations Service - generateIncomeProjection - returns empty array for invalid inputs" duration="4" />
-    <testCase name="Income Calculations Service - generateIncomeProjection - projects a one-off entry only in its start month" duration="3" />
-    <testCase name="Income Calculations Service - generateIncomeProjection - expands a recurring entry across the full horizon, crossing year boundaries" duration="23" />
+    <testCase name="Income Calculations Service - generateIncomeProjection - projects a one-off entry only in its start month" duration="2" />
+    <testCase name="Income Calculations Service - generateIncomeProjection - expands a recurring entry across the full horizon, crossing year boundaries" duration="21" />
     <testCase name="Income Calculations Service - generateIncomeProjection - defaults every month to pending when there is no override" duration="0" />
     <testCase name="Income Calculations Service - generateIncomeProjection - applies status overrides keyed by sourceId and month" duration="1" />
     <testCase name="Income Calculations Service - generateIncomeProjection - projects a recurring source across a multi-year (35-year) horizon" duration="1" />
     <testCase name="Income Calculations Service - generateIncomeProjection - merges and sorts entries from multiple sources by month" duration="1" />
     <testCase name="Income Calculations Service - calculateMonthlyTotals - returns zeroed totals for an empty month" duration="1" />
-    <testCase name="Income Calculations Service - calculateMonthlyTotals - splits totals between received and pending" duration="1" />
+    <testCase name="Income Calculations Service - calculateMonthlyTotals - splits totals between received and pending" duration="0" />
   </file>
   <file path="src\services\loanCalculations.test.js">
-    <testCase name="Loan Calculations Service - generateCreditCardInstallments - returns empty array for invalid inputs" duration="4" />
+    <testCase name="Loan Calculations Service - generateCreditCardInstallments - returns empty array for invalid inputs" duration="2" />
     <testCase name="Loan Calculations Service - generateCreditCardInstallments - splits installments equally and handles rounding remainders on the final installment" duration="2" />
     <testCase name="Loan Calculations Service - generateCreditCardInstallments - correctly increments year and month for subsequent installments" duration="1" />
     <testCase name="Loan Calculations Service - generateCreditCardInstallments - caps due date day at max month length" duration="1" />
