@@ -2,9 +2,11 @@
 kind: phase
 name: phase-08-monthly-expense-tracker
 sources_mtime:
-  docs/project-plan.md: "2026-09-14T17:32:04"
+  docs/project-plan.md: "2026-09-14T18:39:39"
   docs/decisions/technical-decisions-monthly-income-tracker.md: "2026-09-14T10:06:58"
+  docs/decisions/technical-decisions-expense-recurring-end-date.md: "2026-09-14T18:38:36"
   docs/adrs/ADR-004-expense-tracker-pattern-reuse.md: "2026-09-14T17:44:49"
+  docs/adrs/ADR-005-expense-recurring-end-date.md: "2026-09-14T18:39:00"
   docs/phases/phase-07-monthly-income-tracker/CONTEXT.md: "2026-09-14T10:07:13"
 ---
 
@@ -16,7 +18,7 @@ sources_mtime:
 
 **Capabilities** (literal, `docs/project-plan.md`):
 
-- Register expense sources (fixed bills, variable spending, subscriptions), each optionally flagged as recurring; generate a month-by-month projection list (paid vs. pending) with monthly totals, projectable up to 35 years, mirroring the income tracker's data model.
+- Register expense sources (fixed bills, variable spending, subscriptions), each optionally flagged as recurring and optionally given an end date for bounded-term recurring sources; generate a month-by-month projection list (paid vs. pending) with monthly totals, projectable up to 35 years, mirroring the income tracker's data model.
 
 **Out of scope:** Fixed expense category taxonomy / spending reports by category (deferred — see `docs/PRD.md` § Out of Scope / Deferred Items); non-monthly native recurrence (deferred — see `docs/RFC.md` § Open Questions / Future Roadmap).
 **Deliverables:** `src/services/expenseCalculations.js` (new), `src/components/ExpenseTracker.vue` (new).
@@ -31,17 +33,31 @@ sources_mtime:
 
 ## Decisions Index
 
-_No phase-scope decisions document for Phase 8 — `/research phase 08` determined every capability bullet maps to a TD already decided in `technical-decisions-monthly-income-tracker.md` (Phase 7). See `## Inherited Decisions Detail` below and [ADR-004](../../adrs/ADR-004-expense-tracker-pattern-reuse.md) for the reuse rationale._
+_No phase-scope decisions document for Phase 8 — `/research phase 08` determined the core capability maps to TDs already decided in `technical-decisions-monthly-income-tracker.md` (Phase 7). One ad-hoc TD tied to Phase 8 (`related_phases: [8]`) was added afterward:_
+
+| Ref | Source | Scope | Topic | Status | Decision | Libraries |
+|-----|--------|-------|-------|--------|----------|-----------|
+| expense-recurring-end-date/TD-01 | ad-hoc | Cross-layer | Recurring Expense End Date Representation | decided | A | — |
+
+_Source files:_
+
+- expense-recurring-end-date — `docs/decisions/technical-decisions-expense-recurring-end-date.md` (scope_type: ad-hoc, related_phases: [8])
+
+See `## Inherited Decisions Detail` below and [ADR-004](../../adrs/ADR-004-expense-tracker-pattern-reuse.md) for the core-capability reuse rationale.
 
 ## Capability Coverage
 
 | Capability (from project-plan.md) | Covered by |
 |-----------------------------------|------------|
-| Register expense sources (fixed bills, variable spending, subscriptions), each optionally flagged as recurring; generate a month-by-month projection list (paid vs. pending) with monthly totals, projectable up to 35 years, mirroring the income tracker's data model. | monthly-income-tracker/TD-01, monthly-income-tracker/TD-02, monthly-income-tracker/TD-03, monthly-income-tracker/TD-04 _(inherited — see below)_ |
+| Register expense sources (fixed bills, variable spending, subscriptions), each optionally flagged as recurring and optionally given an end date for bounded-term recurring sources; generate a month-by-month projection list (paid vs. pending) with monthly totals, projectable up to 35 years, mirroring the income tracker's data model. | monthly-income-tracker/TD-01, monthly-income-tracker/TD-02, monthly-income-tracker/TD-03, monthly-income-tracker/TD-04 _(inherited — see below)_, expense-recurring-end-date/TD-01 |
 
 ## Decisions Detail
 
-_No current-scope TDs._
+### expense-recurring-end-date/TD-01 — Recurring Expense End Date Representation
+
+**Recommendation:** a nullable `endMonth` mirrors `startMonth`'s existing `'YYYY-MM'` shape and UI control, requires the smallest change to `generateExpenseProjection`'s loop (one additional bound check), and keeps every already-registered recurring expense source behaviorally unchanged (absent field = current behavior).
+**Decision:** Option A — Optional `endMonth` field (nullable `'YYYY-MM'` string, inclusive).
+**Libraries:** —
 
 ## Inherited Decisions Detail
 

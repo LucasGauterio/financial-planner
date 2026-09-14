@@ -1,7 +1,12 @@
 # phase-08-monthly-expense-tracker — Progress
 
 **Status:** completed
-**SIs:** 4/4 completed
+**SIs:** 5/5 completed
+
+### SI-08.5 — Recurring Expense End Date (`endMonth`)
+- **Status:** completed
+- **Tests:** 18 passing
+- **Observations:** none
 
 ### SI-08.1 — Expense Calculation Engine
 - **Status:** completed

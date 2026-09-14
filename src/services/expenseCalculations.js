@@ -7,7 +7,9 @@
  * applying manually-confirmed status overrides and defaulting every
  * unmarked month to 'pending' (TD-04, inherited from monthly-income-tracker).
  *
- * @param {Array} sources - Expense sources: { id, name, amount, type, startMonth ('YYYY-MM'), recurring }.
+ * @param {Array} sources - Expense sources: { id, name, amount, type, startMonth ('YYYY-MM'), recurring, endMonth? }.
+ *   `endMonth` ('YYYY-MM', optional) bounds a recurring source: no entries are generated past it
+ *   (inclusive), regardless of `horizonMonths` (TD-01, expense-recurring-end-date). Ignored when unset.
  * @param {number} horizonMonths - Number of months to project, starting from each source's startMonth.
  * @param {Object} statusOverrides - Sparse map keyed by `${sourceId}:${YYYY-MM}` -> 'paid' | 'pending'.
  * @returns {Array} List of projected entries: { sourceId, name, type, month, amount, status }.
@@ -20,7 +22,7 @@ export function generateExpenseProjection(sources, horizonMonths, statusOverride
   const entries = [];
 
   for (const source of sources) {
-    const { id, name, amount, type, startMonth, recurring } = source;
+    const { id, name, amount, type, startMonth, recurring, endMonth } = source;
     const [startYear, startMonthNum] = startMonth.split('-').map(Number);
 
     const occurrences = recurring ? horizonMonths : 1;
@@ -36,6 +38,10 @@ export function generateExpenseProjection(sources, horizonMonths, statusOverride
       }
 
       const formattedMonth = `${curYear}-${String(curMonth + 1).padStart(2, '0')}`;
+      if (endMonth && formattedMonth > endMonth) {
+        break;
+      }
+
       const overrideKey = `${id}:${formattedMonth}`;
       const status = statusOverrides[overrideKey] || 'pending';
 

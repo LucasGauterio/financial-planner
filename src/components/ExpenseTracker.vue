@@ -100,6 +100,11 @@
                 <input type="checkbox" v-model="form.recurring" />
                 {{ t('expenses.form.recurring') }}
               </label>
+
+              <fieldset v-if="form.recurring" class="form-fieldset">
+                <legend>{{ t('expenses.form.endMonth') }}</legend>
+                <input type="month" v-model="form.endMonth" :min="form.startMonth" max="2200-12" />
+              </fieldset>
             </div>
 
             <div class="modal-footer">
@@ -130,7 +135,8 @@ const formDefaults = () => ({
   type: '',
   amount: null,
   startMonth: new Date().toISOString().slice(0, 7),
-  recurring: false
+  recurring: false,
+  endMonth: ''
 });
 const form = reactive(formDefaults());
 
@@ -169,6 +175,7 @@ async function saveSource() {
     amount: form.amount,
     startMonth: form.startMonth,
     recurring: form.recurring,
+    endMonth: form.recurring && form.endMonth ? form.endMonth : null,
     statusOverrides: {}
   });
 

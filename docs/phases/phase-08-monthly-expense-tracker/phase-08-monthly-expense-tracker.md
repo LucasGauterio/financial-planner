@@ -11,9 +11,14 @@ No new technical-decisions document was produced for this phase — `/research p
 - **TD-03 (Rendering, inherited):** User-selectable projection horizon (e.g. 1 / 5 / 10 / 35 years), defaulting to a short window, reusing the year-grouped list pattern from `InvestmentTimeline.vue` / `IncomeTracker.vue`.
 - **TD-04 (Default status, inherited):** Every projected month defaults to `pending` regardless of date; the user explicitly marks a month as `paid` (same convention as `incomeCalculations.js` / `loanCalculations.js` installment status).
 
+**Addendum** — sourced from [technical-decisions-expense-recurring-end-date.md](../../decisions/technical-decisions-expense-recurring-end-date.md) (ad-hoc, `related_phases: [8]`), decided:
+
+- **TD-01 (Recurring end date, expense-only):** Optional `endMonth` (`'YYYY-MM'`, nullable) on an expense source; when set, the projection stops generating entries past that month (in addition to the existing horizon bound). Absent = today's unbounded-recurring behavior, unchanged. This does **not** apply to income sources (see [ADR-005](../../adrs/ADR-005-expense-recurring-end-date.md)).
+
 ## Dependency Map
 - Depends on Phase 01 (build/test scaffolding), Phase 02 (zero-trust encrypted storage via `indexedDbRepository.js`), and Phase 07 (establishes the derived-projection pattern this phase mirrors — `incomeCalculations.js`, `IncomeTracker.vue`).
 - No dependency on Phases 03–06.
+- SI-05 depends on SI-01 (extends `generateExpenseProjection`) and SI-03 (extends the registration form).
 
 ## Step Implementations (SIs)
 
@@ -57,8 +62,20 @@ No new technical-decisions document was produced for this phase — `/research p
   - [`src/locales/en-US.js`](../../../src/locales/en-US.js#L14) (mirror English keys — every key added to `pt-BR.js` MUST have an `en-US.js` counterpart per the Strict Bi-Lingual i18n rule; mirror the `income` block at [`L216`](../../../src/locales/en-US.js#L216))
 - Tests: `npx vitest run` (full suite, confirm no regressions in tab switching / existing components).
 
+### SI-05: Recurring Expense End Date (`endMonth`)
+- Extend `generateExpenseProjection` per `expense-recurring-end-date/TD-01`: accept an optional `endMonth` on a source; the generation loop stops emitting entries once the computed month exceeds `endMonth` (in addition to the existing `horizonMonths` bound), whichever is reached first. Sources with no `endMonth` are unaffected.
+- Extend the registration form in `ExpenseTracker.vue` with an optional "End Month" `<input type="month">`, shown only when `recurring` is checked (a non-recurring source already has a single implicit month); validate `endMonth >= startMonth` when both are set.
+- Target files:
+  - [`src/services/expenseCalculations.js`](../../../src/services/expenseCalculations.js#L15-L53) (`generateExpenseProjection` loop — add the `endMonth` bound check)
+  - `src/components/ExpenseTracker.vue` (form: new optional field; `saveSource`: persist `endMonth`)
+- Tests:
+  - `src/services/expenseCalculations.test.js` (extend) — a recurring source with `endMonth` stops exactly at that month even when `horizonMonths` extends further; a recurring source with no `endMonth` is unaffected (regression); `endMonth` before `startMonth` produces no entries (or is rejected at the form layer — cover whichever the implementation chooses).
+  - `src/components/ExpenseTracker.test.js` (extend) — the end-month field is submitted and persisted via `repository.saveExpenses`.
+  - Run: `npx vitest run src/services/expenseCalculations.test.js src/components/ExpenseTracker.test.js`
+
 ## Deliverables
 - `expenseCalculations.js` pure projection/aggregation engine with unit tests.
 - Encrypted IndexedDB persistence for expense sources and status overrides, integrated into the existing backup/export/import flow.
 - `ExpenseTracker.vue` component: registration form, horizon selector, and year-grouped paid/pending projection list with monthly totals.
 - New "Expenses" tab wired into `App.vue`, fully bilingual (`en-US` / `pt-BR`).
+- Optional `endMonth` on recurring expense sources, so a bounded-term recurring expense stops projecting past its end date.

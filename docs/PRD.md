@@ -24,7 +24,7 @@
 | **FR-005** | `PortfolioTracker` | Track portfolio allocations, yield rates, and net worth distributions with persistent storage. | Medium | [indexedDbRepository.js](file:///G:/Projects/FinancialPlanner/src/services/indexedDbRepository.js) |
 | **FR-006** | `PastInvestmentSimulator` | Model historical asset growth based on consistent periodic contributions. | Medium | [PastInvestmentSimulator.vue](file:///G:/Projects/FinancialPlanner/src/components/PastInvestmentSimulator.vue) |
 | **FR-007** | `TimeGapComparator` | Compare financial outcomes between starting investments today versus delaying start by $N$ months. | Medium | [TimeGapComparator.vue](file:///G:/Projects/FinancialPlanner/src/components/TimeGapComparator.vue) |
-| **FR-008** | `ExpenseTracker` | Register expense sources (fixed bills, variable spending, subscriptions), each optionally flagged as recurring; generate a month-by-month projection (paid vs. pending) with monthly totals, selectable up to a 35-year horizon. | High | `src/services/expenseCalculations.js` (new) |
+| **FR-008** | `ExpenseTracker` | Register expense sources (fixed bills, variable spending, subscriptions), each optionally flagged as recurring and optionally given an end date (for recurring sources with a known term, e.g. a financed purchase); generate a month-by-month projection (paid vs. pending) with monthly totals, selectable up to a 35-year horizon. | High | `src/services/expenseCalculations.js` (new) |
 
 ---
 

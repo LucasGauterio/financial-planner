@@ -15,7 +15,7 @@ This document maps all product requirements defined in [PRD.md](file:///G:/Proje
 | **FR-005** | Portfolio Allocation Tracking | [PortfolioTracker.vue](file:///G:/Projects/FinancialPlanner/src/components/PortfolioTracker.vue#L1-L250) | `L1-L250` | [PortfolioTracker.test.js](file:///G:/Projects/FinancialPlanner/src/components/PortfolioTracker.test.js) |
 | **FR-006** | Historical Yield Simulation | [PastInvestmentSimulator.vue](file:///G:/Projects/FinancialPlanner/src/components/PastInvestmentSimulator.vue#L1-L120) | `L1-L120` | [PastInvestmentSimulator.test.js](file:///G:/Projects/FinancialPlanner/src/components/PastInvestmentSimulator.test.js) |
 | **FR-007** | Time Gap Opportunity Cost | [TimeGapComparator.vue](file:///G:/Projects/FinancialPlanner/src/components/TimeGapComparator.vue#L1-L150) | `L1-L150` | [TimeGapComparator.test.js](file:///G:/Projects/FinancialPlanner/src/components/TimeGapComparator.test.js) |
-| **FR-008** | Monthly Expense Registration & Projection | `src/services/expenseCalculations.js` _(new, pending `/implement phase 08`)_ | — | `src/services/expenseCalculations.test.js` _(new, pending)_ |
+| **FR-008** | Monthly Expense Registration & Projection | [expenseCalculations.js](file:///G:/Projects/FinancialPlanner/src/services/expenseCalculations.js#L1-L77) | `L1-L77` | [expenseCalculations.test.js](file:///G:/Projects/FinancialPlanner/src/services/expenseCalculations.test.js) |
 
 ---
 
@@ -25,17 +25,24 @@ This document maps all product requirements defined in [PRD.md](file:///G:/Proje
 |---|---|---|---|
 | **ADR-003** | Loan Tracker reuses IndexedDB repository + AES-GCM encryption + pure service-layer patterns | [indexedDbRepository.js](file:///G:/Projects/FinancialPlanner/src/services/indexedDbRepository.js#L14-L17), [loanCalculations.js](file:///G:/Projects/FinancialPlanner/src/services/loanCalculations.js#L1-L119) | `L14-L17`, `L1-L119` |
 | **ADR-004** | Expense Tracker reuses Income Tracker's derived-projection data model + IndexedDB repository + AES-GCM encryption + pure service-layer patterns | [incomeCalculations.js](file:///G:/Projects/FinancialPlanner/src/services/incomeCalculations.js#L15-L54), [indexedDbRepository.js](file:///G:/Projects/FinancialPlanner/src/services/indexedDbRepository.js#L14-L19) | `L15-L54`, `L14-L19` |
+| **ADR-005** | Recurring expense end date (`endMonth`) — bounded, expense-only divergence from the income tracker pattern | [expenseCalculations.js](file:///G:/Projects/FinancialPlanner/src/services/expenseCalculations.js#L1-L83) | `L1-L83` |
 
 ## Technical Decision Traceability (Phase 08 — inherited from `technical-decisions-monthly-income-tracker.md`)
 
-Phase 8 introduces no new technical-decisions document; per [ADR-004](file:///G:/Projects/FinancialPlanner/docs/adrs/ADR-004-expense-tracker-pattern-reuse.md), it reuses TD-01..TD-04 from Phase 7's decisions doc unchanged. Traced here against the Phase 7 code that already embodies each decision, pending the equivalent `expenseCalculations.js` implementation in `/implement phase 08`.
+Phase 8 introduces no new technical-decisions document for its core capability; per [ADR-004](file:///G:/Projects/FinancialPlanner/docs/adrs/ADR-004-expense-tracker-pattern-reuse.md), it reuses TD-01..TD-04 from Phase 7's decisions doc unchanged (implemented — see FR-008 above).
 
-| TD ID (source) | Decision Summary | Implementation File (Phase 7 precedent) | Line Anchor |
+| TD ID (source) | Decision Summary | Implementation File | Line Anchor |
 |---|---|---|---|
-| **TD-01** | Recurring rule + on-the-fly derivation + sparse status overrides (no materialized per-month rows) | [incomeCalculations.js](file:///G:/Projects/FinancialPlanner/src/services/incomeCalculations.js#L15-L54) | `L15-L54` |
-| **TD-02** | Boolean `recurring` flag, monthly-only cadence | [incomeCalculations.js](file:///G:/Projects/FinancialPlanner/src/services/incomeCalculations.js#L26-L36) | `L26-L36` |
-| **TD-03** | User-selectable horizon driving grouped-list rendering | [IncomeTracker.vue](file:///G:/Projects/FinancialPlanner/src/components/IncomeTracker.vue) | — |
-| **TD-04** | Default status is `pending` until explicitly confirmed (no date-inferred default) | [incomeCalculations.js](file:///G:/Projects/FinancialPlanner/src/services/incomeCalculations.js#L40)| `L40` |
+| **TD-01** | Recurring rule + on-the-fly derivation + sparse status overrides (no materialized per-month rows) | [expenseCalculations.js](file:///G:/Projects/FinancialPlanner/src/services/expenseCalculations.js#L15-L53) | `L15-L53` |
+| **TD-02** | Boolean `recurring` flag, monthly-only cadence | [expenseCalculations.js](file:///G:/Projects/FinancialPlanner/src/services/expenseCalculations.js#L26-L36) | `L26-L36` |
+| **TD-03** | User-selectable horizon driving grouped-list rendering | [ExpenseTracker.vue](file:///G:/Projects/FinancialPlanner/src/components/ExpenseTracker.vue) | — |
+| **TD-04** | Default status is `pending` until explicitly confirmed (no date-inferred default) | [expenseCalculations.js](file:///G:/Projects/FinancialPlanner/src/services/expenseCalculations.js#L40)| `L40` |
+
+## Technical Decision Traceability (`technical-decisions-expense-recurring-end-date.md`)
+
+| TD ID | Decision Summary | Implementation File | Line Anchor |
+|---|---|---|---|
+| **TD-01** | Optional `endMonth` (`'YYYY-MM'`, nullable) stops recurring projection past that month; expense-only, income unaffected | [expenseCalculations.js](file:///G:/Projects/FinancialPlanner/src/services/expenseCalculations.js#L38-L40), [ExpenseTracker.vue](file:///G:/Projects/FinancialPlanner/src/components/ExpenseTracker.vue) | `L38-L40` |
 
 ## Technical Decision Traceability (`technical-decisions-loan-tracker-and-schedules.md`)
 

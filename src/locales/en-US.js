@@ -262,6 +262,7 @@ export default {
       amount: 'Amount',
       startMonth: 'Start Month',
       recurring: 'Recurring (monthly)',
+      endMonth: 'End Month (optional)',
       cancel: 'Cancel',
       add: 'Add'
     }

@@ -57,6 +57,30 @@ describe('Expense Calculations Service', () => {
       expect(entries[entries.length - 1].month).toBe('2060-12');
     });
 
+    it('stops a recurring source at endMonth even when horizonMonths extends further', () => {
+      const sources = [
+        { id: 's1', name: 'Financiamento', type: 'fixed bill', amount: 300, startMonth: '2026-01', recurring: true, endMonth: '2026-03' }
+      ];
+      const entries = generateExpenseProjection(sources, 12);
+      expect(entries.map(e => e.month)).toEqual(['2026-01', '2026-02', '2026-03']);
+    });
+
+    it('does not affect a recurring source with no endMonth (regression)', () => {
+      const sources = [
+        { id: 's1', name: 'Rent', type: 'fixed bill', amount: 1500, startMonth: '2026-01', recurring: true }
+      ];
+      const entries = generateExpenseProjection(sources, 3);
+      expect(entries).toHaveLength(3);
+    });
+
+    it('produces no entries when endMonth is before startMonth', () => {
+      const sources = [
+        { id: 's1', name: 'Financiamento', type: 'fixed bill', amount: 300, startMonth: '2026-05', recurring: true, endMonth: '2026-01' }
+      ];
+      const entries = generateExpenseProjection(sources, 12);
+      expect(entries).toEqual([]);
+    });
+
     it('merges and sorts entries from multiple sources by month', () => {
       const sources = [
         { id: 's1', name: 'Rent', type: 'fixed bill', amount: 1500, startMonth: '2026-01', recurring: true },

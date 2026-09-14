@@ -49,5 +49,5 @@ The application follows a **Zero-Trust Client Security Architecture** using nati
 - Target files: `src/services/incomeCalculations.js` (new), `src/components/IncomeTracker.vue` (new).
 
 ### Phase 8: Monthly Expense Registration & Projections (`docs/phases/phase-08-monthly-expense-tracker/`)
-- Register expense sources (fixed bills, variable spending, subscriptions), each optionally flagged as recurring; generate a month-by-month projection list (paid vs. pending) with monthly totals, projectable up to 35 years, mirroring the income tracker's data model.
+- Register expense sources (fixed bills, variable spending, subscriptions), each optionally flagged as recurring and optionally given an end date for bounded-term recurring sources; generate a month-by-month projection list (paid vs. pending) with monthly totals, projectable up to 35 years, mirroring the income tracker's data model.
 - Target files: `src/services/expenseCalculations.js` (new), `src/components/ExpenseTracker.vue` (new).

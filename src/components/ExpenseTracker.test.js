@@ -96,4 +96,58 @@ describe('ExpenseTracker.vue', () => {
     expect(savedSources).toHaveLength(1);
     expect(savedSources[0]).toMatchObject({ name: 'Streaming', type: 'assinatura', amount: 40, startMonth: '2026-05' });
   });
+
+  it('persists an optional endMonth for a recurring source', async () => {
+    repository.getExpenses.mockResolvedValue([]);
+
+    const wrapper = mount(ExpenseTracker, { global: i18nStub });
+    await flushPromises();
+
+    await wrapper.find('.btn-primary').trigger('click');
+    await flushPromises();
+
+    const body = new DOMWrapper(document.body);
+
+    await body.find('input[type="text"]').setValue('Financiamento');
+    const typeInput = body.findAll('input[type="text"]')[1];
+    await typeInput.setValue('conta fixa');
+    await body.find('input[type="number"]').setValue(300);
+    await body.find('input[type="month"]').setValue('2026-01');
+    await body.find('input[type="checkbox"]').setValue(true);
+    await flushPromises();
+
+    const monthInputs = body.findAll('input[type="month"]');
+    expect(monthInputs).toHaveLength(2);
+    await monthInputs[1].setValue('2026-12');
+
+    await body.find('form').trigger('submit.prevent');
+    await flushPromises();
+
+    const savedSources = repository.saveExpenses.mock.calls[0][0];
+    expect(savedSources[0]).toMatchObject({ recurring: true, startMonth: '2026-01', endMonth: '2026-12' });
+  });
+
+  it('does not persist endMonth for a non-recurring source', async () => {
+    repository.getExpenses.mockResolvedValue([]);
+
+    const wrapper = mount(ExpenseTracker, { global: i18nStub });
+    await flushPromises();
+
+    await wrapper.find('.btn-primary').trigger('click');
+    await flushPromises();
+
+    const body = new DOMWrapper(document.body);
+
+    await body.find('input[type="text"]').setValue('Reparo do carro');
+    const typeInput = body.findAll('input[type="text"]')[1];
+    await typeInput.setValue('gasto variável');
+    await body.find('input[type="number"]').setValue(500);
+    await body.find('input[type="month"]').setValue('2026-03');
+
+    await body.find('form').trigger('submit.prevent');
+    await flushPromises();
+
+    const savedSources = repository.saveExpenses.mock.calls[0][0];
+    expect(savedSources[0]).toMatchObject({ recurring: false, endMonth: null });
+  });
 });
