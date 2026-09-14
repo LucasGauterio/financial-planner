@@ -11,9 +11,15 @@ Sourced from [technical-decisions-monthly-income-tracker.md](../../decisions/tec
 - **TD-03 (Rendering):** User-selectable projection horizon (e.g. 1 / 5 / 10 / 35 years), defaulting to a short window, reusing the year-grouped list pattern from `InvestmentTimeline.vue`.
 - **TD-04 (Default status):** Every projected month defaults to `pending` regardless of date; the user explicitly marks a month as `received` (same convention as `loanCalculations.js` installment status).
 
+**Addendum** — sourced from [technical-decisions-tracker-source-edit-delete.md](../../decisions/technical-decisions-tracker-source-edit-delete.md) (ad-hoc, `related_phases: [7, 8]`), decided:
+
+- **TD-01 (Edit & Delete UI):** Reuse [`LoanTracker.vue`'s](../../../src/components/LoanTracker.vue#L605-L764) populated-modal edit + dedicated confirm-modal delete pattern.
+- **TD-02 (Override handling on edit):** Editing `startMonth` or `recurring` discards the source's `statusOverrides`, gated by a `confirm()` warning (mirrors [`updateExistingLoan`'s parameter-change guard](../../../src/components/LoanTracker.vue#L677-L694)); editing `name`/`type`/`amount` alone does not.
+
 ## Dependency Map
 - Depends on Phase 01 (build/test scaffolding) and Phase 02 (zero-trust encrypted storage via `indexedDbRepository.js`).
 - No dependency on Phases 03–06.
+- SI-05 depends on SI-01 (no calculation-engine changes needed, but reuses `generateIncomeProjection`) and SI-03 (extends the registration form and projection list).
 
 ## Step Implementations (SIs)
 
@@ -57,8 +63,21 @@ Sourced from [technical-decisions-monthly-income-tracker.md](../../decisions/tec
   - [`src/locales/en-US.js`](../../../src/locales/en-US.js#L1-L20) (mirror English keys — every key added to `pt-BR.js` MUST have an `en-US.js` counterpart per the Strict Bi-Lingual i18n rule)
 - Tests: `npx vitest run` (full suite, confirm no regressions in tab switching / existing components).
 
+### SI-05: Edit & Delete for Income Sources
+- Add `editSource(source)`, `deleteSource(source)`, and `confirmDeleteSource()` to `IncomeTracker.vue`, mirroring [`LoanTracker.vue`'s `editLoan`/`deleteLoan`/`confirmDeleteLoan`](../../../src/components/LoanTracker.vue#L605-L764):
+  - An edit button on each source row calls `editSource(source)`, which populates `form` (adding a `form.sourceId` field) and reopens the existing add modal; `saveSource()` branches on `form.sourceId` presence to update the matching entry in `sources` in place vs. push a new one.
+  - A delete button calls `deleteSource(source)`, which opens a dedicated confirm modal (`showDeleteConfirm` + `sourceToDelete`); on confirm, the source is filtered out of `sources` and persisted via `repository.saveIncome`.
+  - Per `tracker-source-edit-delete/TD-02`: if the edit changes `startMonth` or `recurring`, a native `confirm()` warns that recorded received/pending statuses for that source will be cleared ([`updateExistingLoan`'s parameter-change guard](../../../src/components/LoanTracker.vue#L677-L694) is the reference); on confirmation, `statusOverrides` resets to `{}` before saving. Editing only `name`/`type`/`amount` skips this reset.
+- Target files:
+  - `src/components/IncomeTracker.vue` (extend)
+  - [`src/locales/en-US.js`](../../../src/locales/en-US.js#L158-L168) / [`src/locales/pt-BR.js`](../../../src/locales/pt-BR.js#L158-L168) (add `income.editSource`, `income.deleteSource`, `income.confirmDeleteTitle`, `income.confirmDelete`, `income.confirmAlterParams` keys, mirroring the `loans.*` equivalents at these line ranges)
+- Tests:
+  - `src/components/IncomeTracker.test.js` (extend) — editing a source pre-fills and updates the existing entry (not a duplicate); deleting a source removes it after confirming; changing `startMonth`/`recurring` on edit clears `statusOverrides` after confirmation; changing only `name`/`amount` leaves `statusOverrides` untouched.
+  - Run: `npx vitest run src/components/IncomeTracker.test.js`
+
 ## Deliverables
 - `incomeCalculations.js` pure projection/aggregation engine with unit tests.
 - Encrypted IndexedDB persistence for income sources and status overrides, integrated into the existing backup/export/import flow.
 - `IncomeTracker.vue` component: registration form, horizon selector, and year-grouped received/pending projection list with monthly totals.
 - New "Income" tab wired into `App.vue`, fully bilingual (`en-US` / `pt-BR`).
+- Edit and delete for registered income sources, matching the `LoanTracker.vue` interaction pattern.

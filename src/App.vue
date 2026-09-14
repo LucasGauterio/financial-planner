@@ -112,6 +112,13 @@
         >
           {{ t('tabs.income') }}
         </button>
+        <button
+          class="btn"
+          :class="activeTab === 'expenses' ? 'btn-primary' : 'btn-secondary'"
+          @click="activeTab = 'expenses'"
+        >
+          {{ t('tabs.expenses') }}
+        </button>
       </div>
 
       <transition name="fade" mode="out-in">
@@ -122,6 +129,7 @@
         <InvestmentTimeline v-else-if="activeTab === 'timeline'" />
         <LoanTracker v-else-if="activeTab === 'loans'" />
         <IncomeTracker v-else-if="activeTab === 'income'" />
+        <ExpenseTracker v-else-if="activeTab === 'expenses'" />
         <PrivacyPolicy v-else-if="activeTab === 'privacy'" />
       </transition>
       
@@ -143,6 +151,7 @@ import LockScreen from './components/LockScreen.vue';
 import BackupManager from './components/BackupManager.vue';
 import LoanTracker from './components/LoanTracker.vue';
 import IncomeTracker from './components/IncomeTracker.vue';
+import ExpenseTracker from './components/ExpenseTracker.vue';
 import PrivacyPolicy from './components/PrivacyPolicy.vue';
 
 const i18n = useI18n();

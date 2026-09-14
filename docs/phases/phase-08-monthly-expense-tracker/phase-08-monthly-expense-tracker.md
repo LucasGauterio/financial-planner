@@ -1,0 +1,100 @@
+# Phase 08: Monthly Expense Registration & Projections
+
+## Objective
+Register recurring and one-off expense sources (fixed bills, variable spending, subscriptions) and project them month-by-month — with monthly totals and a paid/pending status per month — over a user-selectable horizon of up to 35 years, mirroring the income tracker's data model.
+
+## Technical Decisions
+No new technical-decisions document was produced for this phase — `/research phase 08` determined the capability maps entirely onto TDs already decided in [technical-decisions-monthly-income-tracker.md](../../decisions/technical-decisions-monthly-income-tracker.md) (Phase 7). Reuse rationale recorded in [ADR-004](../../adrs/ADR-004-expense-tracker-pattern-reuse.md):
+
+- **TD-01 (Data model, inherited):** Recurring rule + on-the-fly monthly derivation, with a sparse map of manually-confirmed month statuses persisted per source (no materialized 420-row schedule).
+- **TD-02 (Recurrence, inherited):** Simple boolean `recurring` flag — monthly cadence only. Non-monthly bills are registered as separate one-off entries.
+- **TD-03 (Rendering, inherited):** User-selectable projection horizon (e.g. 1 / 5 / 10 / 35 years), defaulting to a short window, reusing the year-grouped list pattern from `InvestmentTimeline.vue` / `IncomeTracker.vue`.
+- **TD-04 (Default status, inherited):** Every projected month defaults to `pending` regardless of date; the user explicitly marks a month as `paid` (same convention as `incomeCalculations.js` / `loanCalculations.js` installment status).
+
+**Addendum** — sourced from [technical-decisions-expense-recurring-end-date.md](../../decisions/technical-decisions-expense-recurring-end-date.md) (ad-hoc, `related_phases: [8]`), decided:
+
+- **TD-01 (Recurring end date, expense-only):** Optional `endMonth` (`'YYYY-MM'`, nullable) on an expense source; when set, the projection stops generating entries past that month (in addition to the existing horizon bound). Absent = today's unbounded-recurring behavior, unchanged. This does **not** apply to income sources (see [ADR-005](../../adrs/ADR-005-expense-recurring-end-date.md)).
+
+**Addendum** — sourced from [technical-decisions-tracker-source-edit-delete.md](../../decisions/technical-decisions-tracker-source-edit-delete.md) (ad-hoc, `related_phases: [7, 8]`), decided:
+
+- **TD-01 (Edit & Delete UI):** Reuse [`LoanTracker.vue`'s](../../../src/components/LoanTracker.vue#L605-L764) populated-modal edit + dedicated confirm-modal delete pattern.
+- **TD-02 (Override handling on edit):** Editing `startMonth`, `recurring`, or `endMonth` discards the source's `statusOverrides`, gated by a `confirm()` warning (mirrors [`updateExistingLoan`'s parameter-change guard](../../../src/components/LoanTracker.vue#L677-L694)); editing `name`/`type`/`amount` alone does not.
+
+## Dependency Map
+- Depends on Phase 01 (build/test scaffolding), Phase 02 (zero-trust encrypted storage via `indexedDbRepository.js`), and Phase 07 (establishes the derived-projection pattern this phase mirrors — `incomeCalculations.js`, `IncomeTracker.vue`).
+- No dependency on Phases 03–06.
+- SI-05 depends on SI-01 (extends `generateExpenseProjection`) and SI-03 (extends the registration form).
+- SI-06 depends on SI-01 (no calculation-engine changes needed, but reuses `generateExpenseProjection`) and SI-03 (extends the registration form and projection list).
+
+## Step Implementations (SIs)
+
+### SI-01: Expense Calculation Engine
+- Implement pure functions in `src/services/expenseCalculations.js` (new), mirroring [`src/services/incomeCalculations.js`](../../../src/services/incomeCalculations.js#L1-L78) function-for-function:
+  - `generateExpenseProjection(sources, horizonMonths, statusOverrides)` — per TD-01/TD-02, expands each expense source (one-off or monthly-recurring) into per-month projected entries up to `horizonMonths`, applying any `statusOverrides` entry for that `{sourceId, "YYYY-MM"}`; unmarked months default to `status: 'pending'` (TD-04).
+  - `calculateMonthlyTotals(projectionMonth)` — sums amounts for a given month's entries, split by `paid` vs. `pending` totals.
+- Target files:
+  - `src/services/expenseCalculations.js` (new)
+- Tests:
+  - `src/services/expenseCalculations.test.js` (new) — cover one-off entries, monthly recurrence expansion, override application, default-pending behavior, and monthly totals across a multi-year horizon (mirror [`src/services/incomeCalculations.test.js`](../../../src/services/incomeCalculations.test.js) test cases, substituting `paid` for `received`).
+  - Run: `npx vitest run src/services/expenseCalculations.test.js`
+
+### SI-02: Expense Repository Integration
+- Add an `EXPENSES_KEY` store following the existing key/get/set convention, including backup snapshot and raw export/import coverage.
+- Target files:
+  - [`src/services/indexedDbRepository.js`](../../../src/services/indexedDbRepository.js#L14-L19) (key constants — add `EXPENSES_KEY = 'financial_planner_expenses'`)
+  - [`src/services/indexedDbRepository.js`](../../../src/services/indexedDbRepository.js#L91-L123) (`get`/`set` — no change needed, generic by key)
+  - [`src/services/indexedDbRepository.js`](../../../src/services/indexedDbRepository.js#L125-L296) (extend `saveBackupSnapshot`, `exportRawBackup`, `importRawBackup`, and the `repository` export with `getExpenses`/`saveExpenses`, mirroring `getIncome`/`saveIncome` at [`L275-L276`](../../../src/services/indexedDbRepository.js#L275-L276))
+- Tests: `npx vitest run` (extend existing repository test coverage if present, otherwise cover via SI-03 component tests).
+
+### SI-03: Expense Tracker Vue Component
+- Build `src/components/ExpenseTracker.vue` (new), mirroring [`src/components/IncomeTracker.vue`](../../../src/components/IncomeTracker.vue):
+  - Form to register an expense source: name, amount, type (fixed bill / variable spending / subscription — free-form label, no enum per TD-02 scope), start month, and a `recurring` checkbox (TD-02).
+  - Horizon selector (1 / 5 / 10 / 35 years) driving `generateExpenseProjection`'s `horizonMonths` argument (TD-03).
+  - Projection list grouped by year (reusing the grouped-list visual pattern from `InvestmentTimeline.vue` / `IncomeTracker.vue`), each month row showing per-source amounts, a paid/pending toggle per entry (defaulting to pending, TD-04), and a monthly total row (TD-01/`calculateMonthlyTotals`).
+- Target files:
+  - `src/components/ExpenseTracker.vue` (new)
+  - Reference pattern: [`src/components/IncomeTracker.vue`](../../../src/components/IncomeTracker.vue) (form + horizon selector + grouped projection list)
+- Tests:
+  - `src/components/ExpenseTracker.test.js` (new)
+  - Run: `npx vitest run src/components/ExpenseTracker.test.js`
+
+### SI-04: Navigation & i18n Integration
+- Register a new top-level "Expenses" tab alongside `portfolio` / `timeline` / `loans` / `income` (not under the Simulations dropdown, since this is a tracker, not a hypothetical simulator).
+- Target files:
+  - [`src/App.vue`](../../../src/App.vue#L108-L114) (add tab button, `activeTab === 'expenses'`, following the `income` tab button pattern)
+  - [`src/App.vue`](../../../src/App.vue#L124) (render `<ExpenseTracker v-else-if="activeTab === 'expenses'" />`)
+  - [`src/App.vue`](../../../src/App.vue#L145) (import `ExpenseTracker` from `./components/ExpenseTracker.vue`)
+  - [`src/locales/pt-BR.js`](../../../src/locales/pt-BR.js#L14) (add `tabs.expenses: 'Despesas Mensais'` and any expense-specific keys, mirroring the `income` block at [`L216`](../../../src/locales/pt-BR.js#L216))
+  - [`src/locales/en-US.js`](../../../src/locales/en-US.js#L14) (mirror English keys — every key added to `pt-BR.js` MUST have an `en-US.js` counterpart per the Strict Bi-Lingual i18n rule; mirror the `income` block at [`L216`](../../../src/locales/en-US.js#L216))
+- Tests: `npx vitest run` (full suite, confirm no regressions in tab switching / existing components).
+
+### SI-05: Recurring Expense End Date (`endMonth`)
+- Extend `generateExpenseProjection` per `expense-recurring-end-date/TD-01`: accept an optional `endMonth` on a source; the generation loop stops emitting entries once the computed month exceeds `endMonth` (in addition to the existing `horizonMonths` bound), whichever is reached first. Sources with no `endMonth` are unaffected.
+- Extend the registration form in `ExpenseTracker.vue` with an optional "End Month" `<input type="month">`, shown only when `recurring` is checked (a non-recurring source already has a single implicit month); validate `endMonth >= startMonth` when both are set.
+- Target files:
+  - [`src/services/expenseCalculations.js`](../../../src/services/expenseCalculations.js#L15-L53) (`generateExpenseProjection` loop — add the `endMonth` bound check)
+  - `src/components/ExpenseTracker.vue` (form: new optional field; `saveSource`: persist `endMonth`)
+- Tests:
+  - `src/services/expenseCalculations.test.js` (extend) — a recurring source with `endMonth` stops exactly at that month even when `horizonMonths` extends further; a recurring source with no `endMonth` is unaffected (regression); `endMonth` before `startMonth` produces no entries (or is rejected at the form layer — cover whichever the implementation chooses).
+  - `src/components/ExpenseTracker.test.js` (extend) — the end-month field is submitted and persisted via `repository.saveExpenses`.
+  - Run: `npx vitest run src/services/expenseCalculations.test.js src/components/ExpenseTracker.test.js`
+
+### SI-06: Edit & Delete for Expense Sources
+- Add `editSource(source)`, `deleteSource(source)`, and `confirmDeleteSource()` to `ExpenseTracker.vue`, mirroring [`LoanTracker.vue`'s `editLoan`/`deleteLoan`/`confirmDeleteLoan`](../../../src/components/LoanTracker.vue#L605-L764) (same shape as `IncomeTracker.vue`'s SI-05, phase-07):
+  - An edit button on each source row calls `editSource(source)`, which populates `form` (adding a `form.sourceId` field) and reopens the existing add modal; `saveSource()` branches on `form.sourceId` presence to update the matching entry in `sources` in place vs. push a new one.
+  - A delete button calls `deleteSource(source)`, which opens a dedicated confirm modal (`showDeleteConfirm` + `sourceToDelete`); on confirm, the source is filtered out of `sources` and persisted via `repository.saveExpenses`.
+  - Per `tracker-source-edit-delete/TD-02`: if the edit changes `startMonth`, `recurring`, or `endMonth`, a native `confirm()` warns that recorded paid/pending statuses for that source will be cleared ([`updateExistingLoan`'s parameter-change guard](../../../src/components/LoanTracker.vue#L677-L694) is the reference); on confirmation, `statusOverrides` resets to `{}` before saving. Editing only `name`/`type`/`amount` skips this reset.
+- Target files:
+  - `src/components/ExpenseTracker.vue` (extend)
+  - [`src/locales/en-US.js`](../../../src/locales/en-US.js#L243-L269) / [`src/locales/pt-BR.js`](../../../src/locales/pt-BR.js#L243-L269) (add `expenses.editSource`, `expenses.deleteSource`, `expenses.confirmDeleteTitle`, `expenses.confirmDelete`, `expenses.confirmAlterParams` keys, mirroring the `loans.*` equivalents)
+- Tests:
+  - `src/components/ExpenseTracker.test.js` (extend) — editing a source pre-fills and updates the existing entry (not a duplicate); deleting a source removes it after confirming; changing `startMonth`/`recurring`/`endMonth` on edit clears `statusOverrides` after confirmation; changing only `name`/`amount` leaves `statusOverrides` untouched.
+  - Run: `npx vitest run src/components/ExpenseTracker.test.js`
+
+## Deliverables
+- `expenseCalculations.js` pure projection/aggregation engine with unit tests.
+- Encrypted IndexedDB persistence for expense sources and status overrides, integrated into the existing backup/export/import flow.
+- `ExpenseTracker.vue` component: registration form, horizon selector, and year-grouped paid/pending projection list with monthly totals.
+- New "Expenses" tab wired into `App.vue`, fully bilingual (`en-US` / `pt-BR`).
+- Optional `endMonth` on recurring expense sources, so a bounded-term recurring expense stops projecting past its end date.
+- Edit and delete for registered expense sources, matching the `LoanTracker.vue` interaction pattern.

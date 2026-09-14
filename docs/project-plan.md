@@ -45,5 +45,9 @@ The application follows a **Zero-Trust Client Security Architecture** using nati
 - Target files: [`src/services/loanCalculations.js`](file:///G:/Projects/FinancialPlanner/src/services/loanCalculations.js#L1-L120), [`src/components/LoanTracker.vue`](file:///G:/Projects/FinancialPlanner/src/components/LoanTracker.vue#L1-L250).
 
 ### Phase 7: Monthly Income Registration & Projections (`docs/phases/phase-07-monthly-income-tracker/`)
-- Register income sources (salary, dividends, received payments), each optionally flagged as recurring; generate a month-by-month projection list (received vs. pending) with monthly totals, projectable up to 35 years.
+- Register income sources (salary, dividends, received payments), each optionally flagged as recurring; generate a month-by-month projection list (received vs. pending) with monthly totals, projectable up to 35 years. Registered sources can be edited (reopens the registration form pre-filled) or deleted (behind a confirmation step), matching the edit/delete flow established by the Loan Tracker.
 - Target files: `src/services/incomeCalculations.js` (new), `src/components/IncomeTracker.vue` (new).
+
+### Phase 8: Monthly Expense Registration & Projections (`docs/phases/phase-08-monthly-expense-tracker/`)
+- Register expense sources (fixed bills, variable spending, subscriptions), each optionally flagged as recurring and optionally given an end date for bounded-term recurring sources; generate a month-by-month projection list (paid vs. pending) with monthly totals, projectable up to 35 years, mirroring the income tracker's data model. Registered sources can be edited (reopens the registration form pre-filled) or deleted (behind a confirmation step), matching the edit/delete flow established by the Loan Tracker.
+- Target files: `src/services/expenseCalculations.js` (new), `src/components/ExpenseTracker.vue` (new).

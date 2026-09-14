@@ -16,7 +16,7 @@ _Subprojects in scope:_
 
 ## TD-01: Income Projection Data Model — Materialized Schedule vs. Rule + Sparse Overrides
 
-**Scope:** Frontend
+**Scope:** Cross-layer
 
 **Capability:** Register income sources (salary, dividends, received payments), each optionally flagged as recurring; generate a month-by-month projection list (received vs. pending) with monthly totals, projectable up to 35 years.
 
@@ -47,7 +47,7 @@ _Subprojects in scope:_
 
 ## TD-02: Recurrence Cadence Representation
 
-**Scope:** Frontend
+**Scope:** Cross-layer
 
 **Capability:** Register income sources (salary, dividends, received payments), each optionally flagged as recurring; generate a month-by-month projection list (received vs. pending) with monthly totals, projectable up to 35 years.
 
@@ -78,7 +78,7 @@ _Subprojects in scope:_
 
 ## TD-03: Long-Horizon Projection Rendering Strategy
 
-**Scope:** Frontend
+**Scope:** Cross-layer
 
 **Capability:** Register income sources (salary, dividends, received payments), each optionally flagged as recurring; generate a month-by-month projection list (received vs. pending) with monthly totals, projectable up to 35 years.
 
@@ -109,7 +109,7 @@ _Subprojects in scope:_
 
 ## TD-04: Received/Pending Default Status Determination
 
-**Scope:** Frontend
+**Scope:** Cross-layer
 
 **Capability:** Register income sources (salary, dividends, received payments), each optionally flagged as recurring; generate a month-by-month projection list (received vs. pending) with monthly totals, projectable up to 35 years.
 
@@ -137,7 +137,7 @@ _Subprojects in scope:_
 
 | ID | Scope | Decision | Recommendation | Choice |
 |----|-------|----------|---------------|--------|
-| TD-01 | Frontend | Income Projection Data Model | Option B — Recurring rule + sparse overrides | Option B |
-| TD-02 | Frontend | Recurrence Cadence Representation | Option C — Generic `repeatEveryMonths` interval | Option A — Monthly-only recurring flag |
-| TD-03 | Frontend | Long-Horizon Projection Rendering Strategy | Option B — User-selectable horizon | Option B |
-| TD-04 | Frontend | Received/Pending Default Status Determination | Option A — Date-inferred default | Option B — Always pending until confirmed |
+| TD-01 | Cross-layer | Income Projection Data Model | Option B — Recurring rule + sparse overrides | Option B |
+| TD-02 | Cross-layer | Recurrence Cadence Representation | Option C — Generic `repeatEveryMonths` interval | Option A — Monthly-only recurring flag |
+| TD-03 | Cross-layer | Long-Horizon Projection Rendering Strategy | Option B — User-selectable horizon | Option B |
+| TD-04 | Cross-layer | Received/Pending Default Status Determination | Option A — Date-inferred default | Option B — Always pending until confirmed |

@@ -220,6 +220,9 @@
               </div>
             </div>
             
+            <div v-if="formError" style="color: #ef4444; padding: 0 1.75rem 0.75rem; font-size: 0.85rem; font-weight: 500;">
+              {{ formError }}
+            </div>
             <div class="modal-footer">
               <button class="btn btn-secondary" @click="cancelEdit">{{ t('tracker.form.cancel') }}</button>
               <button class="btn btn-primary" @click="saveInvestment">
@@ -234,7 +237,7 @@
     <!-- EDIT INVESTMENT SIDEBAR DRAWER PANEL -->
     <Teleport to="body">
       <transition name="slide-panel">
-        <div v-if="editingIndex !== null" class="drawer-overlay" @click.self="cancelEdit">
+        <div v-if="editingIndex !== null" class="drawer-overlay">
           <div class="drawer-panel" style="max-width: 480px;">
             <div class="drawer-header" style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid var(--border-color);">
               <div>
@@ -341,37 +344,30 @@
               </fieldset>
             </div>
             
-            <div style="padding: 1.5rem; border-top: 1px solid var(--border-color); display: flex; gap: 1rem; justify-content: flex-end; background: var(--surface-color);">
-              <button class="btn btn-secondary" @click="cancelEdit">{{ t('tracker.form.cancel') }}</button>
-              <button class="btn btn-primary" @click="saveInvestment">{{ t('tracker.form.save') }}</button>
+            <div style="padding: 1.5rem; border-top: 1px solid var(--border-color); background: var(--surface-color);">
+              <div v-if="formError" style="color: #ef4444; margin-bottom: 0.75rem; font-size: 0.85rem; font-weight: 500;">
+                {{ formError }}
+              </div>
+              <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                <button class="btn btn-secondary" @click="cancelEdit">{{ t('tracker.form.cancel') }}</button>
+                <button class="btn btn-primary" @click="saveInvestment">{{ t('tracker.form.save') }}</button>
+              </div>
             </div>
           </div>
         </div>
       </transition>
     </Teleport>
 
-    <!-- CUSTOM DELETE CONFIRMATION DIALOG -->
-    <Teleport to="body">
-      <transition name="fade">
-        <div v-if="showDeleteConfirm" class="modal-overlay" @click.self="showDeleteConfirm = false">
-          <div class="card modal-content" style="max-width: 400px; text-align: center; padding: 2rem;">
-            <div style="font-size: 3rem; margin-bottom: 1rem; color: #ef4444;">⚠️</div>
-            <h3 style="margin-bottom: 1rem;">{{ t('tracker.confirmDeleteTitle') }}</h3>
-            <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.95rem;">
-              {{ t('tracker.confirmDelete') }}
-            </p>
-            <div style="display: flex; gap: 1rem; justify-content: center;">
-              <button class="btn btn-secondary" @click="showDeleteConfirm = false" style="flex: 1;">
-                {{ t('tracker.form.cancel') }}
-              </button>
-              <button class="btn class-danger" @click="confirmDeleteInv" style="flex: 1; background: #dc2626; border-color: #dc2626; color: white;">
-                {{ t('tracker.actions.del') }}
-              </button>
-            </div>
-          </div>
-        </div>
-      </transition>
-    </Teleport>
+    <ConfirmDialog
+      :show="showDeleteConfirm"
+      :title="t('tracker.confirmDeleteTitle')"
+      :message="t('tracker.confirmDelete')"
+      :confirm-text="t('tracker.actions.del')"
+      :cancel-text="t('tracker.form.cancel')"
+      danger
+      @confirm="confirmDeleteInv"
+      @cancel="showDeleteConfirm = false"
+    />
   </div>
 </template>
 
@@ -379,6 +375,7 @@
 import { ref, watch, onMounted, inject, computed } from 'vue';
 import { repository } from '../services/indexedDbRepository';
 import { calculateCompoundInterest, calculateRequiredMonthlyContribution } from '../services/financialCalculations';
+import ConfirmDialog from './ConfirmDialog.vue';
 
 const { t, formatCurrency } = inject('i18n');
 
@@ -391,6 +388,7 @@ const currentMonthStr = `${currentYear}-${String(currentDate.getMonth() + 1).pad
 const investments = ref([]);
 const projectionYears = ref(10);
 const showDeleteConfirm = ref(false);
+const formError = ref('');
 
 const baseYear = computed(() => {
   if (investments.value.length === 0) return currentYear;
@@ -493,26 +491,28 @@ function triggerAddMode() {
 
 function saveInvestment() {
   if (!formInv.value.name) return;
-  
+
+  formError.value = '';
+
   const startY = Number(formInv.value.startYear);
   const earlyY = Number(formInv.value.earlyStartYear);
   if (Number.isNaN(startY) || startY < 1900 || Number.isNaN(earlyY) || earlyY < 1900) {
-    alert(t('validation.yearMinAlert'));
+    formError.value = t('validation.yearMinAlert');
     return;
   }
-  
+
   const trimmedName = formInv.value.name.trim().toLowerCase();
   const exists = investments.value.some((inv, idx) => inv.name.trim().toLowerCase() === trimmedName && idx !== editingIndex.value);
   if (exists) {
-    alert(t('tracker.alertExists'));
+    formError.value = t('tracker.alertExists');
     return;
   }
-  
+
   const payload = { ...formInv.value };
   payload.actualStartDate = `${payload.startYear}-${payload.startMonth}`;
   delete payload.startYear;
   delete payload.startMonth;
-  
+
   if (editingIndex.value === null) {
     investments.value.push(payload);
     showAddForm.value = false; // Hide adding layout upon saving explicitly
@@ -520,13 +520,14 @@ function saveInvestment() {
     investments.value[editingIndex.value] = payload;
     editingIndex.value = null;
   }
-  
+
   formInv.value = { ...defaultForm };
 }
 
 function editInv(index) {
   showAddForm.value = false; // Isolate states explicitly
   editingIndex.value = index;
+  formError.value = '';
   
   const target = { ...investments.value[index] };
   target.increase = target.increase || 0;
@@ -550,6 +551,7 @@ function cancelEdit() {
   editingIndex.value = null;
   showAddForm.value = false;
   formInv.value = { ...defaultForm };
+  formError.value = '';
 }
 
 function removeInv(index) {
