@@ -12,6 +12,7 @@ export default {
     timeline: 'Linha do Tempo',
     loans: 'Empréstimos',
     income: 'Renda Mensal',
+    expenses: 'Despesas Mensais',
     privacy: 'Política de Privacidade'
   },
   settings: {
@@ -232,6 +233,32 @@ export default {
     form: {
       name: 'Nome da Fonte',
       type: 'Tipo (Salário, Dividendo, Pagamento...)',
+      amount: 'Valor',
+      startMonth: 'Mês de Início',
+      recurring: 'Recorrente (mensal)',
+      cancel: 'Cancelar',
+      add: 'Adicionar'
+    }
+  },
+  expenses: {
+    title: 'Despesas Mensais',
+    subtitle: 'Registre contas fixas, gastos variáveis e assinaturas, e projete-os mês a mês.',
+    addSource: 'Adicionar Despesa',
+    horizon: 'Horizonte de Projeção',
+    horizonYears: '{years} Ano(s)',
+    sourcesCount: 'Despesas Cadastradas',
+    empty: 'Nenhuma despesa cadastrada. Pressione "Adicionar Despesa" para começar!',
+    emptyProjection: 'Nenhuma projeção para o horizonte selecionado.',
+    paid: 'Pago',
+    pending: 'Pendente',
+    total: 'Total',
+    status: {
+      paid: 'Pago',
+      pending: 'Pendente'
+    },
+    form: {
+      name: 'Nome da Despesa',
+      type: 'Tipo (Conta fixa, Gasto variável, Assinatura...)',
       amount: 'Valor',
       startMonth: 'Mês de Início',
       recurring: 'Recorrente (mensal)',

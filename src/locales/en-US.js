@@ -12,6 +12,7 @@ export default {
     timeline: 'Life Timeline',
     loans: 'Loan Tracker',
     income: 'Monthly Income',
+    expenses: 'Monthly Expenses',
     privacy: 'Privacy Policy'
   },
   settings: {
@@ -232,6 +233,32 @@ export default {
     form: {
       name: 'Source Name',
       type: 'Type (Salary, Dividend, Payment...)',
+      amount: 'Amount',
+      startMonth: 'Start Month',
+      recurring: 'Recurring (monthly)',
+      cancel: 'Cancel',
+      add: 'Add'
+    }
+  },
+  expenses: {
+    title: 'Monthly Expenses',
+    subtitle: 'Register fixed bills, variable spending and subscriptions, and project them month by month.',
+    addSource: 'Add Expense Source',
+    horizon: 'Projection Horizon',
+    horizonYears: '{years} Year(s)',
+    sourcesCount: 'Registered Sources',
+    empty: 'No expense sources registered yet. Press "Add Expense Source" to get started!',
+    emptyProjection: 'No projection for the selected horizon.',
+    paid: 'Paid',
+    pending: 'Pending',
+    total: 'Total',
+    status: {
+      paid: 'Paid',
+      pending: 'Pending'
+    },
+    form: {
+      name: 'Source Name',
+      type: 'Type (Fixed bill, Variable spending, Subscription...)',
       amount: 'Amount',
       startMonth: 'Start Month',
       recurring: 'Recurring (monthly)',
