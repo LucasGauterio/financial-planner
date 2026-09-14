@@ -28,6 +28,24 @@
     </div>
 
     <div v-else>
+      <div class="sources-list" style="margin-bottom: 2rem;">
+        <div v-for="source in sources" :key="source.id" class="expense-entry-row source-row">
+          <div class="entry-info">
+            <strong>{{ source.name }}</strong>
+            <span class="entry-type">{{ source.type }}</span>
+          </div>
+          <div class="entry-right">
+            <span class="entry-amount">{{ formatCurrency(source.amount) }}</span>
+            <button class="action-icon-btn" @click="editSource(source)" :title="t('expenses.editSource')">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+            </button>
+            <button class="action-icon-btn danger" @click="deleteSource(source)" :title="t('expenses.deleteSource')">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
       <div v-if="projectionGroups.length === 0" class="card empty-state">
         <h3>{{ t('expenses.emptyProjection') }}</h3>
       </div>
@@ -69,7 +87,7 @@
       <div v-if="showAddModal" class="modal-overlay" @click.self="closeAddModal">
         <div class="modal-content">
           <div class="modal-header">
-            <h3>{{ t('expenses.addSource') }}</h3>
+            <h3>{{ form.sourceId ? t('expenses.editSource') : t('expenses.addSource') }}</h3>
             <button class="close-btn" @click="closeAddModal">&times;</button>
           </div>
 
@@ -109,9 +127,29 @@
 
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" @click="closeAddModal">{{ t('expenses.form.cancel') }}</button>
-              <button type="submit" class="btn btn-primary">{{ t('expenses.form.add') }}</button>
+              <button type="submit" class="btn btn-primary">{{ form.sourceId ? t('expenses.form.save') : t('expenses.form.add') }}</button>
             </div>
           </form>
+        </div>
+      </div>
+    </Teleport>
+
+    <Teleport to="body">
+      <div v-if="showDeleteConfirm" class="modal-overlay" @click.self="showDeleteConfirm = false">
+        <div class="card modal-content" style="max-width: 400px; text-align: center; padding: 2rem;">
+          <div style="font-size: 3rem; margin-bottom: 1rem; color: #ef4444;">⚠️</div>
+          <h3 style="margin-bottom: 1rem;">{{ t('expenses.confirmDeleteTitle') }}</h3>
+          <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.95rem;">
+            {{ t('expenses.confirmDelete') }}
+          </p>
+          <div style="display: flex; gap: 1rem; justify-content: center;">
+            <button class="btn btn-secondary" @click="showDeleteConfirm = false" style="flex: 1;">
+              {{ t('expenses.form.cancel') }}
+            </button>
+            <button class="btn" @click="confirmDeleteSource" style="flex: 1; background: #dc2626; border-color: #dc2626; color: white;">
+              {{ t('expenses.deleteSource') }}
+            </button>
+          </div>
         </div>
       </div>
     </Teleport>
@@ -127,10 +165,13 @@ const { t, formatCurrency, locale } = inject('i18n');
 
 const sources = ref([]);
 const showAddModal = ref(false);
+const showDeleteConfirm = ref(false);
+const sourceToDelete = ref(null);
 const horizonOptions = [1, 5, 10, 35];
 const horizonYears = ref(1);
 
 const formDefaults = () => ({
+  sourceId: null,
   name: '',
   type: '',
   amount: null,
@@ -167,20 +208,69 @@ function closeAddModal() {
   showAddModal.value = false;
 }
 
+function editSource(source) {
+  form.sourceId = source.id;
+  form.name = source.name;
+  form.type = source.type;
+  form.amount = source.amount;
+  form.startMonth = source.startMonth;
+  form.recurring = source.recurring;
+  form.endMonth = source.endMonth || '';
+  showAddModal.value = true;
+}
+
 async function saveSource() {
-  sources.value.push({
-    id: generateSecureId(),
-    name: form.name,
-    type: form.type,
-    amount: form.amount,
-    startMonth: form.startMonth,
-    recurring: form.recurring,
-    endMonth: form.recurring && form.endMonth ? form.endMonth : null,
-    statusOverrides: {}
-  });
+  const newEndMonth = form.recurring && form.endMonth ? form.endMonth : null;
+
+  if (form.sourceId) {
+    const index = sources.value.findIndex(s => s.id === form.sourceId);
+    if (index !== -1) {
+      const existing = sources.value[index];
+      const isParamsChanged = existing.startMonth !== form.startMonth
+        || existing.recurring !== form.recurring
+        || (existing.endMonth || null) !== newEndMonth;
+
+      if (isParamsChanged) {
+        if (confirm(t('expenses.confirmAlterParams'))) {
+          existing.startMonth = form.startMonth;
+          existing.recurring = form.recurring;
+          existing.endMonth = newEndMonth;
+          existing.statusOverrides = {};
+        }
+      }
+      existing.name = form.name;
+      existing.type = form.type;
+      existing.amount = form.amount;
+    }
+  } else {
+    sources.value.push({
+      id: generateSecureId(),
+      name: form.name,
+      type: form.type,
+      amount: form.amount,
+      startMonth: form.startMonth,
+      recurring: form.recurring,
+      endMonth: newEndMonth,
+      statusOverrides: {}
+    });
+  }
 
   await repository.saveExpenses(sources.value);
   closeAddModal();
+}
+
+function deleteSource(source) {
+  sourceToDelete.value = source;
+  showDeleteConfirm.value = true;
+}
+
+async function confirmDeleteSource() {
+  if (sourceToDelete.value) {
+    sources.value = sources.value.filter(s => s.id !== sourceToDelete.value.id);
+    await repository.saveExpenses(sources.value);
+    showDeleteConfirm.value = false;
+    sourceToDelete.value = null;
+  }
 }
 
 // Builds the `${sourceId}:${YYYY-MM}` -> status map expected by generateExpenseProjection
@@ -364,5 +454,29 @@ async function toggleStatus(entry) {
   color: var(--text-secondary);
   cursor: pointer;
   line-height: 1;
+}
+
+.action-icon-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  width: 26px;
+  height: 26px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.action-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+}
+
+.action-icon-btn.danger:hover {
+  background: #dc2626;
+  color: #ffffff;
 }
 </style>

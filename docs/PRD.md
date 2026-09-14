@@ -25,6 +25,7 @@
 | **FR-006** | `PastInvestmentSimulator` | Model historical asset growth based on consistent periodic contributions. | Medium | [PastInvestmentSimulator.vue](file:///G:/Projects/FinancialPlanner/src/components/PastInvestmentSimulator.vue) |
 | **FR-007** | `TimeGapComparator` | Compare financial outcomes between starting investments today versus delaying start by $N$ months. | Medium | [TimeGapComparator.vue](file:///G:/Projects/FinancialPlanner/src/components/TimeGapComparator.vue) |
 | **FR-008** | `ExpenseTracker` | Register expense sources (fixed bills, variable spending, subscriptions), each optionally flagged as recurring and optionally given an end date (for recurring sources with a known term, e.g. a financed purchase); generate a month-by-month projection (paid vs. pending) with monthly totals, selectable up to a 35-year horizon. | High | `src/services/expenseCalculations.js` (new) |
+| **FR-009** | `IncomeTracker`, `ExpenseTracker` | Edit a previously registered income or expense source (reopens the registration form pre-filled) and delete it (behind a confirmation step), matching the edit/delete flow already available in `LoanTracker`. Changing a source's start month, recurring flag, or end date clears its recorded paid/received history for that source (confirmed before applying). | High | [LoanTracker.vue](file:///G:/Projects/FinancialPlanner/src/components/LoanTracker.vue#L605-L764) (reference pattern) |
 
 ---
 

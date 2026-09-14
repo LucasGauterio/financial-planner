@@ -16,6 +16,7 @@ This document maps all product requirements defined in [PRD.md](file:///G:/Proje
 | **FR-006** | Historical Yield Simulation | [PastInvestmentSimulator.vue](file:///G:/Projects/FinancialPlanner/src/components/PastInvestmentSimulator.vue#L1-L120) | `L1-L120` | [PastInvestmentSimulator.test.js](file:///G:/Projects/FinancialPlanner/src/components/PastInvestmentSimulator.test.js) |
 | **FR-007** | Time Gap Opportunity Cost | [TimeGapComparator.vue](file:///G:/Projects/FinancialPlanner/src/components/TimeGapComparator.vue#L1-L150) | `L1-L150` | [TimeGapComparator.test.js](file:///G:/Projects/FinancialPlanner/src/components/TimeGapComparator.test.js) |
 | **FR-008** | Monthly Expense Registration & Projection | [expenseCalculations.js](file:///G:/Projects/FinancialPlanner/src/services/expenseCalculations.js#L1-L77) | `L1-L77` | [expenseCalculations.test.js](file:///G:/Projects/FinancialPlanner/src/services/expenseCalculations.test.js) |
+| **FR-009** | Income/Expense Source Edit & Delete | [IncomeTracker.vue](file:///G:/Projects/FinancialPlanner/src/components/IncomeTracker.vue#L205-L262), [ExpenseTracker.vue](file:///G:/Projects/FinancialPlanner/src/components/ExpenseTracker.vue#L211-L275) | `L205-L262`, `L211-L275` | [IncomeTracker.test.js](file:///G:/Projects/FinancialPlanner/src/components/IncomeTracker.test.js), [ExpenseTracker.test.js](file:///G:/Projects/FinancialPlanner/src/components/ExpenseTracker.test.js) |
 
 ---
 
@@ -26,6 +27,14 @@ This document maps all product requirements defined in [PRD.md](file:///G:/Proje
 | **ADR-003** | Loan Tracker reuses IndexedDB repository + AES-GCM encryption + pure service-layer patterns | [indexedDbRepository.js](file:///G:/Projects/FinancialPlanner/src/services/indexedDbRepository.js#L14-L17), [loanCalculations.js](file:///G:/Projects/FinancialPlanner/src/services/loanCalculations.js#L1-L119) | `L14-L17`, `L1-L119` |
 | **ADR-004** | Expense Tracker reuses Income Tracker's derived-projection data model + IndexedDB repository + AES-GCM encryption + pure service-layer patterns | [incomeCalculations.js](file:///G:/Projects/FinancialPlanner/src/services/incomeCalculations.js#L15-L54), [indexedDbRepository.js](file:///G:/Projects/FinancialPlanner/src/services/indexedDbRepository.js#L14-L19) | `L15-L54`, `L14-L19` |
 | **ADR-005** | Recurring expense end date (`endMonth`) — bounded, expense-only divergence from the income tracker pattern | [expenseCalculations.js](file:///G:/Projects/FinancialPlanner/src/services/expenseCalculations.js#L1-L83) | `L1-L83` |
+| **ADR-006** | Income/Expense source edit & delete reuses LoanTracker's populated-modal edit + confirm-modal delete + parameter-change override-reset pattern | [LoanTracker.vue](file:///G:/Projects/FinancialPlanner/src/components/LoanTracker.vue#L605-L764) (reference), [IncomeTracker.vue](file:///G:/Projects/FinancialPlanner/src/components/IncomeTracker.vue#L205-L262), [ExpenseTracker.vue](file:///G:/Projects/FinancialPlanner/src/components/ExpenseTracker.vue#L211-L275) | `L605-L764`, `L205-L262`, `L211-L275` |
+
+## Technical Decision Traceability (`technical-decisions-tracker-source-edit-delete.md`)
+
+| TD ID | Decision Summary | Implementation File | Line Anchor |
+|---|---|---|---|
+| **TD-01** | Edit reopens populated add-modal (`form.sourceId`); delete via dedicated confirm modal | [IncomeTracker.vue](file:///G:/Projects/FinancialPlanner/src/components/IncomeTracker.vue#L205-L262), [ExpenseTracker.vue](file:///G:/Projects/FinancialPlanner/src/components/ExpenseTracker.vue#L211-L275) | `L205-L262`, `L211-L275` |
+| **TD-02** | Editing `startMonth`/`recurring`/`endMonth` clears `statusOverrides`, gated by `confirm()` | [IncomeTracker.vue](file:///G:/Projects/FinancialPlanner/src/components/IncomeTracker.vue#L215-L247), [ExpenseTracker.vue](file:///G:/Projects/FinancialPlanner/src/components/ExpenseTracker.vue#L222-L260) | `L215-L247`, `L222-L260` |
 
 ## Technical Decision Traceability (Phase 08 — inherited from `technical-decisions-monthly-income-tracker.md`)
 

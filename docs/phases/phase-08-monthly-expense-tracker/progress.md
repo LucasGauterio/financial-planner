@@ -1,7 +1,7 @@
 # phase-08-monthly-expense-tracker — Progress
 
 **Status:** completed
-**SIs:** 5/5 completed
+**SIs:** 6/6 completed
 
 ### SI-08.5 — Recurring Expense End Date (`endMonth`)
 - **Status:** completed
@@ -26,4 +26,9 @@
 ### SI-08.4 — Navigation & i18n Integration
 - **Status:** completed
 - **Tests:** 66 passing (full suite)
+- **Observations:** none
+
+### SI-08.6 — Edit & Delete for Expense Sources
+- **Status:** completed
+- **Tests:** 9 passing
 - **Observations:** none

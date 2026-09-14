@@ -1,7 +1,7 @@
 # phase-07-monthly-income-tracker — Progress
 
 **Status:** completed
-**SIs:** 4/4 completed
+**SIs:** 5/5 completed
 
 ### SI-01 — Income Calculation Engine
 - **Status:** completed
@@ -23,4 +23,9 @@
 ### SI-04 — Navigation & i18n Integration
 - **Status:** completed
 - **Tests:** 46 passing (full suite, 11 files)
+- **Observations:** none
+
+### SI-05 — Edit & Delete for Income Sources
+- **Status:** completed
+- **Tests:** 9 passing
 - **Observations:** none

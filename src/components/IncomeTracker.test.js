@@ -96,4 +96,92 @@ describe('IncomeTracker.vue', () => {
     expect(savedSources).toHaveLength(1);
     expect(savedSources[0]).toMatchObject({ name: 'Dividendos XPTO', type: 'dividendo', amount: 200, startMonth: '2026-05' });
   });
+
+  it('edits a source in place without duplicating it', async () => {
+    repository.getIncome.mockResolvedValue([
+      { id: 's1', name: 'Salário', type: 'salario', amount: 5000, startMonth: '2026-01', recurring: true, statusOverrides: {} }
+    ]);
+
+    const wrapper = mount(IncomeTracker, { global: i18nStub });
+    await flushPromises();
+
+    await wrapper.find('.action-icon-btn').trigger('click');
+    await flushPromises();
+
+    const body = new DOMWrapper(document.body);
+    await body.find('input[type="number"]').setValue(5500);
+    await body.find('form').trigger('submit.prevent');
+    await flushPromises();
+
+    const savedSources = repository.saveIncome.mock.calls[0][0];
+    expect(savedSources).toHaveLength(1);
+    expect(savedSources[0]).toMatchObject({ id: 's1', amount: 5500, startMonth: '2026-01' });
+  });
+
+  it('clears statusOverrides when startMonth changes on edit, gated by confirm', async () => {
+    const confirmSpy = vi.spyOn(globalThis, 'confirm').mockReturnValue(true);
+    repository.getIncome.mockResolvedValue([
+      { id: 's1', name: 'Salário', type: 'salario', amount: 5000, startMonth: '2026-01', recurring: true, statusOverrides: { '2026-01': 'received' } }
+    ]);
+
+    const wrapper = mount(IncomeTracker, { global: i18nStub });
+    await flushPromises();
+
+    await wrapper.find('.action-icon-btn').trigger('click');
+    await flushPromises();
+
+    const body = new DOMWrapper(document.body);
+    await body.find('input[type="month"]').setValue('2026-03');
+    await body.find('form').trigger('submit.prevent');
+    await flushPromises();
+
+    expect(confirmSpy).toHaveBeenCalled();
+    const savedSources = repository.saveIncome.mock.calls[0][0];
+    expect(savedSources[0].statusOverrides).toEqual({});
+    confirmSpy.mockRestore();
+  });
+
+  it('does not clear statusOverrides when only name/amount change on edit', async () => {
+    const confirmSpy = vi.spyOn(globalThis, 'confirm');
+    repository.getIncome.mockResolvedValue([
+      { id: 's1', name: 'Salário', type: 'salario', amount: 5000, startMonth: '2026-01', recurring: true, statusOverrides: { '2026-01': 'received' } }
+    ]);
+
+    const wrapper = mount(IncomeTracker, { global: i18nStub });
+    await flushPromises();
+
+    await wrapper.find('.action-icon-btn').trigger('click');
+    await flushPromises();
+
+    const body = new DOMWrapper(document.body);
+    await body.find('input[type="number"]').setValue(5500);
+    await body.find('form').trigger('submit.prevent');
+    await flushPromises();
+
+    expect(confirmSpy).not.toHaveBeenCalled();
+    const savedSources = repository.saveIncome.mock.calls[0][0];
+    expect(savedSources[0].statusOverrides).toEqual({ '2026-01': 'received' });
+    confirmSpy.mockRestore();
+  });
+
+  it('deletes a source after confirming in the delete modal', async () => {
+    repository.getIncome.mockResolvedValue([
+      { id: 's1', name: 'Salário', type: 'salario', amount: 5000, startMonth: '2026-01', recurring: true, statusOverrides: {} }
+    ]);
+
+    const wrapper = mount(IncomeTracker, { global: i18nStub });
+    await flushPromises();
+
+    await wrapper.find('.action-icon-btn.danger').trigger('click');
+    await flushPromises();
+
+    const body = new DOMWrapper(document.body);
+    const deleteBtn = body.findAll('button').find(b => b.text() === 'income.deleteSource');
+    await deleteBtn.trigger('click');
+    await flushPromises();
+
+    expect(repository.saveIncome).toHaveBeenCalled();
+    const savedSources = repository.saveIncome.mock.calls[0][0];
+    expect(savedSources).toHaveLength(0);
+  });
 });

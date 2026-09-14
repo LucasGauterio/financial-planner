@@ -218,6 +218,11 @@ export default {
     title: 'Renda Mensal',
     subtitle: 'Registre salários, dividendos e pagamentos recebidos, e projete-os mês a mês.',
     addSource: 'Adicionar Fonte de Renda',
+    editSource: 'Editar Fonte de Renda',
+    deleteSource: 'Excluir Fonte',
+    confirmDeleteTitle: 'Excluir Fonte?',
+    confirmDelete: 'Tem certeza de que deseja excluir esta fonte de renda e todo o seu histórico registrado?',
+    confirmAlterParams: 'Alterar o mês de início ou a recorrência vai limpar todos os status de recebido/pendente registrados para esta fonte. Continuar?',
     horizon: 'Horizonte de Projeção',
     horizonYears: '{years} Ano(s)',
     sourcesCount: 'Fontes Cadastradas',
@@ -237,13 +242,19 @@ export default {
       startMonth: 'Mês de Início',
       recurring: 'Recorrente (mensal)',
       cancel: 'Cancelar',
-      add: 'Adicionar'
+      add: 'Adicionar',
+      save: 'Salvar Alterações'
     }
   },
   expenses: {
     title: 'Despesas Mensais',
     subtitle: 'Registre contas fixas, gastos variáveis e assinaturas, e projete-os mês a mês.',
     addSource: 'Adicionar Despesa',
+    editSource: 'Editar Despesa',
+    deleteSource: 'Excluir Despesa',
+    confirmDeleteTitle: 'Excluir Despesa?',
+    confirmDelete: 'Tem certeza de que deseja excluir esta despesa e todo o seu histórico registrado?',
+    confirmAlterParams: 'Alterar o mês de início, a recorrência ou o mês final vai limpar todos os status de pago/pendente registrados para esta despesa. Continuar?',
     horizon: 'Horizonte de Projeção',
     horizonYears: '{years} Ano(s)',
     sourcesCount: 'Despesas Cadastradas',
@@ -264,7 +275,8 @@ export default {
       recurring: 'Recorrente (mensal)',
       endMonth: 'Mês Final (opcional)',
       cancel: 'Cancelar',
-      add: 'Adicionar'
+      add: 'Adicionar',
+      save: 'Salvar Alterações'
     }
   },
   backup: {

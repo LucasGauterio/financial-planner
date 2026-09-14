@@ -150,4 +150,94 @@ describe('ExpenseTracker.vue', () => {
     const savedSources = repository.saveExpenses.mock.calls[0][0];
     expect(savedSources[0]).toMatchObject({ recurring: false, endMonth: null });
   });
+
+  it('edits a source in place without duplicating it', async () => {
+    repository.getExpenses.mockResolvedValue([
+      { id: 's1', name: 'Aluguel', type: 'conta fixa', amount: 1500, startMonth: '2026-01', recurring: true, endMonth: null, statusOverrides: {} }
+    ]);
+
+    const wrapper = mount(ExpenseTracker, { global: i18nStub });
+    await flushPromises();
+
+    await wrapper.find('.action-icon-btn').trigger('click');
+    await flushPromises();
+
+    const body = new DOMWrapper(document.body);
+    await body.find('input[type="number"]').setValue(1600);
+    await body.find('form').trigger('submit.prevent');
+    await flushPromises();
+
+    const savedSources = repository.saveExpenses.mock.calls[0][0];
+    expect(savedSources).toHaveLength(1);
+    expect(savedSources[0]).toMatchObject({ id: 's1', amount: 1600, startMonth: '2026-01' });
+  });
+
+  it('clears statusOverrides when endMonth changes on edit, gated by confirm', async () => {
+    const confirmSpy = vi.spyOn(globalThis, 'confirm').mockReturnValue(true);
+    repository.getExpenses.mockResolvedValue([
+      { id: 's1', name: 'Financiamento', type: 'conta fixa', amount: 300, startMonth: '2026-01', recurring: true, endMonth: '2026-12', statusOverrides: { '2026-01': 'paid' } }
+    ]);
+
+    const wrapper = mount(ExpenseTracker, { global: i18nStub });
+    await flushPromises();
+
+    await wrapper.find('.action-icon-btn').trigger('click');
+    await flushPromises();
+
+    const body = new DOMWrapper(document.body);
+    const monthInputs = body.findAll('input[type="month"]');
+    expect(monthInputs).toHaveLength(2);
+    await monthInputs[1].setValue('2026-06');
+    await body.find('form').trigger('submit.prevent');
+    await flushPromises();
+
+    expect(confirmSpy).toHaveBeenCalled();
+    const savedSources = repository.saveExpenses.mock.calls[0][0];
+    expect(savedSources[0].statusOverrides).toEqual({});
+    confirmSpy.mockRestore();
+  });
+
+  it('does not clear statusOverrides when only name/amount change on edit', async () => {
+    const confirmSpy = vi.spyOn(globalThis, 'confirm');
+    repository.getExpenses.mockResolvedValue([
+      { id: 's1', name: 'Aluguel', type: 'conta fixa', amount: 1500, startMonth: '2026-01', recurring: true, endMonth: null, statusOverrides: { '2026-01': 'paid' } }
+    ]);
+
+    const wrapper = mount(ExpenseTracker, { global: i18nStub });
+    await flushPromises();
+
+    await wrapper.find('.action-icon-btn').trigger('click');
+    await flushPromises();
+
+    const body = new DOMWrapper(document.body);
+    await body.find('input[type="number"]').setValue(1600);
+    await body.find('form').trigger('submit.prevent');
+    await flushPromises();
+
+    expect(confirmSpy).not.toHaveBeenCalled();
+    const savedSources = repository.saveExpenses.mock.calls[0][0];
+    expect(savedSources[0].statusOverrides).toEqual({ '2026-01': 'paid' });
+    confirmSpy.mockRestore();
+  });
+
+  it('deletes a source after confirming in the delete modal', async () => {
+    repository.getExpenses.mockResolvedValue([
+      { id: 's1', name: 'Aluguel', type: 'conta fixa', amount: 1500, startMonth: '2026-01', recurring: true, endMonth: null, statusOverrides: {} }
+    ]);
+
+    const wrapper = mount(ExpenseTracker, { global: i18nStub });
+    await flushPromises();
+
+    await wrapper.find('.action-icon-btn.danger').trigger('click');
+    await flushPromises();
+
+    const body = new DOMWrapper(document.body);
+    const deleteBtn = body.findAll('button').find(b => b.text() === 'expenses.deleteSource');
+    await deleteBtn.trigger('click');
+    await flushPromises();
+
+    expect(repository.saveExpenses).toHaveBeenCalled();
+    const savedSources = repository.saveExpenses.mock.calls[0][0];
+    expect(savedSources).toHaveLength(0);
+  });
 });

@@ -15,10 +15,16 @@ No new technical-decisions document was produced for this phase — `/research p
 
 - **TD-01 (Recurring end date, expense-only):** Optional `endMonth` (`'YYYY-MM'`, nullable) on an expense source; when set, the projection stops generating entries past that month (in addition to the existing horizon bound). Absent = today's unbounded-recurring behavior, unchanged. This does **not** apply to income sources (see [ADR-005](../../adrs/ADR-005-expense-recurring-end-date.md)).
 
+**Addendum** — sourced from [technical-decisions-tracker-source-edit-delete.md](../../decisions/technical-decisions-tracker-source-edit-delete.md) (ad-hoc, `related_phases: [7, 8]`), decided:
+
+- **TD-01 (Edit & Delete UI):** Reuse [`LoanTracker.vue`'s](../../../src/components/LoanTracker.vue#L605-L764) populated-modal edit + dedicated confirm-modal delete pattern.
+- **TD-02 (Override handling on edit):** Editing `startMonth`, `recurring`, or `endMonth` discards the source's `statusOverrides`, gated by a `confirm()` warning (mirrors [`updateExistingLoan`'s parameter-change guard](../../../src/components/LoanTracker.vue#L677-L694)); editing `name`/`type`/`amount` alone does not.
+
 ## Dependency Map
 - Depends on Phase 01 (build/test scaffolding), Phase 02 (zero-trust encrypted storage via `indexedDbRepository.js`), and Phase 07 (establishes the derived-projection pattern this phase mirrors — `incomeCalculations.js`, `IncomeTracker.vue`).
 - No dependency on Phases 03–06.
 - SI-05 depends on SI-01 (extends `generateExpenseProjection`) and SI-03 (extends the registration form).
+- SI-06 depends on SI-01 (no calculation-engine changes needed, but reuses `generateExpenseProjection`) and SI-03 (extends the registration form and projection list).
 
 ## Step Implementations (SIs)
 
@@ -73,9 +79,22 @@ No new technical-decisions document was produced for this phase — `/research p
   - `src/components/ExpenseTracker.test.js` (extend) — the end-month field is submitted and persisted via `repository.saveExpenses`.
   - Run: `npx vitest run src/services/expenseCalculations.test.js src/components/ExpenseTracker.test.js`
 
+### SI-06: Edit & Delete for Expense Sources
+- Add `editSource(source)`, `deleteSource(source)`, and `confirmDeleteSource()` to `ExpenseTracker.vue`, mirroring [`LoanTracker.vue`'s `editLoan`/`deleteLoan`/`confirmDeleteLoan`](../../../src/components/LoanTracker.vue#L605-L764) (same shape as `IncomeTracker.vue`'s SI-05, phase-07):
+  - An edit button on each source row calls `editSource(source)`, which populates `form` (adding a `form.sourceId` field) and reopens the existing add modal; `saveSource()` branches on `form.sourceId` presence to update the matching entry in `sources` in place vs. push a new one.
+  - A delete button calls `deleteSource(source)`, which opens a dedicated confirm modal (`showDeleteConfirm` + `sourceToDelete`); on confirm, the source is filtered out of `sources` and persisted via `repository.saveExpenses`.
+  - Per `tracker-source-edit-delete/TD-02`: if the edit changes `startMonth`, `recurring`, or `endMonth`, a native `confirm()` warns that recorded paid/pending statuses for that source will be cleared ([`updateExistingLoan`'s parameter-change guard](../../../src/components/LoanTracker.vue#L677-L694) is the reference); on confirmation, `statusOverrides` resets to `{}` before saving. Editing only `name`/`type`/`amount` skips this reset.
+- Target files:
+  - `src/components/ExpenseTracker.vue` (extend)
+  - [`src/locales/en-US.js`](../../../src/locales/en-US.js#L243-L269) / [`src/locales/pt-BR.js`](../../../src/locales/pt-BR.js#L243-L269) (add `expenses.editSource`, `expenses.deleteSource`, `expenses.confirmDeleteTitle`, `expenses.confirmDelete`, `expenses.confirmAlterParams` keys, mirroring the `loans.*` equivalents)
+- Tests:
+  - `src/components/ExpenseTracker.test.js` (extend) — editing a source pre-fills and updates the existing entry (not a duplicate); deleting a source removes it after confirming; changing `startMonth`/`recurring`/`endMonth` on edit clears `statusOverrides` after confirmation; changing only `name`/`amount` leaves `statusOverrides` untouched.
+  - Run: `npx vitest run src/components/ExpenseTracker.test.js`
+
 ## Deliverables
 - `expenseCalculations.js` pure projection/aggregation engine with unit tests.
 - Encrypted IndexedDB persistence for expense sources and status overrides, integrated into the existing backup/export/import flow.
 - `ExpenseTracker.vue` component: registration form, horizon selector, and year-grouped paid/pending projection list with monthly totals.
 - New "Expenses" tab wired into `App.vue`, fully bilingual (`en-US` / `pt-BR`).
 - Optional `endMonth` on recurring expense sources, so a bounded-term recurring expense stops projecting past its end date.
+- Edit and delete for registered expense sources, matching the `LoanTracker.vue` interaction pattern.
