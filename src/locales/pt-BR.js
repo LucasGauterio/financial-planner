@@ -13,6 +13,7 @@ export default {
     loans: 'Empréstimos',
     income: 'Renda Mensal',
     expenses: 'Despesas Mensais',
+    cashFlow: 'Fluxo de Caixa',
     privacy: 'Política de Privacidade'
   },
   settings: {
@@ -224,15 +225,16 @@ export default {
     confirmDeleteTitle: 'Excluir Fonte?',
     confirmDelete: 'Tem certeza de que deseja excluir esta fonte de renda e todo o seu histórico registrado?',
     confirmAlterParamsTitle: 'Limpar Histórico Registrado?',
-    confirmAlterParams: 'Alterar o mês de início ou a recorrência vai limpar todos os status de recebido/pendente registrados para esta fonte. Continuar?',
+    confirmAlterParams: 'Alterar o mês de início, a recorrência ou o mês final vai limpar todos os status de recebido/pendente registrados para esta fonte. Continuar?',
     horizon: 'Horizonte de Projeção',
-    horizonYears: '{years} Ano(s)',
+    horizonMonths: '{months} Mês(es)',
     sourcesCount: 'Fontes Cadastradas',
     empty: 'Nenhuma fonte de renda cadastrada. Pressione "Adicionar Fonte de Renda" para começar!',
     emptyProjection: 'Nenhuma projeção para o horizonte selecionado.',
     received: 'Recebido',
     pending: 'Pendente',
     total: 'Total',
+    actualAmount: 'Valor efetivamente recebido',
     status: {
       received: 'Recebido',
       pending: 'Pendente'
@@ -243,6 +245,7 @@ export default {
       amount: 'Valor',
       startMonth: 'Mês de Início',
       recurring: 'Recorrente (mensal)',
+      endMonth: 'Mês Final (opcional)',
       cancel: 'Cancelar',
       add: 'Adicionar',
       save: 'Salvar Alterações'
@@ -259,13 +262,14 @@ export default {
     confirmAlterParamsTitle: 'Limpar Histórico Registrado?',
     confirmAlterParams: 'Alterar o mês de início, a recorrência ou o mês final vai limpar todos os status de pago/pendente registrados para esta despesa. Continuar?',
     horizon: 'Horizonte de Projeção',
-    horizonYears: '{years} Ano(s)',
+    horizonMonths: '{months} Mês(es)',
     sourcesCount: 'Despesas Cadastradas',
     empty: 'Nenhuma despesa cadastrada. Pressione "Adicionar Despesa" para começar!',
     emptyProjection: 'Nenhuma projeção para o horizonte selecionado.',
     paid: 'Pago',
     pending: 'Pendente',
     total: 'Total',
+    actualAmount: 'Valor efetivamente pago',
     status: {
       paid: 'Pago',
       pending: 'Pendente'
@@ -280,6 +284,19 @@ export default {
       cancel: 'Cancelar',
       add: 'Adicionar',
       save: 'Salvar Alterações'
+    }
+  },
+  cashFlow: {
+    title: 'Visão Geral do Fluxo de Caixa',
+    subtitle: 'Projeções de renda e despesas juntas, mês a mês.',
+    horizon: 'Horizonte de Projeção',
+    horizonMonths: '{months} Mês(es)',
+    empty: 'Nenhuma fonte de renda ou despesa cadastrada ainda.',
+    emptyProjection: 'Nenhuma projeção para o horizonte selecionado.',
+    net: 'Saldo',
+    kind: {
+      income: 'Renda',
+      expense: 'Despesa'
     }
   },
   backup: {
