@@ -12,6 +12,8 @@ export default {
     timeline: 'Life Timeline',
     loans: 'Loan Tracker',
     income: 'Monthly Income',
+    expenses: 'Monthly Expenses',
+    cashFlow: 'Cash Flow',
     privacy: 'Privacy Policy'
   },
   settings: {
@@ -164,6 +166,7 @@ export default {
     alertLentDateMin: 'The lent date cannot be before year 1900.',
     alertStartMonthMin: 'The starting month cannot be before year 1900.',
     alertPaymentDateMin: 'The payment date cannot be before year 1900.',
+    confirmAlterParamsTitle: 'Regenerate Installments?',
     confirmAlterParams: 'Altering these credit parameters will RE-GENERATE all installments, clearing past payment flags. Continue?',
     form: {
       type: 'Loan Type',
@@ -217,14 +220,21 @@ export default {
     title: 'Monthly Income',
     subtitle: 'Register salaries, dividends and received payments, and project them month by month.',
     addSource: 'Add Income Source',
+    editSource: 'Edit Income Source',
+    deleteSource: 'Delete Source',
+    confirmDeleteTitle: 'Delete Source?',
+    confirmDelete: 'Are you sure you want to delete this income source and all its recorded history?',
+    confirmAlterParamsTitle: 'Clear Recorded History?',
+    confirmAlterParams: 'Altering the start month, recurrence, or end month will clear all recorded received/pending statuses for this source. Continue?',
     horizon: 'Projection Horizon',
-    horizonYears: '{years} Year(s)',
+    horizonMonths: '{months} Month(s)',
     sourcesCount: 'Registered Sources',
     empty: 'No income sources registered yet. Press "Add Income Source" to get started!',
     emptyProjection: 'No projection for the selected horizon.',
     received: 'Received',
     pending: 'Pending',
     total: 'Total',
+    actualAmount: 'Actual amount received',
     status: {
       received: 'Received',
       pending: 'Pending'
@@ -235,8 +245,58 @@ export default {
       amount: 'Amount',
       startMonth: 'Start Month',
       recurring: 'Recurring (monthly)',
+      endMonth: 'End Month (optional)',
       cancel: 'Cancel',
-      add: 'Add'
+      add: 'Add',
+      save: 'Save Changes'
+    }
+  },
+  expenses: {
+    title: 'Monthly Expenses',
+    subtitle: 'Register fixed bills, variable spending and subscriptions, and project them month by month.',
+    addSource: 'Add Expense Source',
+    editSource: 'Edit Expense Source',
+    deleteSource: 'Delete Source',
+    confirmDeleteTitle: 'Delete Source?',
+    confirmDelete: 'Are you sure you want to delete this expense source and all its recorded history?',
+    confirmAlterParamsTitle: 'Clear Recorded History?',
+    confirmAlterParams: 'Altering the start month, recurrence, or end month will clear all recorded paid/pending statuses for this source. Continue?',
+    horizon: 'Projection Horizon',
+    horizonMonths: '{months} Month(s)',
+    sourcesCount: 'Registered Sources',
+    empty: 'No expense sources registered yet. Press "Add Expense Source" to get started!',
+    emptyProjection: 'No projection for the selected horizon.',
+    paid: 'Paid',
+    pending: 'Pending',
+    total: 'Total',
+    actualAmount: 'Actual amount paid',
+    status: {
+      paid: 'Paid',
+      pending: 'Pending'
+    },
+    form: {
+      name: 'Source Name',
+      type: 'Type (Fixed bill, Variable spending, Subscription...)',
+      amount: 'Amount',
+      startMonth: 'Start Month',
+      recurring: 'Recurring (monthly)',
+      endMonth: 'End Month (optional)',
+      cancel: 'Cancel',
+      add: 'Add',
+      save: 'Save Changes'
+    }
+  },
+  cashFlow: {
+    title: 'Cash Flow Overview',
+    subtitle: 'Income and Expense projections together, month by month.',
+    horizon: 'Projection Horizon',
+    horizonMonths: '{months} Month(s)',
+    empty: 'No income or expense sources registered yet.',
+    emptyProjection: 'No projection for the selected horizon.',
+    net: 'Net',
+    kind: {
+      income: 'Income',
+      expense: 'Expense'
     }
   },
   backup: {
@@ -253,6 +313,8 @@ export default {
     restoreBtn: 'Restore',
     downloadTooltip: 'Download this snapshot',
     closeBtn: 'Close',
+    cancelBtn: 'Cancel',
+    confirmRestoreTitle: 'Restore Snapshot?',
     confirmRestore: 'Are you sure you want to restore the snapshot from {date}? Your current unsaved changes will be lost.',
     statusRestoring: 'Restoring...',
     statusRestoreFailed: 'Restore failed: {error}',
@@ -299,7 +361,9 @@ export default {
     backToLogin: 'Back to Login',
     createBtn: 'Create Profile',
     deleteProfileBtn: 'Delete Profile',
+    confirmDeleteProfileTitle: 'Delete Profile?',
     confirmDeleteProfile: 'Are you sure you want to delete the profile "{name}" and ALL its data? This cannot be undone.',
+    cancelBtn: 'Cancel',
     authMethodLabel: 'Login Method',
     authMethodPin: 'PIN Code',
     authMethodPassword: 'Old Password (Deprecated)',

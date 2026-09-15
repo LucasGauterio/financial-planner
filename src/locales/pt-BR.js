@@ -12,6 +12,8 @@ export default {
     timeline: 'Linha do Tempo',
     loans: 'Empréstimos',
     income: 'Renda Mensal',
+    expenses: 'Despesas Mensais',
+    cashFlow: 'Fluxo de Caixa',
     privacy: 'Política de Privacidade'
   },
   settings: {
@@ -164,6 +166,7 @@ export default {
     alertLentDateMin: 'A data do empréstimo não pode ser anterior ao ano 1900.',
     alertStartMonthMin: 'O mês de início não pode ser anterior ao ano 1900.',
     alertPaymentDateMin: 'A data do pagamento não pode ser anterior ao ano 1900.',
+    confirmAlterParamsTitle: 'Regerar Parcelas?',
     confirmAlterParams: 'Alterar estes parâmetros de crédito irá REGERAR todas as parcelas, limpando o histórico de pagamentos anteriores. Continuar?',
     form: {
       type: 'Tipo de Empréstimo',
@@ -217,14 +220,21 @@ export default {
     title: 'Renda Mensal',
     subtitle: 'Registre salários, dividendos e pagamentos recebidos, e projete-os mês a mês.',
     addSource: 'Adicionar Fonte de Renda',
+    editSource: 'Editar Fonte de Renda',
+    deleteSource: 'Excluir Fonte',
+    confirmDeleteTitle: 'Excluir Fonte?',
+    confirmDelete: 'Tem certeza de que deseja excluir esta fonte de renda e todo o seu histórico registrado?',
+    confirmAlterParamsTitle: 'Limpar Histórico Registrado?',
+    confirmAlterParams: 'Alterar o mês de início, a recorrência ou o mês final vai limpar todos os status de recebido/pendente registrados para esta fonte. Continuar?',
     horizon: 'Horizonte de Projeção',
-    horizonYears: '{years} Ano(s)',
+    horizonMonths: '{months} Mês(es)',
     sourcesCount: 'Fontes Cadastradas',
     empty: 'Nenhuma fonte de renda cadastrada. Pressione "Adicionar Fonte de Renda" para começar!',
     emptyProjection: 'Nenhuma projeção para o horizonte selecionado.',
     received: 'Recebido',
     pending: 'Pendente',
     total: 'Total',
+    actualAmount: 'Valor efetivamente recebido',
     status: {
       received: 'Recebido',
       pending: 'Pendente'
@@ -235,8 +245,58 @@ export default {
       amount: 'Valor',
       startMonth: 'Mês de Início',
       recurring: 'Recorrente (mensal)',
+      endMonth: 'Mês Final (opcional)',
       cancel: 'Cancelar',
-      add: 'Adicionar'
+      add: 'Adicionar',
+      save: 'Salvar Alterações'
+    }
+  },
+  expenses: {
+    title: 'Despesas Mensais',
+    subtitle: 'Registre contas fixas, gastos variáveis e assinaturas, e projete-os mês a mês.',
+    addSource: 'Adicionar Despesa',
+    editSource: 'Editar Despesa',
+    deleteSource: 'Excluir Despesa',
+    confirmDeleteTitle: 'Excluir Despesa?',
+    confirmDelete: 'Tem certeza de que deseja excluir esta despesa e todo o seu histórico registrado?',
+    confirmAlterParamsTitle: 'Limpar Histórico Registrado?',
+    confirmAlterParams: 'Alterar o mês de início, a recorrência ou o mês final vai limpar todos os status de pago/pendente registrados para esta despesa. Continuar?',
+    horizon: 'Horizonte de Projeção',
+    horizonMonths: '{months} Mês(es)',
+    sourcesCount: 'Despesas Cadastradas',
+    empty: 'Nenhuma despesa cadastrada. Pressione "Adicionar Despesa" para começar!',
+    emptyProjection: 'Nenhuma projeção para o horizonte selecionado.',
+    paid: 'Pago',
+    pending: 'Pendente',
+    total: 'Total',
+    actualAmount: 'Valor efetivamente pago',
+    status: {
+      paid: 'Pago',
+      pending: 'Pendente'
+    },
+    form: {
+      name: 'Nome da Despesa',
+      type: 'Tipo (Conta fixa, Gasto variável, Assinatura...)',
+      amount: 'Valor',
+      startMonth: 'Mês de Início',
+      recurring: 'Recorrente (mensal)',
+      endMonth: 'Mês Final (opcional)',
+      cancel: 'Cancelar',
+      add: 'Adicionar',
+      save: 'Salvar Alterações'
+    }
+  },
+  cashFlow: {
+    title: 'Visão Geral do Fluxo de Caixa',
+    subtitle: 'Projeções de renda e despesas juntas, mês a mês.',
+    horizon: 'Horizonte de Projeção',
+    horizonMonths: '{months} Mês(es)',
+    empty: 'Nenhuma fonte de renda ou despesa cadastrada ainda.',
+    emptyProjection: 'Nenhuma projeção para o horizonte selecionado.',
+    net: 'Saldo',
+    kind: {
+      income: 'Renda',
+      expense: 'Despesa'
     }
   },
   backup: {
@@ -253,6 +313,8 @@ export default {
     restoreBtn: 'Restaurar',
     downloadTooltip: 'Baixar este snapshot',
     closeBtn: 'Fechar',
+    cancelBtn: 'Cancelar',
+    confirmRestoreTitle: 'Restaurar Snapshot?',
     confirmRestore: 'Tem certeza de que deseja restaurar o snapshot de {date}? Suas alterações não salvas serão perdidas.',
     statusRestoring: 'Restaurando...',
     statusRestoreFailed: 'Falha na restauração: {error}',
@@ -299,7 +361,9 @@ export default {
     backToLogin: 'Voltar ao Login',
     createBtn: 'Criar Perfil',
     deleteProfileBtn: 'Excluir Perfil',
+    confirmDeleteProfileTitle: 'Excluir Perfil?',
     confirmDeleteProfile: 'Tem certeza de que deseja excluir o perfil "{name}" e TODOS os seus dados? Esta ação não pode ser desfeita.',
+    cancelBtn: 'Cancelar',
     authMethodLabel: 'Método de Entrada',
     authMethodPin: 'Código PIN',
     authMethodPassword: 'Senha Antiga (Descontinuado)',

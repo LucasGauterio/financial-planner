@@ -296,7 +296,7 @@
     <!-- DETAILED LOAN DRAWER (RIGHT PANEL) -->
     <Teleport to="body">
       <transition name="slide-panel">
-        <div v-if="showDetailsDrawer && selectedLoan" class="drawer-overlay" @click.self="closeDetailsDrawer">
+        <div v-if="showDetailsDrawer && selectedLoan" class="drawer-overlay">
           <div class="drawer-panel">
           <!-- Drawer Header -->
           <div class="drawer-header">
@@ -439,28 +439,27 @@
     </transition>
     </Teleport>
 
-    <!-- CUSTOM DELETE CONFIRMATION DIALOG -->
-    <Teleport to="body">
-      <transition name="fade">
-        <div v-if="showDeleteConfirm" class="modal-overlay" @click.self="showDeleteConfirm = false">
-          <div class="card modal-content" style="max-width: 400px; text-align: center; padding: 2rem;">
-            <div style="font-size: 3rem; margin-bottom: 1rem; color: #ef4444;">⚠️</div>
-            <h3 style="margin-bottom: 1rem;">{{ t('loans.confirmDeleteTitle') }}</h3>
-            <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.95rem;">
-              {{ t('loans.confirmDelete') }}
-            </p>
-            <div style="display: flex; gap: 1rem; justify-content: center;">
-              <button class="btn btn-secondary" @click="showDeleteConfirm = false" style="flex: 1;">
-                {{ t('loans.form.cancel') }}
-              </button>
-              <button class="btn" @click="confirmDeleteLoan" style="flex: 1; background: #dc2626; border-color: #dc2626; color: white;">
-                {{ t('loans.deleteLoan') }}
-              </button>
-            </div>
-          </div>
-        </div>
-      </transition>
-    </Teleport>
+    <ConfirmDialog
+      :show="showDeleteConfirm"
+      :title="t('loans.confirmDeleteTitle')"
+      :message="t('loans.confirmDelete')"
+      :confirm-text="t('loans.deleteLoan')"
+      :cancel-text="t('loans.form.cancel')"
+      danger
+      @confirm="confirmDeleteLoan"
+      @cancel="showDeleteConfirm = false"
+    />
+
+    <ConfirmDialog
+      :show="showParamsConfirm"
+      :title="t('loans.confirmAlterParamsTitle')"
+      :message="t('loans.confirmAlterParams')"
+      :confirm-text="t('loans.form.save')"
+      :cancel-text="t('loans.form.cancel')"
+      danger
+      @confirm="confirmParamsChange"
+      @cancel="cancelParamsChange"
+    />
   </div>
 </template>
 
@@ -468,11 +467,12 @@
 import { ref, reactive, computed, onMounted } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import { repository } from '../services/indexedDbRepository';
-import { 
-  generateCreditCardInstallments, 
-  calculateCasualLoanSummary, 
-  calculateCreditLoanSummary 
+import {
+  generateCreditCardInstallments,
+  calculateCasualLoanSummary,
+  calculateCreditLoanSummary
 } from '../services/loanCalculations';
+import ConfirmDialog from './ConfirmDialog.vue';
 
 const { t, formatCurrency, locale } = useI18n();
 
@@ -484,6 +484,8 @@ const showDetailsDrawer = ref(false);
 const selectedLoan = ref(null);
 const showDeleteConfirm = ref(false);
 const loanToDelete = ref(null);
+const showParamsConfirm = ref(false);
+const pendingParamsChange = ref(null);
 
 // Form States
 const formDefaults = () => ({
@@ -663,36 +665,6 @@ function validateLoanForm() {
   return true;
 }
 
-function updateExistingLoan(existing) {
-  existing.friendName = form.friendName;
-  existing.loanName = form.loanName;
-  existing.notes = form.notes;
-  
-  if (existing.type === 'casual') {
-    existing.amountLent = form.totalAmount;
-    existing.dateLent = form.dateLent;
-    return;
-  }
-
-  const isParamsChanged = existing.totalAmount !== form.totalAmount ||
-                          existing.installmentsCount !== form.installmentsCount ||
-                          existing.startMonth !== form.startMonth ||
-                          existing.dueDay !== form.dueDay;
-
-  if (isParamsChanged) {
-    if (confirm(t('loans.confirmAlterParams'))) {
-      existing.totalAmount = form.totalAmount;
-      existing.installmentsCount = form.installmentsCount;
-      existing.startMonth = form.startMonth;
-      existing.dueDay = form.dueDay;
-      existing.cardName = form.cardName;
-      existing.installments = generateCreditCardInstallments(form.totalAmount, form.installmentsCount, form.startMonth, form.dueDay);
-    }
-  } else {
-    existing.cardName = form.cardName;
-  }
-}
-
 function generateSecureId() {
   if (globalThis.crypto !== undefined) {
     const array = new Uint32Array(1);
@@ -733,12 +705,71 @@ async function saveLoan() {
   if (form.loanId) {
     const index = loans.value.findIndex(l => l.id === form.loanId);
     if (index !== -1) {
-      updateExistingLoan(loans.value[index]);
+      const existing = loans.value[index];
+      existing.friendName = form.friendName;
+      existing.loanName = form.loanName;
+      existing.notes = form.notes;
+
+      if (existing.type === 'casual') {
+        existing.amountLent = form.totalAmount;
+        existing.dateLent = form.dateLent;
+      } else {
+        const isParamsChanged = existing.totalAmount !== form.totalAmount ||
+                                existing.installmentsCount !== form.installmentsCount ||
+                                existing.startMonth !== form.startMonth ||
+                                existing.dueDay !== form.dueDay;
+
+        // Directive 1/2 (dialog-implementation rule): the parameter-change warning is a Vue
+        // dialog (ConfirmDialog), not window.confirm(). Per the original behavior, cardName
+        // is applied here only when params did NOT change; when they did, cardName is applied
+        // only if the user confirms the regeneration (see confirmParamsChange).
+        if (isParamsChanged) {
+          pendingParamsChange.value = {
+            index,
+            totalAmount: form.totalAmount,
+            installmentsCount: form.installmentsCount,
+            startMonth: form.startMonth,
+            dueDay: form.dueDay,
+            cardName: form.cardName
+          };
+          showParamsConfirm.value = true;
+          return;
+        }
+        existing.cardName = form.cardName;
+      }
     }
   } else {
     loans.value.push(createNewLoan());
   }
 
+  await repository.saveLoans(loans.value);
+  closeAddModal();
+  await loadLoans();
+}
+
+async function confirmParamsChange() {
+  const pending = pendingParamsChange.value;
+  if (pending) {
+    const existing = loans.value[pending.index];
+    existing.totalAmount = pending.totalAmount;
+    existing.installmentsCount = pending.installmentsCount;
+    existing.startMonth = pending.startMonth;
+    existing.dueDay = pending.dueDay;
+    existing.cardName = pending.cardName;
+    existing.installments = generateCreditCardInstallments(pending.totalAmount, pending.installmentsCount, pending.startMonth, pending.dueDay);
+  }
+  showParamsConfirm.value = false;
+  pendingParamsChange.value = null;
+  await repository.saveLoans(loans.value);
+  closeAddModal();
+  await loadLoans();
+}
+
+async function cancelParamsChange() {
+  // Matches the original behavior: declining the schedule regeneration leaves
+  // totalAmount/installmentsCount/startMonth/dueDay/cardName/installments untouched.
+  showParamsConfirm.value = false;
+  pendingParamsChange.value = null;
   await repository.saveLoans(loans.value);
   closeAddModal();
   await loadLoans();

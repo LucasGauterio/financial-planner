@@ -304,7 +304,7 @@
     <!-- PRIVACY POLICY MODAL FOR LOCK SCREEN -->
     <Teleport to="body">
       <transition name="fade">
-        <div v-if="showPrivacyModal" class="modal-overlay" style="position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 1.5rem;" @click.self="showPrivacyModal = false">
+        <div v-if="showPrivacyModal" class="modal-overlay" style="position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 1.5rem;">
           <div class="card modal-content" style="width: 100%; max-width: 800px; max-height: 90vh; overflow: hidden; position: relative; padding: 0; display: flex; flex-direction: column;">
             <div style="padding: 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: flex-end; flex-shrink: 0;">
               <button 
@@ -323,6 +323,17 @@
         </div>
       </transition>
     </Teleport>
+
+    <ConfirmDialog
+      :show="showDeleteProfileConfirm"
+      :title="t('auth.confirmDeleteProfileTitle')"
+      :message="profileToDelete ? t('auth.confirmDeleteProfile', { name: profileToDelete }) : ''"
+      :confirm-text="t('auth.deleteProfileBtn')"
+      :cancel-text="t('auth.cancelBtn')"
+      danger
+      @confirm="confirmDeleteProfile"
+      @cancel="cancelDeleteProfile"
+    />
   </div>
 </template>
 
@@ -331,8 +342,11 @@ import { ref, onMounted, inject, watch } from 'vue';
 import { repository } from '../services/indexedDbRepository';
 import { useAuth } from '../composables/useAuth';
 import PrivacyPolicy from './PrivacyPolicy.vue';
+import ConfirmDialog from './ConfirmDialog.vue';
 
 const showPrivacyModal = ref(false);
+const showDeleteProfileConfirm = ref(false);
+const profileToDelete = ref(null);
 
 const { t } = inject('i18n');
 const { 
@@ -639,20 +653,32 @@ function cancelCreateProfile() {
   }, 100);
 }
 
-async function handleDeleteProfile(pName) {
+function handleDeleteProfile(pName) {
   if (pName === 'default') return;
-  
-  const confirmed = confirm(t('auth.confirmDeleteProfile', { name: pName }));
-  if (confirmed) {
-    loading.value = true;
-    try {
-      await deleteProfile(pName);
-    } catch (e) {
-      console.error("Failed to delete profile", e);
-    } finally {
-      loading.value = false;
-    }
+
+  profileToDelete.value = pName;
+  showDeleteProfileConfirm.value = true;
+}
+
+async function confirmDeleteProfile() {
+  const pName = profileToDelete.value;
+  showDeleteProfileConfirm.value = false;
+  profileToDelete.value = null;
+  if (!pName) return;
+
+  loading.value = true;
+  try {
+    await deleteProfile(pName);
+  } catch (e) {
+    console.error("Failed to delete profile", e);
+  } finally {
+    loading.value = false;
   }
+}
+
+function cancelDeleteProfile() {
+  showDeleteProfileConfirm.value = false;
+  profileToDelete.value = null;
 }
 </script>
 

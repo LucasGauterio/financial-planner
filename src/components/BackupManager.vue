@@ -89,8 +89,19 @@
           {{ t('backup.closeBtn') }}
         </button>
       </div>
-      
+
     </div>
+
+    <ConfirmDialog
+      :show="showRestoreConfirm"
+      :title="t('backup.confirmRestoreTitle')"
+      :message="snapshotToRestore ? t('backup.confirmRestore', { date: snapshotToRestore.date }) : ''"
+      :confirm-text="t('backup.restoreBtn')"
+      :cancel-text="t('backup.cancelBtn')"
+      danger
+      @confirm="confirmRestoreSnapshot"
+      @cancel="cancelRestoreSnapshot"
+    />
   </div>
 </template>
 
@@ -100,12 +111,15 @@ import { useI18n } from '../composables/useI18n';
 import { repository } from '../services/indexedDbRepository';
 import { useAuth } from '../composables/useAuth';
 import { decryptData } from '../services/cryptoService';
+import ConfirmDialog from './ConfirmDialog.vue';
 
 const emit = defineEmits(['close']);
 const { t, locale } = useI18n();
 
 const importMsg = ref('');
 const history = ref([]);
+const showRestoreConfirm = ref(false);
+const snapshotToRestore = ref(null);
 
 const reversedHistory = computed(() => {
    return [...history.value].reverse();
@@ -132,17 +146,29 @@ async function createManualSnapshot() {
    await loadHistory();
 }
 
-async function restoreSnapshot(snap) {
-   const confirmMsg = t('backup.confirmRestore', { date: snap.date });
-   if (confirm(confirmMsg)) {
-       try {
-           importMsg.value = t('backup.statusRestoring');
-           await repository.importRawBackup(snap.data);
-           globalThis.location.reload();
-       } catch (e) {
-           importMsg.value = t('backup.statusRestoreFailed', { error: e.message });
-       }
+function restoreSnapshot(snap) {
+   snapshotToRestore.value = snap;
+   showRestoreConfirm.value = true;
+}
+
+async function confirmRestoreSnapshot() {
+   const snap = snapshotToRestore.value;
+   showRestoreConfirm.value = false;
+   snapshotToRestore.value = null;
+   if (!snap) return;
+
+   try {
+       importMsg.value = t('backup.statusRestoring');
+       await repository.importRawBackup(snap.data);
+       globalThis.location.reload();
+   } catch (e) {
+       importMsg.value = t('backup.statusRestoreFailed', { error: e.message });
    }
+}
+
+function cancelRestoreSnapshot() {
+   showRestoreConfirm.value = false;
+   snapshotToRestore.value = null;
 }
 
 async function downloadSnapshot(snap) {
@@ -160,7 +186,7 @@ async function downloadSnapshot(snap) {
     link.remove();
     URL.revokeObjectURL(url);
   } catch (err) {
-    alert(t('backup.errorDownloadFailed', { error: err.message }));
+    importMsg.value = t('backup.errorDownloadFailed', { error: err.message });
   }
 }
 
@@ -180,7 +206,7 @@ async function exportBackup() {
     link.remove();
     URL.revokeObjectURL(url);
   } catch (err) {
-    alert(t('backup.errorExportFailed', { error: err.message }));
+    importMsg.value = t('backup.errorExportFailed', { error: err.message });
   }
 }
 
