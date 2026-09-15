@@ -181,3 +181,16 @@ Fix verified: 130/130 tests pass, `npm run build` succeeds. Scaled proportionate
 
 ### Result
 148/148 tests pass, `npm run build` succeeds. No behavioral change — CSS/markup parity fix only, restoring the visual consistency `ui-pattern-consistency.md` requires between sibling tracker screens. No new ADR: this corrects an implementation gap in an already-decided pattern (ADR-008), not a new architectural choice.
+
+---
+
+## Glob Deprecation Warning Pin (2026-09-15)
+
+| Check ID | Verification Rule | Target Files | Status | Details |
+|---|---|---|---|---|
+| **CHK-047** | Rule `traceability-required.md` | `docs/TRACKER.md` § Bug Fix Traceability | PASSED | BUGFIX-004 maps to a real `#Lnn` anchor (`package.json`'s `overrides` block). |
+| **CHK-048** | Regression risk (dependency override) | `package.json`, `package-lock.json` | PASSED | `npm ls glob` confirms every transitive `glob` resolves to `13.0.6` (non-deprecated); `npm ls @vue/test-utils` confirms `js-beautify` stayed on its `1.15.4`/`nopt@^7.2.1` line, so no new Node-engine warning was introduced. `npm install` produces zero deprecation output. |
+| **CHK-049** | Test correctness (regression risk) | full suite | PASSED | `npx vitest run` — 148/148 passing after the override, confirming `js-beautify`'s HTML pretty-print usage inside `@vue/test-utils` (if any) is unaffected by the newer `glob` resolution. |
+
+### Result
+148/148 tests pass, `npm run build` succeeds. `npm install` prints zero deprecation warnings. This entry is retroactive — the fix (commit `73410ee` on `chore/glob-deprecation-warning`, PR #5) predates this doc update; recorded here per `traceability-required.md` so the fix has the same TRACKER/VALIDATION_REPORT coverage as every other change in this project.
