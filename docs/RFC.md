@@ -107,6 +107,12 @@ graph TD
 ### 4.15 Projection Horizon Defaults to the Current Month Only
 - **Decision**: the `horizonMonths` ref's initial value is lowered from `3` to `1` across `IncomeTracker.vue`, `ExpenseTracker.vue`, and `CashFlowOverview.vue` (§4.9/§4.13), so each screen opens scoped to exactly the current month. Combined with §4.14's windowing, the stats dashboard's first-paint figures reflect only the current month's entries. The ruler's range/step (§4.12) are unchanged — only the default selection moves. See [ADR-015](adrs/ADR-015-default-horizon-current-month-only.md).
 
+### 4.16 Dependency Deprecation Pin (`glob`)
+- **Decision**: `npm install` printed a `glob@10.5.0` deprecation warning at deploy time, transitively required by `@vue/test-utils → js-beautify`. A top-level `"overrides": { "glob": "^13.0.6" }` in `package.json` forces every transitive `glob` resolution to a current, non-deprecated version without bumping `js-beautify`'s major (which would pull a `nopt` version requiring a newer Node than the deploy image supported at the time). See BUGFIX-004 in [TRACKER.md](TRACKER.md#bug-fix-traceability).
+
+### 4.17 Full Dependency & Runtime Upgrade (Phase 11)
+- **Decision**: every project dependency is bumped to its latest compatible release — `vue`, `vite`, `@vitejs/plugin-vue` within their current majors, and `vitest`/`@vitest/coverage-v8` (major 4→5) and `jsdom` (major 29→30) to their new majors — and the Node runtime the project builds/deploys against moves from `node:20-alpine` to `node:24-alpine` (the current Active/Maintenance LTS line), which `vitest@5`/`jsdom@30` both require. `@vue/test-utils` is deliberately held at `^2.4.6` rather than bumped to `2.5.0`, since that would reintroduce the Node-engine constraint §4.16's `glob` override was written to avoid — this time in a way the Node runtime upgrade can't fully close, because a developer's local Node version is outside this project's control. See [ADR-016](adrs/ADR-016-full-dependency-and-runtime-upgrade.md).
+
 ---
 
 ## 5. Open Questions / Future Roadmap

@@ -1,16 +1,16 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { repository } from './localStorageRepository.js';
 
 describe('Local Storage Repository', () => {
   beforeEach(() => {
     const store = {};
-    global.localStorage = {
+    vi.stubGlobal('localStorage', {
       getItem: (key) => store[key] || null,
       setItem: (key, value) => { store[key] = value.toString(); },
       clear: () => {
         for (const key in store) delete store[key];
       }
-    };
+    });
   });
 
   it('saves and retrieves investments', () => {

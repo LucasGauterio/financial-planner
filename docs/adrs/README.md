@@ -20,3 +20,4 @@ This directory contains key architectural decisions for the **FinancialPlanner**
 | [ADR-013](ADR-013-cashflow-horizon-ruler-slider.md) | Cash Flow Overview Horizon Adopts the Same Ruler Slider as Portfolio/Income/Expense | Accepted | 2026-09-15 |
 | [ADR-014](ADR-014-stats-dashboard-horizon-window-scoping.md) | Stats Dashboard Scoped to the Selected Horizon Window | Accepted | 2026-09-15 |
 | [ADR-015](ADR-015-default-horizon-current-month-only.md) | Projection Horizon Defaults to the Current Month Only | Accepted | 2026-09-15 |
+| [ADR-016](ADR-016-full-dependency-and-runtime-upgrade.md) | Full Dependency & Runtime Upgrade (Phase 11) | Accepted | 2026-09-15 |
