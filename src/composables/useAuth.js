@@ -1,4 +1,5 @@
 import { ref } from 'vue';
+import { repository } from '../services/indexedDbRepository';
 
 const encryptionKey = ref(null);
 const isUnlocked = ref(false);
@@ -12,8 +13,6 @@ const IDLE_TIMEOUT_MS = 60 * 60 * 1000; // 1 hour
 async function lock() {
   if (isUnlocked.value) {
     try {
-      // Dynamic import to prevent circular dependencies
-      const { repository } = await import('../services/indexedDbRepository');
       await repository.saveBackupSnapshot();
     } catch (e) {
       console.error("Auto-backup before lock failed", e);
@@ -88,7 +87,6 @@ if (globalThis.window !== undefined) {
   document.addEventListener('visibilitychange', async () => {
      if (document.visibilityState === 'hidden' && isUnlocked.value) {
          try {
-             const { repository } = await import('../services/indexedDbRepository');
              await repository.saveBackupSnapshot();
          } catch(e) {
              console.error("Visibility auto-backup failed", e);
