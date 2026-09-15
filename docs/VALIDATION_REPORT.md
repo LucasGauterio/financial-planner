@@ -194,3 +194,18 @@ Fix verified: 130/130 tests pass, `npm run build` succeeds. Scaled proportionate
 
 ### Result
 148/148 tests pass, `npm run build` succeeds. `npm install` prints zero deprecation warnings. This entry is retroactive — the fix (commit `73410ee` on `chore/glob-deprecation-warning`, PR #5) predates this doc update; recorded here per `traceability-required.md` so the fix has the same TRACKER/VALIDATION_REPORT coverage as every other change in this project.
+
+---
+
+## Full Dependency & Runtime Upgrade — Phase 11 (2026-09-15)
+
+| Check ID | Verification Rule | Target Files | Status | Details |
+|---|---|---|---|---|
+| **CHK-050** | Rule `traceability-required.md` | `docs/TRACKER.md` | PASSED | ADR-016 maps to real `#Lnn` anchors (`package.json`, `Dockerfile`). |
+| **CHK-051** | Rule `source-code-is-read-only.md` (N/A — implementation phase, not reverse-engineering) | — | N/A | This phase is a direct implementation request, not a `design-docs` reverse-engineering pass; the read-only restriction doesn't apply. Documentation (ADR-016, RFC §4.17, FDD §4.8, PRD NFR-005, TRACKER, phase-11 folder) was written before the dependency bumps were installed, per the documentation-first policy. |
+| **CHK-052** | Regression risk (major-version bumps: vitest 4→5, `@vitest/coverage-v8` 4→5, jsdom 29→30) | `package.json`, `package-lock.json`, `src/services/localStorageRepository.test.js` | PASSED | One real breaking change found and fixed (vitest 5's jsdom environment makes `window.localStorage` a non-configurable getter; `global.localStorage = {...}` now throws). Fixed via `vi.stubGlobal('localStorage', {...})`. No other test or `vite.config.js` change was required — verified against the Vitest 5 migration guide's documented breaking changes (coverage glob/include-exclude precision, reporter output paths, `clearMocks` default) as not applicable to this project's config shape. |
+| **CHK-053** | Deploy-warning elimination (Node runtime) | `Dockerfile`, `package.json` | PASSED | `Dockerfile`'s builder stage now targets `node:24-alpine`, which satisfies `vitest@5`'s (`^22.12.0\|\|^24.0.0\|\|>=26.0.0`) and `jsdom@30`'s (`^22.22.2\|\|^24.15.0\|\|>=26.0.0`) engines requirements. A fresh `npm install` on this development sandbox (whose own installed Node, v25.2.1, is an odd-numbered non-LTS release matching neither range) still shows two `EBADENGINE` warnings for exactly this reason — expected and does not indicate a deploy-environment problem; see ADR-016 Alternative A and `phase-11-dependency-upgrade/progress.md` SI-11.5. |
+| **CHK-054** | Deliberate non-upgrade documented | `docs/PRD.md` § Out of Scope, `docs/adrs/ADR-016-full-dependency-and-runtime-upgrade.md` | PASSED | `@vue/test-utils` intentionally held at `^2.4.6` (not `2.5.0`) and Vue 3.6 intentionally not adopted (pre-release at decision time); both are recorded as deferred rather than silently skipped. |
+
+### Result
+148/148 tests pass (from a fully clean `node_modules` reinstall), `npm run build` succeeds. Every dependency is at its latest compatible release except the one documented, deliberate exception (`@vue/test-utils`). `npm install` produces zero deprecation warnings in every environment, and zero engine warnings in the actual deploy target (`node:24-alpine`); the two `EBADENGINE` warnings observed locally are specific to this sandbox's own non-LTS Node installation and are expected per ADR-016.
