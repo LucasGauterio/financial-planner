@@ -209,3 +209,16 @@ Fix verified: 130/130 tests pass, `npm run build` succeeds. Scaled proportionate
 
 ### Result
 148/148 tests pass (from a fully clean `node_modules` reinstall), `npm run build` succeeds. Every dependency is at its latest compatible release except the one documented, deliberate exception (`@vue/test-utils`). `npm install` produces zero deprecation warnings in every environment, and zero engine warnings in the actual deploy target (`node:24-alpine`); the two `EBADENGINE` warnings observed locally are specific to this sandbox's own non-LTS Node installation and are expected per ADR-016.
+
+---
+
+## Ineffective Dynamic Import Warning Fix (2026-09-15)
+
+| Check ID | Verification Rule | Target Files | Status | Details |
+|---|---|---|---|---|
+| **CHK-055** | Rule `traceability-required.md` | `docs/TRACKER.md` § Bug Fix Traceability | PASSED | BUGFIX-005 maps to a real `#Lnn` anchor in `useAuth.js`. |
+| **CHK-056** | Regression risk (circular dependency safety) | `src/composables/useAuth.js`, `src/services/indexedDbRepository.js` | PASSED | Confirmed `indexedDbRepository.js` only calls `useAuth()` inside function bodies (`getSources`, `unlock`, etc.), never at module-top-level, and `useAuth.js` only references `repository` inside `lock()`/the `visibilitychange` handler, never at module-top-level either — so converting the dynamic `import()` to a static top-level import cannot hit an uninitialized-binding error from the circular reference. |
+| **CHK-057** | Test correctness (regression risk) | full suite | PASSED | `npx vitest run` — 148/148 passing after the change; no test exercises module-load-order edge cases this change could have affected. |
+
+### Result
+148/148 tests pass, `npm run build` succeeds with **zero warnings** (the `[INEFFECTIVE_DYNAMIC_IMPORT]` notice — present in every build throughout this session — is gone). Root cause: `useAuth.js` dynamically imported `indexedDbRepository.js` to break a circular dependency, but 10+ other components already import it statically, so the module was always bundled eagerly regardless — the dynamic import achieved nothing but the warning. Fixed by importing it statically in `useAuth.js` too, which is safe because neither module touches the other's bindings at module-evaluation time.

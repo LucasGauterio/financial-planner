@@ -113,6 +113,9 @@ graph TD
 ### 4.17 Full Dependency & Runtime Upgrade (Phase 11)
 - **Decision**: every project dependency is bumped to its latest compatible release — `vue`, `vite`, `@vitejs/plugin-vue` within their current majors, and `vitest`/`@vitest/coverage-v8` (major 4→5) and `jsdom` (major 29→30) to their new majors — and the Node runtime the project builds/deploys against moves from `node:20-alpine` to `node:24-alpine` (the current Active/Maintenance LTS line), which `vitest@5`/`jsdom@30` both require. `@vue/test-utils` is deliberately held at `^2.4.6` rather than bumped to `2.5.0`, since that would reintroduce the Node-engine constraint §4.16's `glob` override was written to avoid — this time in a way the Node runtime upgrade can't fully close, because a developer's local Node version is outside this project's control. See [ADR-016](adrs/ADR-016-full-dependency-and-runtime-upgrade.md).
 
+### 4.18 Ineffective Dynamic Import Warning Fix
+- **Decision**: `npm run build` printed a Vite `[INEFFECTIVE_DYNAMIC_IMPORT]` warning because `useAuth.js` dynamically `import()`-ed `indexedDbRepository.js` to break a circular dependency (`indexedDbRepository.js` statically imports `useAuth`), while 10+ components already import it statically — so it was always bundled eagerly, and the dynamic import bought no code-splitting benefit. Converted `useAuth.js`'s two dynamic import call sites to a single static top-level import; safe because neither module references the other's bindings at module-evaluation time (only inside function bodies), so the circular reference resolves correctly regardless of static-vs-dynamic import timing. See BUGFIX-005 in [TRACKER.md](TRACKER.md#bug-fix-traceability).
+
 ---
 
 ## 5. Open Questions / Future Roadmap
