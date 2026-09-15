@@ -44,6 +44,7 @@
 - **NFR-002 (Offline-First)**: Complete functionality available without active network connection using IndexedDB and LocalStorage.
 - **NFR-003 (i18n & Localization)**: Full bi-lingual dynamic translation (`en-US` and `pt-BR`) with currency-agnostic formatting.
 - **NFR-004 (Performance)**: Instant mathematical projection computation (< 50ms) capped to prevent float precision overflow.
+- **NFR-005 (Dependency Currency)**: Project dependencies, libraries, frameworks, and the Node.js runtime are kept at their latest compatible releases (Phase 11); the build/deploy toolchain (`npm install`, Docker build) produces zero deprecation or unsupported-engine warnings.
 
 ---
 
@@ -52,3 +53,4 @@
 - **Non-monthly native recurrence**: quarterly, semi-annual, or annual recurring expenses (and income) are registered as separate one-off entries in this phase; a generic recurrence-interval model is deferred, not part of Phase 8 scope.
 - **Legacy status-override migration sweep**: Phase 9's actual-amount storage upgrade reads old and new override shapes side by side indefinitely (FR-010); a one-time migration that normalizes every persisted source to the new shape is deferred, not part of Phase 9 scope.
 - **Income/Expense source lifecycle (archive/complete) and filter tabs**: FR-012's restyle does not carry over `LoanTracker`'s active/completed/archived/all filter tabs, since income/expense sources have no equivalent lifecycle concept today; introducing one is deferred, not part of Phase 10 scope.
+- **Vue 3.6 and `@vue/test-utils` 2.5.0**: Phase 11's dependency upgrade (NFR-005) intentionally stays on Vue 3.5.x (3.6 is only available as `beta`/`rc` at the time of the upgrade) and holds `@vue/test-utils` at `2.4.6` rather than `2.5.0`, to avoid reintroducing a Node-engine-version constraint via `js-beautify`. Revisiting both is deferred to a future phase.
