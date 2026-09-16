@@ -27,6 +27,7 @@ This document maps all product requirements defined in [PRD.md](file:///G:/Proje
 | **FR-017** | Cash Flow Overview Ruler Slider | [CashFlowOverview.vue](file:///G:/Projects/FinancialPlanner/src/components/CashFlowOverview.vue#L1-L476) | `L1-L476` | [CashFlowOverview.test.js](file:///G:/Projects/FinancialPlanner/src/components/CashFlowOverview.test.js) |
 | **FR-018** | Stats Dashboard Scoped to the Selected Horizon Window | [IncomeTracker.vue](file:///G:/Projects/FinancialPlanner/src/components/IncomeTracker.vue#L448-L456), [ExpenseTracker.vue](file:///G:/Projects/FinancialPlanner/src/components/ExpenseTracker.vue#L448-L456) | `L448-L456`, `L448-L456` | [IncomeTracker.test.js](file:///G:/Projects/FinancialPlanner/src/components/IncomeTracker.test.js), [ExpenseTracker.test.js](file:///G:/Projects/FinancialPlanner/src/components/ExpenseTracker.test.js) |
 | **FR-019** | Projection Horizon Defaults to the Current Month Only | [IncomeTracker.vue](file:///G:/Projects/FinancialPlanner/src/components/IncomeTracker.vue#L266), [ExpenseTracker.vue](file:///G:/Projects/FinancialPlanner/src/components/ExpenseTracker.vue#L266), [CashFlowOverview.vue](file:///G:/Projects/FinancialPlanner/src/components/CashFlowOverview.vue#L106) | `L266`, `L266`, `L106` | [IncomeTracker.test.js](file:///G:/Projects/FinancialPlanner/src/components/IncomeTracker.test.js), [ExpenseTracker.test.js](file:///G:/Projects/FinancialPlanner/src/components/ExpenseTracker.test.js), [CashFlowOverview.test.js](file:///G:/Projects/FinancialPlanner/src/components/CashFlowOverview.test.js) |
+| **FR-020** | Spreadsheet Data Export (all domains, one `.xlsx` workbook, plaintext-warning gate) | [spreadsheetExportService.js](file:///G:/Projects/FinancialPlanner/src/services/spreadsheetExportService.js#L1-L257), [DataExport.vue](file:///G:/Projects/FinancialPlanner/src/components/DataExport.vue#L1-L209) | `L1-L257`, `L1-L209` | [spreadsheetExportService.test.js](file:///G:/Projects/FinancialPlanner/src/services/spreadsheetExportService.test.js), [DataExport.test.js](file:///G:/Projects/FinancialPlanner/src/components/DataExport.test.js) |
 
 ---
 
@@ -48,6 +49,7 @@ This document maps all product requirements defined in [PRD.md](file:///G:/Proje
 | **ADR-014** | Stats dashboard aggregates only entries within `[currentMonth, currentMonth + horizonMonths - 1]` via a new `statsEntries` computed; the detail drawer keeps reading the unfiltered projection | [IncomeTracker.vue](file:///G:/Projects/FinancialPlanner/src/components/IncomeTracker.vue#L448-L456), [ExpenseTracker.vue](file:///G:/Projects/FinancialPlanner/src/components/ExpenseTracker.vue#L448-L456) | `L448-L456`, `L448-L456` |
 | **ADR-015** | Default `horizonMonths` lowered from `3` to `1`, so Income/Expense/Cash Flow Overview all open scoped to the current month only | [IncomeTracker.vue](file:///G:/Projects/FinancialPlanner/src/components/IncomeTracker.vue#L266), [ExpenseTracker.vue](file:///G:/Projects/FinancialPlanner/src/components/ExpenseTracker.vue#L266), [CashFlowOverview.vue](file:///G:/Projects/FinancialPlanner/src/components/CashFlowOverview.vue#L106) | `L266`, `L266`, `L106` |
 | **ADR-016** | Full dependency upgrade (`vue`, `vite`, `@vitejs/plugin-vue`, `vitest`/`@vitest/coverage-v8` major 4→5, `jsdom` major 29→30) and Node runtime upgrade (Dockerfile `node:20-alpine` → `node:24-alpine`, new `engines` field); `@vue/test-utils` deliberately held at `^2.4.6` (see ADR body) | [package.json](file:///G:/Projects/FinancialPlanner/package.json#L1-L27), [Dockerfile](file:///G:/Projects/FinancialPlanner/Dockerfile#L4) | `L1-L27`, `L4` |
+| **ADR-017** | Spreadsheet Data Export: SheetJS (`xlsx`, project's first production dependency beyond `vue`) assembles a single multi-sheet `.xlsx` workbook (always all six domains); plaintext export gated by a `ConfirmDialog` warning; new dedicated `DataExport.vue` screen, separate from `BackupManager.vue`'s encrypted vault backup | [spreadsheetExportService.js](file:///G:/Projects/FinancialPlanner/src/services/spreadsheetExportService.js#L1-L257), [DataExport.vue](file:///G:/Projects/FinancialPlanner/src/components/DataExport.vue#L1-L209), [package.json](file:///G:/Projects/FinancialPlanner/package.json#L18) | `L1-L257`, `L1-L209`, `L18` |
 
 ## Technical Decision Traceability (`technical-decisions-tracker-source-edit-delete.md`)
 
@@ -96,6 +98,15 @@ _Decision fields for TD-01..TD-05 are pending user confirmation via `/plan-resol
 ## Technical Decision Traceability (Phase 10 — no TD, pattern-reuse ADR)
 
 No technical-decisions document was produced for Phase 10 — the target pattern (`LoanTracker.vue`'s stats/cards/drawer) is a fully specified, already-shipped sibling component, not a new architectural choice. Rationale and the three points resolved directly with the user (per-source drawer, stats dashboard, Cash Flow Overview out of scope) are recorded in [ADR-008](adrs/ADR-008-income-expense-card-restyle.md).
+
+## Technical Decision Traceability (`technical-decisions-spreadsheet-export.md`)
+
+| TD ID | Decision Summary | Implementation File | Line Anchor |
+|---|---|---|---|
+| **TD-01** | SheetJS Community Edition (`xlsx`), installed from SheetJS's own CDN tarball | [package.json](file:///G:/Projects/FinancialPlanner/package.json#L18) | `L18` |
+| **TD-02** | Single multi-sheet `.xlsx` workbook, always all six domains | [spreadsheetExportService.js](file:///G:/Projects/FinancialPlanner/src/services/spreadsheetExportService.js#L245-L257) | `L245-L257` |
+| **TD-03** | Plaintext export gated by a `ConfirmDialog` warning before download fires | [DataExport.vue](file:///G:/Projects/FinancialPlanner/src/components/DataExport.vue#L47-L55) | `L47-L55` |
+| **TD-04** | New dedicated Data Export screen, reachable from main navigation | [App.vue](file:///G:/Projects/FinancialPlanner/src/App.vue#L129-L135), [DataExport.vue](file:///G:/Projects/FinancialPlanner/src/components/DataExport.vue#L1-L209) | `L129-L135`, `L1-L209` |
 
 ## Bug Fix Traceability
 

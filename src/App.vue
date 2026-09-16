@@ -126,6 +126,13 @@
         >
           {{ t('tabs.cashFlow') }}
         </button>
+        <button
+          class="btn"
+          :class="activeTab === 'dataExport' ? 'btn-primary' : 'btn-secondary'"
+          @click="activeTab = 'dataExport'"
+        >
+          {{ t('tabs.dataExport') }}
+        </button>
       </div>
 
       <transition name="fade" mode="out-in">
@@ -138,6 +145,7 @@
         <IncomeTracker v-else-if="activeTab === 'income'" />
         <ExpenseTracker v-else-if="activeTab === 'expenses'" />
         <CashFlowOverview v-else-if="activeTab === 'cashFlow'" />
+        <DataExport v-else-if="activeTab === 'dataExport'" />
         <PrivacyPolicy v-else-if="activeTab === 'privacy'" />
       </transition>
       
@@ -161,6 +169,7 @@ import LoanTracker from './components/LoanTracker.vue';
 import IncomeTracker from './components/IncomeTracker.vue';
 import ExpenseTracker from './components/ExpenseTracker.vue';
 import CashFlowOverview from './components/CashFlowOverview.vue';
+import DataExport from './components/DataExport.vue';
 import PrivacyPolicy from './components/PrivacyPolicy.vue';
 
 const i18n = useI18n();
