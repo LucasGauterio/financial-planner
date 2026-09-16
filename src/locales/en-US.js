@@ -14,6 +14,7 @@ export default {
     income: 'Monthly Income',
     expenses: 'Monthly Expenses',
     cashFlow: 'Cash Flow',
+    dataExport: 'Data Export',
     privacy: 'Privacy Policy'
   },
   settings: {
@@ -326,6 +327,17 @@ export default {
     errorParsing: 'Error parsing backup file.',
     errorDownloadFailed: 'Download failed: {error}',
     errorExportFailed: 'Export failed: {error}'
+  },
+  dataExport: {
+    title: 'Data Export',
+    subtitle: 'Export every tracked domain to a single spreadsheet file.',
+    description: 'Downloads one .xlsx workbook containing a sheet for Income, Expenses, Loans, Portfolio, Cash Flow, and Investment Timeline. The file contains unencrypted, human-readable data — store and share it carefully.',
+    exportButton: 'Export to Spreadsheet',
+    cancelBtn: 'Cancel',
+    confirmTitle: 'Export Unencrypted Data?',
+    confirmMessage: 'The downloaded spreadsheet will contain your financial data in plain, unencrypted form so it can be opened in Excel or Google Sheets. Anyone with access to the file can read it. Continue?',
+    statusSuccess: 'Spreadsheet exported successfully.',
+    statusError: 'Export failed: {error}'
   },
   validation: {
     minYear: 'Minimum year allowed is 1900',

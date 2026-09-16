@@ -36,6 +36,7 @@
 | **FR-017** | `CashFlowOverview` | Replace the Projection Horizon `<select>` dropdown with the identical month-by-month ruler slider used by `PortfolioTracker`/`IncomeTracker`/`ExpenseTracker` (1-420 months). | Low | `src/components/CashFlowOverview.vue` |
 | **FR-018** | `IncomeTracker`, `ExpenseTracker` | The stats dashboard (total/received-or-paid/pending) aggregates only the months within the selected Projection Horizon window, not every projected entry — so old unconfirmed backlog and a bounded source's full future span no longer inflate the dashboard's figures beyond what the horizon slider visually represents. The per-source detail drawer is unaffected and still shows the complete projection. | High | `src/components/IncomeTracker.vue`, `src/components/ExpenseTracker.vue` |
 | **FR-019** | `IncomeTracker`, `ExpenseTracker`, `CashFlowOverview` | The Projection Horizon slider defaults to `1` month (the current month only) instead of `3`, so all three screens open scoped to just the current month; the user still drags the slider to widen the view. | Medium | `src/components/IncomeTracker.vue`, `src/components/ExpenseTracker.vue`, `src/components/CashFlowOverview.vue` |
+| **FR-020** | `DataExport` (new) | Export every tracked domain — Income, Expenses, Loans, Portfolio, Cash Flow, and Investment Timeline — to a single downloadable `.xlsx` workbook, one sheet/tab per domain, from a new dedicated Data Export screen. Since the export is human-readable, it contains decrypted plaintext data; the action is gated by an explicit in-app warning dialog before the download fires. | High | `src/services/spreadsheetExportService.js` (new) |
 
 ---
 
@@ -45,6 +46,7 @@
 - **NFR-003 (i18n & Localization)**: Full bi-lingual dynamic translation (`en-US` and `pt-BR`) with currency-agnostic formatting.
 - **NFR-004 (Performance)**: Instant mathematical projection computation (< 50ms) capped to prevent float precision overflow.
 - **NFR-005 (Dependency Currency)**: Project dependencies, libraries, frameworks, and the Node.js runtime are kept at their latest compatible releases (Phase 11); the build/deploy toolchain (`npm install`, Docker build) produces zero deprecation or unsupported-engine warnings.
+- **NFR-006 (Explicit Plaintext-Export Disclosure)**: Any feature that writes decrypted, human-readable financial data outside the encrypted vault (Phase 12's spreadsheet export) must surface an explicit in-app warning before the write occurs — no such export may fire silently on a single click.
 
 ---
 
@@ -54,3 +56,5 @@
 - **Legacy status-override migration sweep**: Phase 9's actual-amount storage upgrade reads old and new override shapes side by side indefinitely (FR-010); a one-time migration that normalizes every persisted source to the new shape is deferred, not part of Phase 9 scope.
 - **Income/Expense source lifecycle (archive/complete) and filter tabs**: FR-012's restyle does not carry over `LoanTracker`'s active/completed/archived/all filter tabs, since income/expense sources have no equivalent lifecycle concept today; introducing one is deferred, not part of Phase 10 scope.
 - **Vue 3.6 and `@vue/test-utils` 2.5.0**: Phase 11's dependency upgrade (NFR-005) intentionally stays on Vue 3.5.x (3.6 is only available as `beta`/`rc` at the time of the upgrade) and holds `@vue/test-utils` at `2.4.6` rather than `2.5.0`, to avoid reintroducing a Node-engine-version constraint via `js-beautify`. Revisiting both is deferred to a future phase.
+- **Per-domain or zipped export files, and a user-selectable export subset**: Phase 12's export (FR-020) always produces one workbook containing every domain; splitting the export into separate files per domain or letting the user choose which domains to include is deferred, not part of Phase 12 scope.
+- **Password-protected or encrypted spreadsheet export**: Phase 12's export (FR-020) is plaintext, mitigated only by a warning dialog rather than a technical control, since neither the chosen spreadsheet library nor its main alternative supports setting a native file password from the browser. Adding one is deferred to a future phase.

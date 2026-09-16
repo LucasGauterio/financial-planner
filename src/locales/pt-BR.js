@@ -14,6 +14,7 @@ export default {
     income: 'Renda Mensal',
     expenses: 'Despesas Mensais',
     cashFlow: 'Fluxo de Caixa',
+    dataExport: 'Exportar Dados',
     privacy: 'Política de Privacidade'
   },
   settings: {
@@ -326,6 +327,17 @@ export default {
     errorParsing: 'Erro ao analisar arquivo de backup.',
     errorDownloadFailed: 'Falha no download: {error}',
     errorExportFailed: 'Falha na exportação: {error}'
+  },
+  dataExport: {
+    title: 'Exportar Dados',
+    subtitle: 'Exporte todos os dados rastreados para um único arquivo de planilha.',
+    description: 'Baixa um arquivo .xlsx contendo uma aba para Receitas, Despesas, Empréstimos, Portfólio, Fluxo de Caixa e Linha do Tempo de Investimentos. O arquivo contém dados legíveis e não criptografados — armazene e compartilhe com cuidado.',
+    exportButton: 'Exportar para Planilha',
+    cancelBtn: 'Cancelar',
+    confirmTitle: 'Exportar Dados Não Criptografados?',
+    confirmMessage: 'A planilha baixada conterá seus dados financeiros em texto simples, não criptografado, para que possa ser aberta no Excel ou Google Sheets. Qualquer pessoa com acesso ao arquivo poderá lê-lo. Continuar?',
+    statusSuccess: 'Planilha exportada com sucesso.',
+    statusError: 'Falha na exportação: {error}'
   },
   validation: {
     minYear: 'O ano mínimo permitido é 1900',
